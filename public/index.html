@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=600, initial-scale=1" />
+  <title>WF test</title>
+  <style>
+    html,body{margin:0}
+    .frame{
+      width:600px;height:800px;
+      display:flex;align-items:center;justify-content:center;
+      font: 700 40px system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:#fff;color:#111;
+      border:12px solid #ddd;
+      box-sizing:border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame" id="t">WF TEST</div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const place = qs.get("place") || "sauze";
+    const lang  = qs.get("lang")  || "it";
+    const mode  = qs.get("mode")  || "auto";
+    document.getElementById("t").textContent = `WF TEST • ${place} • ${lang} • ${mode}`;
+    // segnala a puppeteer che è pronto
+    window.__WF_READY__ = true;
+  </script>
+</body>
+</html>

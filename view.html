@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=600, initial-scale=1" />
+  <title>Weather Frame · View (600x800)</title>
+
+  <style>
+    :root{
+      --w:600px; --h:800px;
+      --pad:14px;
+      --gap:10px;
+      --ink:#111;
+      --soft:#c9c9c9;
+      --mist:#f2f2f2;
+      --r:14px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background:#cfcfcf;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+    }
+    .inkplate{
+      width:var(--w);
+      height:var(--h);
+      background:#fff;
+      margin:0 auto;
+      padding:var(--pad);
+      overflow:hidden;
+    }
+
+    /* HEADER */
+    h1{
+      margin:0;
+      font-size:50px;
+      line-height:1;
+      letter-spacing:-0.6px;
+      font-weight:900;
+    }
+    .meta{
+      margin-top:6px;
+      font-size:15px;
+      line-height:1.2;
+      opacity:.92;
+      font-weight:600;
+    }
+    .rule{
+      height:2px;
+      background:var(--ink);
+      opacity:.85;
+      margin:10px 0 12px 0;
+    }
+
+    /* Top controls (solo in view, poco invasivi; Puppeteer li taglia comunque se vuoi) */
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+    }
+    select{
+      appearance:none;
+      -webkit-appearance:none;
+      padding:8px 34px 8px 10px;
+      border-radius:12px;
+      border:1px solid var(--soft);
+      font-size:14px;
+      font-weight:700;
+      outline:none;
+      background:#fff;
+    }
+
+    /* COMMON */
+    .panel{
+      border:1px solid var(--soft);
+      border-radius:var(--r);
+      background:#fff;
+    }
+    .kicker{
+      font-size:11px;
+      letter-spacing:6px;
+      text-transform:uppercase;
+      opacity:.62;
+      font-weight:800;
+    }
+
+    /* GRID TOP */
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:var(--gap);
+      margin-bottom:var(--gap);
+    }
+    .paese{ padding:12px; min-height:126px; }
+    .consigli{ padding:12px; min-height:126px; }
+
+    .hero{
+      display:grid;
+      grid-template-columns:52px 1fr;
+      gap:10px;
+      align-items:center;
+      margin-top:8px;
+    }
+    .icoBox{
+      width:52px; height:52px;
+      border:1px solid var(--soft);
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+    }
+    .mainRow{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mainWx{
+      font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
+      font-weight:950;
+      line-height:1.05;
+      letter-spacing:-0.2px;
+      white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
+    }
+    .mainTemp{
+      font-size:40px;
+      font-weight:950;
+      line-height:1.05;
+      letter-spacing:-0.2px;
+      white-space:nowrap;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:16px;
+      font-weight:700;
+      opacity:.95;
+    }
+
+    .adviceTitle{
+      font-size:11px;
+      letter-spacing:6px;
+      text-transform:uppercase;
+      opacity:.62;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+    .adviceLines{
+      font-size:18px;
+      font-weight:800;
+      line-height:1.22;
+      white-space:pre-line;
+    }
+    .adviceLines .line{
+      display:block;
+      margin-top:6px;
+      font-size:16px;
+      font-weight:700;
+    }
+
+    /* TRENDS */
+    .trends{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:var(--gap);
+      margin-bottom:var(--gap);
+    }
+    .trend{
+      padding:10px 12px;
+      min-height:76px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+    .trendLine{
+      margin-top:8px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:18px;
+      font-weight:850;
+      line-height:1.15;
+    }
+
+    /* SKI */
+    .ski{
+      padding:12px;
+      margin-bottom:var(--gap);
+    }
+    .skiHead{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .skiNow{
+      font-size:16px;
+      font-weight:850;
+      white-space:nowrap;
+      opacity:.95;
+    }
+
+    .bands{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+    .band{
+      border:1px solid var(--soft);
+      border-radius:14px;
+      padding:10px 10px;
+      text-align:center;
+      background:#fff;
+      min-height:140px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+    .time{
+      font-size:18px;
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+    .wx{
+      margin-top:6px;
+      font-size:16px;
+      font-weight:950;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+    }
+    .det{
+      margin-top:8px;
+      font-size:14px;
+      font-weight:750;
+      line-height:1.22;
+    }
+    .risk{
+      margin-top:auto;
+      padding-top:8px;
+      font-size:12px;
+      font-weight:800;
+      opacity:.95;
+    }
+
+    /* FORECAST */
+    .forecast{ padding:10px; }
+    .days{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:8px;
+      margin-top:8px;
+    }
+    .day{
+      border:1px solid var(--soft);
+      border-radius:14px;
+      padding:10px 8px;
+      text-align:center;
+      background:var(--mist);
+      min-height:112px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+    }
+    .dow{
+      font-size:18px;
+      font-weight:950;
+      text-transform:lowercase;
+      line-height:1;
+      margin-bottom:6px;
+    }
+    .dayIco{
+      display:flex;
+      justify-content:center;
+      margin-bottom:6px;
+    }
+    .temp{
+      font-size:20px;
+      font-weight:950;
+      letter-spacing:-0.2px;
+    }
+    .mm{
+      margin-top:6px;
+      font-size:13px;
+      font-weight:850;
+      opacity:.95;
+    }
+    .footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-top:8px;
+      font-size:12px;
+      font-weight:750;
+      opacity:.78;
+    }
+
+    /* SVG ICONS */
+    svg{ display:block; }
+    .icoStroke{ stroke:#111; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+
+    /* per render: nascondi i controlli se ?render=1 */
+    .render .controls{ display:none; margin:0; }
+  </style>
+</head>
+
+<body>
+  <div class="inkplate" id="root">
+
+    <h1 id="title">Sauze d’Oulx</h1>
+    <div class="meta" id="meta">Via Lattea · Paese 1509 m · Quota 2300 m · OGGI</div>
+
+    <div class="controls" id="controls">
+      <select id="placeSelect"></select>
+      <select id="langSelect">
+        <option value="it">IT</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+      </select>
+      <select id="modeSelect" title="auto / oggi / domani">
+        <option value="auto">AUTO</option>
+        <option value="oggi">OGGI</option>
+        <option value="domani">DOMANI</option>
+      </select>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="grid2">
+      <div class="panel paese">
+        <div class="kicker" id="kPaese">PAESE</div>
+
+        <div class="hero">
+          <div class="icoBox" aria-label="Icona meteo paese" id="mainIconBox">
+            <!-- placeholder -->
+            <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="icoStroke" cx="24" cy="24" r="8"/>
+            </svg>
+          </div>
+
+          <div>
+            <div class="mainRow">
+              <div class="mainWx" id="mainWx">Variabile</div>
+              <div class="mainTemp" id="mainTemp">4.6°</div>
+            </div>
+            <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel consigli">
+        <div class="adviceTitle" id="kConsigli">CONSIGLI PER OGGI</div>
+        <div class="adviceLines" id="advice">Caricamento…</div>
+      </div>
+    </div>
+
+    <div class="trends">
+      <div class="panel trend">
+        <div class="kicker" id="kTrendVillage">ANDAMENTO PAESE OGGI</div>
+        <div class="trendLine" id="trendVillage">
+          <!-- icon + text -->
+        </div>
+      </div>
+
+      <div class="panel trend">
+        <div class="kicker" id="kTrendLift">ANDAMENTO QUOTA IMPIANTI OGGI</div>
+        <div class="trendLine" id="trendLift">
+          <!-- icon + text -->
+        </div>
+      </div>
+    </div>
+
+    <div class="panel ski">
+      <div class="skiHead">
+        <div>
+          <div class="kicker" id="kSki">QUOTA IMPIANTI OGGI</div>
+          <div class="kicker" style="letter-spacing:3px; margin-top:6px;">FASCE SCI</div>
+        </div>
+        <div class="skiNow" id="skiNow">Ora --.-° · Vento --</div>
+      </div>
+
+      <div class="bands" id="bands"></div>
+    </div>
+
+    <div class="panel forecast">
+      <div class="kicker" id="kNext">PROSSIMI 3 GIORNI (PAESE)</div>
+
+      <div class="days" id="days"></div>
+
+      <div class="footer">
+        <div id="updated">Aggiornato: --:--</div>
+        <div id="source">Fonte: Open-Meteo</div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* =========================
+   CONFIG LOCALITÀ (COMPLETE)
+   ========================= */
+const PLACES = [
+  { key:"bardonecchia", name:"Bardonecchia", town:1312, lifts:2400, lat:45.0760, lon:6.7030, region:"Bardonecchia" },
+
+  { key:"cesana",      name:"Cesana",        town:1354, lifts:2300, lat:44.9543, lon:6.7923, region:"Via Lattea" },
+  { key:"claviere",    name:"Claviere",      town:1766, lifts:2500, lat:44.9369, lon:6.6615, region:"Via Lattea" },
+  { key:"monginevro",  name:"Monginevro",    town:1860, lifts:2700, lat:44.9319, lon:6.7209, region:"Via Lattea" },
+  { key:"oulx",        name:"Oulx",          town:1100, lifts:2550, lat:45.0333, lon:6.8333, region:"Via Lattea" },
+  { key:"pragelato",   name:"Pragelato",     town:1518, lifts:2500, lat:45.0173, lon:6.9422, region:"Via Lattea" },
+  { key:"sanmarco",    name:"San Marco",     town:1212, lifts:2550, lat:45.0444, lon:6.7917, region:"Via Lattea" },
+  { key:"sansicario",  name:"San Sicario",   town:1700, lifts:2550, lat:44.9810, lon:6.8040, region:"Via Lattea" },
+  { key:"sauze",       name:"Sauze d’Oulx",  town:1509, lifts:2300, lat:44.9408, lon:6.8614, region:"Via Lattea" },
+  { key:"sestriere",   name:"Sestriere",     town:2035, lifts:2700, lat:44.9570, lon:6.8789, region:"Via Lattea" }
+];
+
+const I18N = {
+  it: {
+    region: (p)=> p.region === "Bardonecchia" ? "Bardonecchia" : "Via Lattea",
+    today:"OGGI",
+    tomorrow:"DOMANI",
+    village:"PAESE",
+    adviceToday:"CONSIGLI PER OGGI",
+    adviceTomorrow:"CONSIGLI PER DOMANI",
+    trendVillageToday:"ANDAMENTO PAESE OGGI",
+    trendVillageTomorrow:"ANDAMENTO PAESE DOMANI",
+    trendLiftToday:"ANDAMENTO QUOTA IMPIANTI OGGI",
+    trendLiftTomorrow:"ANDAMENTO QUOTA IMPIANTI DOMANI",
+    liftToday:"QUOTA IMPIANTI OGGI",
+    liftTomorrow:"QUOTA IMPIANTI DOMANI",
+    next3:"PROSSIMI 3 GIORNI (PAESE)",
+    updated:"Aggiornato",
+    source:"Fonte: Open-Meteo",
+    now:"Ora",
+    min:"Min",
+    max:"Max",
+    wind:"Vento",
+    mm:"mm"
+  },
+  en: {
+    region: (p)=> p.region === "Bardonecchia" ? "Bardonecchia" : "Via Lattea",
+    today:"TODAY",
+    tomorrow:"TOMORROW",
+    village:"VILLAGE",
+    adviceToday:"TIPS FOR TODAY",
+    adviceTomorrow:"TIPS FOR TOMORROW",
+    trendVillageToday:"VILLAGE TREND · TODAY",
+    trendVillageTomorrow:"VILLAGE TREND · TOMORROW",
+    trendLiftToday:"LIFT ALTITUDE TREND · TODAY",
+    trendLiftTomorrow:"LIFT ALTITUDE TREND · TOMORROW",
+    liftToday:"LIFT ALTITUDE · TODAY",
+    liftTomorrow:"LIFT ALTITUDE · TOMORROW",
+    next3:"NEXT 3 DAYS (VILLAGE)",
+    updated:"Updated",
+    source:"Source: Open-Meteo",
+    now:"Now",
+    min:"Min",
+    max:"Max",
+    wind:"Wind",
+    mm:"mm"
+  },
+  fr: {
+    region: (p)=> p.region === "Bardonecchia" ? "Bardonecchia" : "Via Lattea",
+    today:"AUJOURD’HUI",
+    tomorrow:"DEMAIN",
+    village:"VILLAGE",
+    adviceToday:"CONSEILS POUR AUJOURD’HUI",
+    adviceTomorrow:"CONSEILS POUR DEMAIN",
+    trendVillageToday:"TENDANCE VILLAGE · AUJOURD’HUI",
+    trendVillageTomorrow:"TENDANCE VILLAGE · DEMAIN",
+    trendLiftToday:"TENDANCE ALTITUDE · AUJOURD’HUI",
+    trendLiftTomorrow:"TENDANCE ALTITUDE · DEMAIN",
+    liftToday:"ALTITUDE · AUJOURD’HUI",
+    liftTomorrow:"ALTITUDE · DEMAIN",
+    next3:"3 PROCHAINS JOURS (VILLAGE)",
+    updated:"Mis à jour",
+    source:"Source: Open-Meteo",
+    now:"Actuel",
+    min:"Min",
+    max:"Max",
+    wind:"Vent",
+    mm:"mm"
+  }
+};
+
+const $ = (id)=>document.getElementById(id);
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function round0(x){ return Math.round(x); }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+
+function isAfter1630(d){
+  const h=d.getHours(), m=d.getMinutes();
+  return (h>16) || (h===16 && m>=30);
+}
+function pickMode(modeParam){
+  const now = new Date();
+  if(modeParam==="oggi") return "oggi";
+  if(modeParam==="domani") return "domani";
+  return isAfter1630(now) ? "domani" : "oggi";
+}
+function pickDayIndex(mode){
+  return (mode==="domani") ? 1 : 0;
+}
+
+function fmtDow(d, lang){
+  const it=["dom","lun","mar","mer","gio","ven","sab"];
+  const en=["sun","mon","tue","wed","thu","fri","sat"];
+  const fr=["dim","lun","mar","mer","jeu","ven","sam"];
+  const arr = (lang==="en")?en:(lang==="fr")?fr:it;
+  return arr[d.getDay()];
+}
+
+function wxToLabel(code, lang){
+  const it = { clear:"Sereno", part:"Variabile", cloudy:"Nuvoloso", fog:"Nebbia", rain:"Pioggia", shower:"Rovesci", snow:"Neve", thunder:"Temporali" };
+  const en = { clear:"Clear",  part:"Mixed",     cloudy:"Cloudy",   fog:"Fog",    rain:"Rain",   shower:"Showers", snow:"Snow", thunder:"Thunder" };
+  const fr = { clear:"Beau",   part:"Variable",  cloudy:"Nuageux",  fog:"Brouillard", rain:"Pluie", shower:"Averses", snow:"Neige", thunder:"Orages" };
+  const dict = (lang==="en")?en:(lang==="fr")?fr:it;
+
+  if(code===0) return dict.clear;
+  if([1,2].includes(code)) return dict.part;
+  if(code===3) return dict.cloudy;
+  if([45,48].includes(code)) return dict.fog;
+  if([51,53,55,56,57,61,63,65,66,67].includes(code)) return dict.rain;
+  if([80,81,82].includes(code)) return dict.shower;
+  if([71,73,75,77,85,86].includes(code)) return dict.snow;
+  if([95,96,99].includes(code)) return dict.thunder;
+  return dict.part;
+}
+
+function wxIconSVG(code){
+  // ritorna SVG in B/N (stile “ink”)
+  // 0 sole / 1-2 variabile / 3 nuvoloso / pioggia / neve / temporali / fog
+  if(code===0){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="icoStroke" cx="24" cy="24" r="8"/>
+        <path class="icoStroke" d="M24 5v6M24 37v6M5 24h6M37 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/>
+      </svg>`;
+  }
+  if([1,2].includes(code)){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="icoStroke" d="M18 18a9 9 0 1 1 9 9"/>
+        <path class="icoStroke" d="M29 28h-1a9 9 0 0 0-17.5 2A7 7 0 0 0 12 44h17a7 7 0 0 0 0-14z"/>
+        <path class="icoStroke" d="M27 6v4M12 21H8M46 21h-4M15 12l-3-3"/>
+      </svg>`;
+  }
+  if(code===3){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 32" aria-hidden="true">
+        <path class="icoStroke" d="M16 26h20a8 8 0 0 0 0-16 11 11 0 0 0-21-2A7 7 0 0 0 16 26z"/>
+      </svg>`;
+  }
+  if([45,48].includes(code)){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 40" aria-hidden="true">
+        <path class="icoStroke" d="M8 14h32M6 20h36M8 26h32M10 32h28"/>
+      </svg>`;
+  }
+  if([71,73,75,77,85,86].includes(code)){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="icoStroke" d="M16 24h20a8 8 0 0 0 0-16 11 11 0 0 0-21-2A7 7 0 0 0 16 24z"/>
+        <path class="icoStroke" d="M18 32l2 2-2 2-2-2 2-2zM30 32l2 2-2 2-2-2 2-2zM24 36l2 2-2 2-2-2 2-2z"/>
+      </svg>`;
+  }
+  if([95,96,99].includes(code)){
+    return `
+      <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+        <path class="icoStroke" d="M16 22h20a7 7 0 0 0 0-14 10 10 0 0 0-19-2A6.5 6.5 0 0 0 16 22z"/>
+        <path class="icoStroke" d="M23 26l-4 8h6l-3 8"/>
+      </svg>`;
+  }
+  // pioggia / rovesci default
+  return `
+    <svg width="32" height="32" viewBox="0 0 48 40" aria-hidden="true">
+      <path class="icoStroke" d="M16 22h20a7 7 0 0 0 0-14 10 10 0 0 0-19-2A6.5 6.5 0 0 0 16 22z"/>
+      <path class="icoStroke" d="M18 28l-2 4M26 28l-2 4M34 28l-2 4"/>
+    </svg>`;
+}
+
+function riskLabel(mm, code, lang){
+  const thunder=[95,96,99].includes(code);
+  const snow=[71,73,75,77,85,86].includes(code);
+  const rain=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code);
+  let risk="basso";
+  if(thunder) risk="alto";
+  else if(snow || (rain && mm>=2)) risk="medio";
+  else if(rain) risk="basso";
+
+  if(lang==="en"){
+    return thunder ? "Precip risk: high" : (risk==="medio" ? "Precip risk: medium" : "Precip risk: low");
+  }
+  if(lang==="fr"){
+    return thunder ? "Risque pluie: élevé" : (risk==="medio" ? "Risque pluie: moyen" : "Risque pluie: faible");
+  }
+  return thunder ? "Rischio precip: alto" : (risk==="medio" ? "Rischio precip: medio" : "Rischio precip: basso");
+}
+
+function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike}){
+  const t = I18N[lang];
+
+  const sunny = (vDayCode===0 || [1,2].includes(vDayCode));
+  const rainy = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(vDayCode) || vDayMm>=2;
+  const thunder = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
+  const windy = (lNowWind >= 25);
+  const snowy = lSnowLike;
+
+  const lines = [];
+
+  // Riga 1 sempre significativa (condizioni)
+  if(thunder){
+    lines.push(lang==="en" ? "Thunder risk: plan breaks & safe routes"
+      : lang==="fr" ? "Risque d’orage: pauses & itinéraires sûrs"
+      : "Rischio temporali: pause e itinerari sicuri");
+  }else if(rainy){
+    lines.push(lang==="en" ? "Wet conditions: keep a shell handy"
+      : lang==="fr" ? "Conditions humides: veste imperméable"
+      : "Condizioni umide: guscio leggero a portata");
+  }else if(snowy){
+    lines.push(lang==="en" ? "Snow up high: goggles & warm layers"
+      : lang==="fr" ? "Neige en altitude: masque & couches"
+      : "Neve in quota: maschera e strati caldi");
+  }else if(windy){
+    lines.push(lang==="en" ? "Wind at altitude: protect face & hands"
+      : lang==="fr" ? "Vent en altitude: protège visage & mains"
+      : "Vento in quota: proteggi viso e mani");
+  }else{
+    lines.push(
+      lang==="en" ? (mode==="domani" ? "Tomorrow looks very good conditions" : "Today looks very good conditions")
+      : lang==="fr" ? (mode==="domani" ? "Demain: très bonnes conditions" : "Aujourd’hui: très bonnes conditions")
+      : (mode==="domani" ? "Domani condizioni ideali" : "Oggi condizioni ideali")
+    );
+  }
+
+  // Accessori “sempre sensati” ma attivati
+  if(sunny){
+    lines.push(lang==="en" ? "UV can be strong: sunscreen recommended"
+      : lang==="fr" ? "UV parfois fort: crème solaire conseillée"
+      : "UV spesso alto: crema solare consigliata");
+    lines.push(lang==="en" ? "Pack sunglasses"
+      : lang==="fr" ? "Lunettes de soleil"
+      : "Occhiali da sole nello zaino");
+  }
+  if(rainy){
+    lines.push(lang==="en" ? "Pack a light rain jacket"
+      : lang==="fr" ? "Veste pluie légère"
+      : "K-way / guscio nello zaino");
+  }
+  if(snowy && lNowTemp<=0){
+    lines.push(lang==="en" ? "If it’s snowing: park in a garage if possible"
+      : lang==="fr" ? "S’il neige: voiture au garage si possible"
+      : "Se sta nevicando: auto in garage se puoi");
+  }
+
+  // 2–3 righe max
+  return lines.slice(0,3).join("\n");
+}
+
+/* =========================
+   OPEN-METEO FETCH
+   ========================= */
+async function fetchForecast(lat, lon, elevation){
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  url.searchParams.set("latitude", String(lat));
+  url.searchParams.set("longitude", String(lon));
+  url.searchParams.set("elevation", String(elevation));
+  url.searchParams.set("timezone", "Europe/Rome");
+
+  url.searchParams.set("current", [
+    "temperature_2m",
+    "weather_code",
+    "precipitation",
+    "wind_speed_10m"
+  ].join(","));
+
+  url.searchParams.set("hourly", [
+    "temperature_2m",
+    "weather_code",
+    "precipitation",
+    "wind_speed_10m"
+  ].join(","));
+
+  url.searchParams.set("daily", [
+    "weather_code",
+    "temperature_2m_min",
+    "temperature_2m_max",
+    "precipitation_sum"
+  ].join(","));
+
+  const r = await fetch(url.toString());
+  if(!r.ok) throw new Error("Forecast failed");
+  return await r.json();
+}
+
+function buildSlots(hourly, lang, dayISO){
+  const slotDefs = [
+    { label:"09:00–13:00", from:9, to:13 },
+    { label:"13:00–15:00", from:13, to:15 },
+    { label:"15:00–18:00", from:15, to:18 }
+  ];
+
+  const out = [];
+  const time = hourly.time;
+
+  for(const s of slotDefs){
+    const idxs = [];
+    for(let i=0;i<time.length;i++){
+      const isoDate = time[i].slice(0,10);
+      if(isoDate !== dayISO) continue;
+      const h = new Date(time[i]).getHours();
+      if(h>=s.from && h<s.to) idxs.push(i);
+    }
+
+    if(!idxs.length){
+      out.push({ time:s.label, code:2, label:wxToLabel(2,lang), mm:0, wind:0, temp:0 });
+      continue;
+    }
+
+    const mid = idxs[Math.floor(idxs.length/2)];
+    const code = hourly.weather_code[mid] ?? 2;
+    const temp = hourly.temperature_2m[mid] ?? 0;
+
+    let mm=0, wind=0;
+    for(const i of idxs){
+      mm += (hourly.precipitation[i] ?? 0);
+      wind = Math.max(wind, hourly.wind_speed_10m[i] ?? 0);
+    }
+
+    out.push({ time:s.label, code, label:wxToLabel(code,lang), mm, wind, temp });
+  }
+  return out;
+}
+
+function buildNext3(daily, lang, baseIdx){
+  const days = [];
+  for(let k=1;k<=3;k++){
+    const i = baseIdx + k;
+    const dateISO = daily.time[i];
+    const d = new Date(dateISO+"T12:00:00");
+    const dow = fmtDow(d, lang);
+    const code = daily.weather_code[i] ?? 2;
+    days.push({
+      dow, code,
+      tmin: daily.temperature_2m_min[i],
+      tmax: daily.temperature_2m_max[i],
+      mm: daily.precipitation_sum[i] ?? 0
+    });
+  }
+  return days;
+}
+
+/* =========================
+   RENDER UI
+   ========================= */
+function populateSelects(defaultPlaceKey, defaultLang){
+  const ps = $("placeSelect");
+  ps.innerHTML = "";
+  PLACES.forEach(p=>{
+    const opt = document.createElement("option");
+    opt.value = p.key;
+    opt.textContent = p.name;
+    ps.appendChild(opt);
+  });
+  ps.value = defaultPlaceKey;
+
+  $("langSelect").value = defaultLang;
+}
+
+function setKickers(lang, mode){
+  const t = I18N[lang];
+  $("kPaese").textContent = t.village;
+  $("kConsigli").textContent = (mode==="domani") ? t.adviceTomorrow : t.adviceToday;
+  $("kTrendVillage").textContent = (mode==="domani") ? t.trendVillageTomorrow : t.trendVillageToday;
+  $("kTrendLift").textContent = (mode==="domani") ? t.trendLiftTomorrow : t.trendLiftToday;
+  $("kSki").textContent = (mode==="domani") ? t.liftTomorrow : t.liftToday;
+  $("kNext").textContent = t.next3;
+  $("source").textContent = t.source;
+}
+
+function trendLineHTML(code, label, tmin, tmax, mm, lang, t){
+  return `
+    <div style="flex:0 0 auto;">${wxIconSVG(code).replace('width="32"', 'width="24"').replace('height="32"', 'height="24"')}</div>
+    <div>${label} · ${t.min} ${round0(tmin)}° · ${t.max} ${round0(tmax)}° · ${round0(mm)} ${t.mm}</div>
+  `;
+}
+
+async function refresh(){
+  const params = new URLSearchParams(location.search);
+  const placeKey = (params.get("place") || $("placeSelect")?.value || "sauze").toLowerCase();
+  const lang = (params.get("lang") || $("langSelect")?.value || "it").toLowerCase();
+  const modeParam = (params.get("mode") || $("modeSelect")?.value || "auto").toLowerCase();
+
+  const renderFlag = params.get("render")==="1";
+  if(renderFlag) $("root").classList.add("render");
+
+  const place = PLACES.find(p=>p.key===placeKey) || PLACES.find(p=>p.key==="sauze");
+  const t = I18N[lang] || I18N.it;
+
+  const mode = pickMode(modeParam);
+  const dayIdx = pickDayIndex(mode);
+
+  // Header
+  $("title").textContent = place.name;
+
+  const modeLabel = (mode==="domani") ? t.tomorrow : t.today;
+  $("meta").textContent = `${t.region(place)} · Paese ${place.town} m · Quota ${place.lifts} m · ${modeLabel}`;
+
+  setKickers(lang, mode);
+
+  try{
+    const [vF, lF] = await Promise.all([
+      fetchForecast(place.lat, place.lon, place.town),
+      fetchForecast(place.lat, place.lon, place.lifts)
+    ]);
+
+    const now = new Date();
+    $("updated").textContent = `${t.updated}: ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+
+    const dayISO = vF.daily.time[dayIdx];
+
+    // MAIN (Paese) — ora + min/max/day mm
+    const vNowT = vF.current.temperature_2m;
+    const vNowCode = vF.current.weather_code;
+    const vMin = vF.daily.temperature_2m_min[dayIdx];
+    const vMax = vF.daily.temperature_2m_max[dayIdx];
+    const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
+
+    $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
+    $("mainWx").textContent = wxToLabel(vNowCode, lang);
+    $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
+    $("mainSub").textContent = `${t.min} ${round0(vMin)}° · ${t.max} ${round0(vMax)}° · ${round0(vDayMm)} ${t.mm}`;
+
+    // TRENDS
+    const vDayCode = vF.daily.weather_code[dayIdx];
+    const lDayCode = lF.daily.weather_code[dayIdx];
+
+    const lMin = lF.daily.temperature_2m_min[dayIdx];
+    const lMax = lF.daily.temperature_2m_max[dayIdx];
+    const lDayMm = lF.daily.precipitation_sum[dayIdx] ?? 0;
+
+    $("trendVillage").innerHTML = trendLineHTML(vDayCode, wxToLabel(vDayCode,lang), vMin, vMax, vDayMm, lang, t);
+    $("trendLift").innerHTML = trendLineHTML(lDayCode, wxToLabel(lDayCode,lang), lMin, lMax, lDayMm, lang, t);
+
+    // SKI NOW
+    const lNowT = lF.current.temperature_2m;
+    const lNowW = lF.current.wind_speed_10m ?? 0;
+    $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)}`;
+
+    // BANDS
+    const slots = buildSlots(lF.hourly, lang, dayISO);
+    const bands = $("bands");
+    bands.innerHTML = "";
+    for(const s of slots){
+      const div = document.createElement("div");
+      div.className = "band";
+      div.innerHTML = `
+        <div class="time">${s.time}</div>
+        <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')} ${s.label}</div>
+        <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)}</div>
+        <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
+      `;
+      bands.appendChild(div);
+    }
+
+    // ADVICE
+    const lSnowLike = [71,73,75,77,85,86].includes(lF.current.weather_code) ||
+                      ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
+
+    const advice = chooseAdvice({
+      lang, mode,
+      vDayCode, lDayCode,
+      lNowWind:lNowW,
+      lNowTemp:lNowT,
+      vDayMm,
+      lSnowLike
+    });
+    $("advice").textContent = advice;
+
+    // NEXT 3 DAYS (dal giorno base)
+    const next = buildNext3(vF.daily, lang, dayIdx);
+    const days = $("days");
+    days.innerHTML = "";
+    for(const d of next){
+      const box = document.createElement("div");
+      box.className = "day";
+      box.innerHTML = `
+        <div class="dow">${d.dow}</div>
+        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"', 'width="26"').replace('height="32"', 'height="18"')}</div>
+        <div class="temp">${round0(d.tmin)}° / ${round0(d.tmax)}°</div>
+        <div class="mm">${round0(d.mm)} ${t.mm}</div>
+      `;
+      days.appendChild(box);
+    }
+
+    // READY per puppeteer
+    window.__WF_READY__ = true;
+
+  }catch(err){
+    console.error(err);
+    window.__WF_READY__ = true;
+    $("advice").textContent = (lang==="en")
+      ? "Error loading weather.\nCheck connection."
+      : (lang==="fr")
+        ? "Erreur météo.\nVérifie la connexion."
+        : "Errore nel caricare il meteo.\nControlla la connessione.";
+  }
+}
+
+/* =========================
+   INIT
+   ========================= */
+(function init(){
+  const params = new URLSearchParams(location.search);
+  const place = (params.get("place") || "sauze").toLowerCase();
+  const lang  = (params.get("lang")  || "it").toLowerCase();
+  const mode  = (params.get("mode")  || "auto").toLowerCase();
+  const renderFlag = params.get("render")==="1";
+
+  populateSelects(place, lang);
+  $("modeSelect").value = ["auto","oggi","domani"].includes(mode) ? mode : "auto";
+
+  $("placeSelect").addEventListener("change", ()=>{
+    const p = $("placeSelect").value;
+    const l = $("langSelect").value;
+    const m = $("modeSelect").value;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
+  });
+  $("langSelect").addEventListener("change", ()=>{
+    const p = $("placeSelect").value;
+    const l = $("langSelect").value;
+    const m = $("modeSelect").value;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
+  });
+  $("modeSelect").addEventListener("change", ()=>{
+    const p = $("placeSelect").value;
+    const l = $("langSelect").value;
+    const m = $("modeSelect").value;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
