@@ -44,11 +44,19 @@ async function renderPNGBuffer(place, lang, mode) {
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu"
+    ]
   });
 
   try {
     const page = await browser.newPage();
+
+    page.on("console", msg => console.log("[PAGE]", msg.text()));
+    page.on("pageerror", err => console.error("[PAGEERROR]", err.message));
 
     await page.setViewport({
       width: IMG_W,
@@ -56,8 +64,19 @@ async function renderPNGBuffer(place, lang, mode) {
       deviceScaleFactor: 1
     });
 
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 90000 });
-    await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 90000 });
+    await page.goto(url, {
+      waitUntil: "domcontentloaded",
+      timeout: 90000
+    });
+
+    await page.waitForSelector("#title", { timeout: 30000 });
+
+    await page.waitForFunction(
+      () => window.__WF_READY__ === true,
+      { timeout: 60000 }
+    );
+
+    await new Promise(r => setTimeout(r, 1200));
 
     const pngBuffer = await page.screenshot({
       type: "png"
