@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=600, initial-scale=1" />
-  <title>Weather Frame · View (600x800)</title>
+  <meta name="viewport" content="width=600, initial-scale=1" id="metaViewport" />
+  <title>Weather Frame · View</title>
 
   <style>
     :root{
@@ -15,6 +15,37 @@
       --mist:#f2f2f2;
       --r:14px;
     }
+
+    /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
+    .profile-waveshare75 {
+      --w: 480px;
+      --h: 800px;
+      --pad: 11px;
+      --gap: 8px;
+      --r: 11px;
+    }
+    .profile-waveshare75 h1               { font-size: 42px; }
+    .profile-waveshare75 .meta            { font-size: 13px; }
+    .profile-waveshare75 .mainWx          { font-size: 22px; }
+    .profile-waveshare75 .mainTemp        { font-size: 34px; }
+    .profile-waveshare75 .sub             { font-size: 14px; }
+    .profile-waveshare75 .adviceLines     { font-size: 15px; }
+    .profile-waveshare75 .adviceLines .line { font-size: 14px; }
+    .profile-waveshare75 .trendLine       { font-size: 15px; }
+    .profile-waveshare75 .time            { font-size: 15px; }
+    .profile-waveshare75 .wx              { font-size: 13px; }
+    .profile-waveshare75 .det             { font-size: 12px; }
+    .profile-waveshare75 .risk            { font-size: 11px; }
+    .profile-waveshare75 .band            { min-height: 120px; padding: 8px; }
+    .profile-waveshare75 .dow             { font-size: 15px; }
+    .profile-waveshare75 .temp            { font-size: 17px; }
+    .profile-waveshare75 .mm              { font-size: 12px; }
+    .profile-waveshare75 .day             { min-height: 96px; padding: 8px 6px; }
+    .profile-waveshare75 .icoBox          { width: 44px; height: 44px; }
+    .profile-waveshare75 .hero            { grid-template-columns: 44px 1fr; }
+    .profile-waveshare75 .paese           { min-height: 110px; }
+    .profile-waveshare75 .consigli        { min-height: 110px; }
+    /* ───────────────────────────────────────────────────────────────────── */
     *{ box-sizing:border-box; }
     body{
       margin:0;
@@ -922,6 +953,16 @@ async function refresh(){
   const lang  = (params.get("lang")  || "it").toLowerCase();
   const mode  = (params.get("mode")  || "auto").toLowerCase();
   const renderFlag = params.get("render")==="1";
+
+  // ── Profile (inkplate6 default, waveshare75 for Waveshare 7.5" V2) ──
+  const profile = (params.get("profile") || "inkplate6").toLowerCase();
+  if (profile === "waveshare75") {
+    $("root").classList.add("profile-waveshare75");
+    // Update meta viewport so the browser renders at the right width
+    const mv = document.getElementById("metaViewport");
+    if (mv) mv.setAttribute("content", "width=480, initial-scale=1");
+  }
+  // ────────────────────────────────────────────────────────────────────
 
   populateSelects(place, lang);
   $("modeSelect").value = ["auto","oggi","domani"].includes(mode) ? mode : "auto";
