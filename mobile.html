@@ -1,0 +1,1153 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="WeatherFrame"/>
+  <meta name="theme-color" content="#080c14"/>
+  <title>WeatherFrame</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg:        #080c14;
+      --bg2:       #0f1420;
+      --bg3:       #161d2e;
+      --card:      #111827;
+      --card2:     #1a2235;
+      --border:    rgba(255,255,255,0.07);
+      --border2:   rgba(255,255,255,0.12);
+      --text:      #f0f4ff;
+      --muted:     rgba(240,244,255,0.45);
+      --muted2:    rgba(240,244,255,0.25);
+      --accent:    #4d9fff;
+      --accent2:   #7cc4ff;
+      --snow:      #a8d4ff;
+      --warm:      #ff9a5c;
+      --cold:      #7cc4ff;
+      --safe:      #5dde8f;
+      --warn:      #ffd166;
+      --danger:    #ff6b6b;
+      --r:         20px;
+      --r2:        14px;
+      --safe-area-top: env(safe-area-inset-top, 44px);
+      --safe-area-bottom: env(safe-area-inset-bottom, 34px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overscroll-behavior: none;
+    }
+
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-bottom: calc(var(--safe-area-bottom) + 20px);
+    }
+
+    /* ── ANIMATED BACKGROUND ── */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      animation: orbFloat 12s ease-in-out infinite;
+    }
+    .orb1 { width: 340px; height: 340px; background: #1a4a8a; top: -80px; right: -60px; animation-delay: 0s; }
+    .orb2 { width: 260px; height: 260px; background: #0a2a5e; bottom: 20%; left: -80px; animation-delay: -4s; }
+    .orb3 { width: 200px; height: 200px; background: #1e3a6a; top: 40%; right: -40px; animation-delay: -8s; }
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    /* ── LAYOUT ── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 430px;
+      margin: 0 auto;
+      padding: calc(var(--safe-area-top) + 16px) 16px 0;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .place-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #f0f4ff 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      padding-top: 6px;
+    }
+    .mode-pills {
+      display: flex;
+      gap: 6px;
+    }
+    .pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+    }
+    .pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .place-select {
+      appearance: none;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      outline: none;
+    }
+    .meta-row {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.05s ease both;
+    }
+
+    /* ── HERO CARD ── */
+    .hero-card {
+      background: linear-gradient(145deg, #0d1e3a 0%, #091628 60%, #0d1520 100%);
+      border: 1px solid rgba(77,159,255,0.2);
+      border-radius: 28px;
+      padding: 24px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(77,159,255,0.5), transparent);
+    }
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .hero-temp {
+      font-family: 'Syne', sans-serif;
+      font-size: 76px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -3px;
+    }
+    .hero-temp sup {
+      font-size: 32px;
+      vertical-align: super;
+      letter-spacing: 0;
+    }
+    .hero-icon-wrap {
+      padding-top: 8px;
+    }
+    .hero-icon-wrap svg {
+      width: 64px;
+      height: 64px;
+      filter: drop-shadow(0 0 16px rgba(77,159,255,0.4));
+    }
+    .hero-wx {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 4px;
+    }
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ── ADVICE CARD ── */
+    .advice-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.15s ease both;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .advice-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--safe);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--safe);
+    }
+    .advice-dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+    .advice-dot.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    .advice-text {
+      font-size: 15px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      margin-top: 4px;
+    }
+
+    /* ── CHART CARD ── */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .chart-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .chart-legend {
+      display: flex;
+      gap: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 110px;
+    }
+    canvas#tempChart {
+      width: 100% !important;
+      height: 110px !important;
+    }
+
+    /* ── SKI BANDS ── */
+    .bands-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.25s ease both;
+    }
+    .bands-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .ski-now {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+    .bands-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .band {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 12px 10px;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .band:active { transform: scale(0.97); }
+    .band-time {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .band-wx {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--accent2);
+    }
+    .band-wx svg { width: 14px; height: 14px; }
+    .band-det {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .band-risk {
+      margin-top: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .risk-low  { background: rgba(93,222,143,0.15); color: var(--safe); }
+    .risk-mid  { background: rgba(255,209,102,0.15); color: var(--warn); }
+    .risk-high { background: rgba(255,107,107,0.15); color: var(--danger); }
+
+    /* ── SNOW CARD ── */
+    .snow-card {
+      background: linear-gradient(135deg, #0a1e3a 0%, #0d1a2e 100%);
+      border: 1px solid rgba(168,212,255,0.2);
+      border-radius: var(--r);
+      padding: 18px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.3s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+    .snow-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168,212,255,0.4), transparent);
+    }
+    .snow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .snow-stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 14px;
+      text-align: center;
+    }
+    .snow-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--snow);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .snow-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .snow-trend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--r2);
+      border: 1px solid var(--border);
+    }
+    .snow-trend-text {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+      line-height: 1.4;
+    }
+    .snow-trend-text strong { color: var(--snow); font-weight: 600; }
+
+    /* ── ALTITUDE CARD ── */
+    .alt-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.28s ease both;
+    }
+    .alt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .alt-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 14px;
+    }
+    .alt-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .alt-wx {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .alt-wx svg { width: 20px; height: 20px; }
+    .alt-wx-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .alt-detail {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    /* ── FORECAST ── */
+    .forecast-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.6s 0.35s ease both;
+    }
+    .days-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .day-row {
+      display: grid;
+      grid-template-columns: 80px 32px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .day-row:last-child { border-bottom: none; }
+    .day-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .day-name.today { color: var(--accent2); }
+    .day-ico svg { width: 28px; height: 28px; }
+    .day-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .day-bar-track {
+      height: 4px;
+      background: var(--bg3);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .day-bar-fill {
+      position: absolute;
+      top: 0; bottom: 0;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--cold), var(--warm));
+    }
+    .day-mm {
+      font-size: 11px;
+      color: var(--snow);
+      font-weight: 600;
+    }
+    .day-temps {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .day-temps .tmin { color: var(--cold); }
+    .day-temps .tmax { color: var(--warm); }
+
+    /* ── FOOTER ── */
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0 4px;
+      font-size: 11px;
+      color: var(--muted2);
+      font-weight: 500;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    /* ── LOADER ── */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+    .loader.hidden { opacity: 0; visibility: hidden; }
+    .loader-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f0f4ff, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .loader-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .loader-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SVG ICONS ── */
+    .ico-stroke { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-name" id="loaderName">WeatherFrame</div>
+  <div class="loader-dots">
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+    <div class="loader-dot"></div>
+  </div>
+</div>
+
+<!-- Background orbs -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- App -->
+<div class="app">
+
+  <div class="header">
+    <div>
+      <div class="place-name" id="title">Sauze d'Oulx</div>
+    </div>
+    <div class="header-right">
+      <select class="place-select" id="placeSelect"></select>
+      <div class="mode-pills">
+        <button class="pill active" id="pillOggi" onclick="setMode('oggi')">Oggi</button>
+        <button class="pill" id="pillDomani" onclick="setMode('domani')">Domani</button>
+      </div>
+    </div>
+  </div>
+  <div class="meta-row" id="meta">Via Lattea · 1509 m · 2300 m quota</div>
+
+  <!-- Hero -->
+  <div class="hero-card" id="heroCard">
+    <div class="hero-top">
+      <div>
+        <div class="hero-temp" id="heroTemp">—<sup>°</sup></div>
+        <div class="hero-wx" id="heroWx">Caricamento…</div>
+        <div class="hero-sub" id="heroSub">Min — · Max —</div>
+      </div>
+      <div class="hero-icon-wrap" id="heroIcon"></div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-val" id="statWind">—</div>
+        <div class="stat-lbl">Vento km/h</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statMm">—</div>
+        <div class="stat-lbl">Precip mm</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statLifts">—</div>
+        <div class="stat-lbl">Quota °C</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advice -->
+  <div class="advice-card" id="adviceCard">
+    <div class="advice-dot" id="adviceDot"></div>
+    <div class="advice-text" id="adviceText">Caricamento…</div>
+  </div>
+
+  <!-- Temp Chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">Temperatura 24h</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Paese</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--snow)"></div> Quota</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="tempChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Altitude comparison -->
+  <div class="section-title">Confronto Quote · Oggi</div>
+  <div class="alt-card" style="margin-top:0">
+    <div class="alt-grid" id="altGrid">
+      <div class="alt-item">
+        <div class="alt-label">Paese</div>
+        <div class="alt-wx" id="altVillageWx"></div>
+        <div class="alt-detail" id="altVillageDet">—</div>
+      </div>
+      <div class="alt-item">
+        <div class="alt-label">Quota Impianti</div>
+        <div class="alt-wx" id="altLiftWx"></div>
+        <div class="alt-detail" id="altLiftDet">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snow card -->
+  <div class="snow-card" id="snowCard">
+    <div class="section-title" style="color:var(--snow);margin-bottom:0">❄ Stato Neve</div>
+    <div class="snow-grid">
+      <div class="snow-stat">
+        <div class="snow-val" id="snowTempLift">—°</div>
+        <div class="snow-lbl">Temp. Quota</div>
+      </div>
+      <div class="snow-stat">
+        <div class="snow-val" id="snowPrecip">— mm</div>
+        <div class="snow-lbl">Precip. Attesa</div>
+      </div>
+    </div>
+    <div class="snow-trend" id="snowTrend">
+      <svg width="18" height="18" viewBox="0 0 24 24" style="color:var(--snow);flex-shrink:0"><path class="ico-stroke" d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
+      <div class="snow-trend-text" id="snowTrendText">Analisi neve in corso…</div>
+    </div>
+  </div>
+
+  <!-- Ski bands -->
+  <div class="bands-card">
+    <div class="bands-header">
+      <div class="section-title" style="margin:0">Fasce Sci · Quota</div>
+      <div class="ski-now" id="skiNow">— °</div>
+    </div>
+    <div class="bands-grid" id="bands"></div>
+  </div>
+
+  <!-- Forecast -->
+  <div class="forecast-card">
+    <div class="section-title">Prossimi 7 Giorni</div>
+    <div class="days-list" id="daysList"></div>
+  </div>
+
+  <div class="footer-bar">
+    <div id="updated">Aggiornato: —</div>
+    <div>Open-Meteo</div>
+  </div>
+
+</div>
+
+<script>
+/* ── PLACES ── */
+const PLACES = [
+  { key:"bardonecchia", name:"Bardonecchia", town:1312, lifts:2400, lat:45.0760, lon:6.7030 },
+  { key:"cesana",       name:"Cesana",       town:1354, lifts:2300, lat:44.9543, lon:6.7923 },
+  { key:"claviere",     name:"Claviere",     town:1766, lifts:2500, lat:44.9369, lon:6.6615 },
+  { key:"monginevro",   name:"Monginevro",   town:1860, lifts:2700, lat:44.9319, lon:6.7209 },
+  { key:"sansicario",   name:"San Sicario",  town:1700, lifts:2550, lat:44.9810, lon:6.8040 },
+  { key:"sauze",        name:"Sauze d'Oulx", town:1509, lifts:2300, lat:44.9408, lon:6.8614 },
+  { key:"sestriere",    name:"Sestriere",    town:2035, lifts:2700, lat:44.9570, lon:6.8789 },
+];
+
+const $ = id => document.getElementById(id);
+
+/* ── MODE ── */
+let currentMode = "oggi";
+function setMode(m) {
+  currentMode = m;
+  $("pillOggi").classList.toggle("active", m === "oggi");
+  $("pillDomani").classList.toggle("active", m === "domani");
+  refresh();
+}
+
+/* ── WX CODES ── */
+function wxLabel(code) {
+  if (code <= 1) return "Sereno";
+  if (code <= 3) return "Variabile";
+  if (code <= 9) return "Nebbia";
+  if (code <= 19) return "Pioviggine";
+  if (code <= 29) return "Pioggia";
+  if (code <= 39) return "Neve";
+  if (code <= 49) return "Foschia";
+  if (code <= 59) return "Pioviggine";
+  if (code <= 69) return "Pioggia";
+  if (code <= 79) return "Neve";
+  if (code <= 84) return "Rovesci";
+  if (code <= 94) return "Temporale";
+  return "Temporale forte";
+}
+
+function wxIconSVG(code, color = "currentColor") {
+  const s = `stroke="${color}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
+  if (code <= 1) return `<svg viewBox="0 0 48 48"><circle ${s} cx="24" cy="24" r="10"/><line ${s} x1="24" y1="6" x2="24" y2="10"/><line ${s} x1="24" y1="38" x2="24" y2="42"/><line ${s} x1="6" y1="24" x2="10" y2="24"/><line ${s} x1="38" y1="24" x2="42" y2="24"/><line ${s} x1="11.5" y1="11.5" x2="14.3" y2="14.3"/><line ${s} x1="33.7" y1="33.7" x2="36.5" y2="36.5"/><line ${s} x1="36.5" y1="11.5" x2="33.7" y2="14.3"/><line ${s} x1="14.3" y1="33.7" x2="11.5" y2="36.5"/></svg>`;
+  if (code <= 3) return `<svg viewBox="0 0 48 48"><circle ${s} cx="20" cy="26" r="9"/><path ${s} d="M28 18a8 8 0 0 1 0 16H16"/><path ${s} d="M14 26a6 6 0 0 1 6-6"/></svg>`;
+  if (code <= 69) return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><line ${s} x1="20" y1="36" x2="18" y2="42"/><line ${s} x1="28" y1="36" x2="26" y2="42"/></svg>`;
+  if (code <= 79) return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><path ${s} d="M20 38 l-2 4 l4-2 l-2 4"/><path ${s} d="M28 38 l-2 4 l4-2 l-2 4"/></svg>`;
+  return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><path ${s} d="M24 34 L20 44 M28 34 L24 44"/><path ${s} d="M20 38 L28 38"/></svg>`;
+}
+
+function wxColor(code) {
+  if (code <= 1) return "#ffd166";
+  if (code <= 3) return "#a8d4ff";
+  if (code <= 69) return "#7cc4ff";
+  if (code <= 79) return "#c8e8ff";
+  return "#ff9a5c";
+}
+
+/* ── OPEN-METEO ── */
+async function fetchForecast(lat, lon, elevation) {
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  url.searchParams.set("latitude", lat);
+  url.searchParams.set("longitude", lon);
+  url.searchParams.set("elevation", elevation);
+  url.searchParams.set("timezone", "Europe/Rome");
+  url.searchParams.set("current", ["temperature_2m","weather_code","precipitation","wind_speed_10m"].join(","));
+  url.searchParams.set("hourly", ["temperature_2m","weather_code","precipitation","wind_speed_10m"].join(","));
+  url.searchParams.set("daily", ["weather_code","temperature_2m_min","temperature_2m_max","precipitation_sum"].join(","));
+  url.searchParams.set("forecast_days", "7");
+  const r = await fetch(url.toString());
+  if (!r.ok) throw new Error("Fetch failed");
+  return r.json();
+}
+
+function pickDayIndex(mode) {
+  const h = new Date().getHours();
+  if (mode === "domani") return 1;
+  if (mode === "auto" && h >= 17) return 1;
+  return 0;
+}
+
+function buildSlots(hourly, dayISO) {
+  const slotDefs = [
+    { label:"09–13", from:9, to:13 },
+    { label:"13–15", from:13, to:15 },
+    { label:"15–18", from:15, to:18 },
+  ];
+  return slotDefs.map(s => {
+    const idxs = hourly.time.reduce((a, t, i) => {
+      if (t.slice(0,10) !== dayISO) return a;
+      const h = new Date(t).getHours();
+      if (h >= s.from && h < s.to) a.push(i);
+      return a;
+    }, []);
+    if (!idxs.length) return { time: s.label, code: 2, label: wxLabel(2), mm: 0, wind: 0, temp: 0 };
+    const mid = idxs[Math.floor(idxs.length/2)];
+    const code = hourly.weather_code[mid] ?? 2;
+    const temp = hourly.temperature_2m[mid] ?? 0;
+    let mm = 0, wind = 0;
+    idxs.forEach(i => {
+      mm += hourly.precipitation[i] ?? 0;
+      wind = Math.max(wind, hourly.wind_speed_10m[i] ?? 0);
+    });
+    return { time: s.label, code, label: wxLabel(code), mm, wind, temp };
+  });
+}
+
+function riskClass(mm, code) {
+  if (mm > 5 || [95,96,99].includes(code)) return "risk-high";
+  if (mm > 1 || [61,63,65,71,73,75,80,81,82].includes(code)) return "risk-mid";
+  return "risk-low";
+}
+function riskText(mm, code) {
+  if (mm > 5 || [95,96,99].includes(code)) return "Alto";
+  if (mm > 1 || [61,63,65,71,73,75,80,81,82].includes(code)) return "Medio";
+  return "Basso";
+}
+
+const DOW = ["dom","lun","mar","mer","gio","ven","sab"];
+
+/* ── CHART ── */
+let chartInstance = null;
+function drawChart(labels, village, lifts) {
+  const canvas = $("tempChart");
+  const ctx = canvas.getContext("2d");
+
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  // Gradient fill village
+  const gradV = ctx.createLinearGradient(0, 0, 0, 110);
+  gradV.addColorStop(0, "rgba(77,159,255,0.35)");
+  gradV.addColorStop(1, "rgba(77,159,255,0)");
+
+  const gradL = ctx.createLinearGradient(0, 0, 0, 110);
+  gradL.addColorStop(0, "rgba(168,212,255,0.2)");
+  gradL.addColorStop(1, "rgba(168,212,255,0)");
+
+  // Inline Chart.js from CDN via dynamic script
+  if (!window.Chart) return;
+
+  chartInstance = new window.Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Paese",
+          data: village,
+          borderColor: "#4d9fff",
+          backgroundColor: gradV,
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: "Quota",
+          data: lifts,
+          borderColor: "#a8d4ff",
+          backgroundColor: gradL,
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.4,
+          fill: true,
+          borderDash: [4, 3],
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      animation: { duration: 600 },
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: "rgba(15,20,32,0.95)",
+        titleColor: "#f0f4ff",
+        bodyColor: "#a8d4ff",
+        borderColor: "rgba(77,159,255,0.3)",
+        borderWidth: 1,
+        padding: 10,
+        callbacks: {
+          label: ctx => ` ${ctx.parsed.y.toFixed(1)}°`
+        }
+      }},
+      scales: {
+        x: {
+          grid: { color: "rgba(255,255,255,0.05)" },
+          ticks: { color: "rgba(240,244,255,0.4)", font: { size: 10 }, maxTicksLimit: 8 }
+        },
+        y: {
+          grid: { color: "rgba(255,255,255,0.05)" },
+          ticks: { color: "rgba(240,244,255,0.4)", font: { size: 10 }, callback: v => v + "°" }
+        }
+      }
+    }
+  });
+}
+
+/* ── ADVICE ── */
+function chooseAdvice({ vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike }) {
+  if (lNowWind > 60) return { text: "Vento forte in quota — verificare apertura impianti", level: "warn" };
+  if ([95,96,99].includes(lDayCode)) return { text: "Temporale previsto in quota — valutare con cautela", level: "danger" };
+  if ([71,73,75,77,85,86].includes(lDayCode) && lNowTemp < -5)
+    return { text: "Nevicate in quota con freddo intenso — attrezzatura adeguata", level: "warn" };
+  if (vDayCode <= 1 && lDayCode <= 3 && lNowWind < 30)
+    return { text: "Condizioni ottime — giornata ideale per sciare", level: "safe" };
+  if (vDayMm > 3)
+    return { text: "Precipitazioni attese — possibile neve fresca in quota", level: "safe" };
+  if (lSnowLike)
+    return { text: "Sta nevicando — lascia l'auto in garage se puoi", level: "warn" };
+  return { text: "Condizioni nella norma — buona giornata sulle piste", level: "safe" };
+}
+
+/* ── REFRESH ── */
+async function refresh() {
+  const placeKey = $("placeSelect").value || "sauze";
+  const place = PLACES.find(p => p.key === placeKey) || PLACES.find(p => p.key === "sauze");
+
+  $("loaderName").textContent = place.name;
+  $("loader").classList.remove("hidden");
+
+  try {
+    const [vF, lF] = await Promise.all([
+      fetchForecast(place.lat, place.lon, place.town),
+      fetchForecast(place.lat, place.lon, place.lifts),
+    ]);
+
+    const dayIdx = pickDayIndex(currentMode);
+    const dayISO = vF.daily.time[dayIdx];
+
+    // Header
+    $("title").textContent = place.name;
+    $("meta").textContent = `Via Lattea · Paese ${place.town} m · Quota ${place.lifts} m`;
+
+    // Hero
+    const vNowT = vF.current.temperature_2m;
+    const vNowCode = vF.current.weather_code;
+    const vMin = vF.daily.temperature_2m_min[dayIdx];
+    const vMax = vF.daily.temperature_2m_max[dayIdx];
+    const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
+    const lNowT = lF.current.temperature_2m;
+    const lNowW = lF.current.wind_speed_10m ?? 0;
+
+    $("heroTemp").innerHTML = `${vNowT.toFixed(1)}<sup>°</sup>`;
+    $("heroWx").textContent = wxLabel(vNowCode);
+    $("heroSub").textContent = `Min ${Math.round(vMin)}° · Max ${Math.round(vMax)}° · ${Math.round(vDayMm)} mm`;
+    $("heroIcon").innerHTML = wxIconSVG(vNowCode, wxColor(vNowCode));
+    $("statWind").textContent = Math.round(lNowW);
+    $("statMm").textContent = Math.round(vDayMm);
+    $("statLifts").textContent = lNowT.toFixed(1);
+
+    // Advice
+    const lSnowLike = [71,73,75,77,85,86].includes(lF.current.weather_code) ||
+                      ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
+    const adv = chooseAdvice({
+      vDayCode: vF.daily.weather_code[dayIdx],
+      lDayCode: lF.daily.weather_code[dayIdx],
+      lNowWind: lNowW, lNowTemp: lNowT,
+      vDayMm, lSnowLike
+    });
+    $("adviceText").textContent = adv.text;
+    $("adviceDot").className = "advice-dot" + (adv.level !== "safe" ? ` ${adv.level}` : "");
+
+    // Chart — next 24h from now
+    const nowISO = new Date().toISOString().slice(0,13);
+    const chartLabels = [], chartV = [], chartL = [];
+    vF.hourly.time.forEach((t, i) => {
+      if (t.slice(0,13) >= nowISO && chartLabels.length < 24) {
+        const h = new Date(t).getHours();
+        chartLabels.push(`${String(h).padStart(2,"0")}:00`);
+        chartV.push(vF.hourly.temperature_2m[i]);
+        chartL.push(lF.hourly.temperature_2m[i]);
+      }
+    });
+    drawChart(chartLabels, chartV, chartL);
+
+    // Altitude comparison
+    const vDayCode = vF.daily.weather_code[dayIdx];
+    const lDayCode = lF.daily.weather_code[dayIdx];
+    const lMin = lF.daily.temperature_2m_min[dayIdx];
+    const lMax = lF.daily.temperature_2m_max[dayIdx];
+    const lDayMm = lF.daily.precipitation_sum[dayIdx] ?? 0;
+
+    $("altVillageWx").innerHTML = wxIconSVG(vDayCode, wxColor(vDayCode)) + `<span class="alt-wx-label">${wxLabel(vDayCode)}</span>`;
+    $("altVillageDet").textContent = `Min ${Math.round(vMin)}° · Max ${Math.round(vMax)}° · ${Math.round(vDayMm)} mm`;
+    $("altLiftWx").innerHTML = wxIconSVG(lDayCode, wxColor(lDayCode)) + `<span class="alt-wx-label">${wxLabel(lDayCode)}</span>`;
+    $("altLiftDet").textContent = `Min ${Math.round(lMin)}° · Max ${Math.round(lMax)}° · ${Math.round(lDayMm)} mm`;
+
+    // Snow card
+    $("snowTempLift").textContent = `${lNowT.toFixed(1)}°`;
+    $("snowPrecip").textContent = `${Math.round(lDayMm)} mm`;
+    let snowText = "";
+    if (lNowT < 0 && lDayMm > 0) snowText = `Precipitazioni attese con temp. <strong>${lNowT.toFixed(1)}°</strong> in quota — <strong>neve fresca probabile</strong>`;
+    else if (lNowT < 0 && lDayMm === 0) snowText = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> in quota — neve presente in buone condizioni`;
+    else if (lNowT >= 0 && lNowT < 3) snowText = `Temperatura limite a <strong>${lNowT.toFixed(1)}°</strong> — possibile innevamento artificiale`;
+    else snowText = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> in quota — neve molla possibile nelle ore calde`;
+    $("snowTrendText").innerHTML = snowText;
+
+    // Ski bands
+    $("skiNow").textContent = `${lNowT.toFixed(1)}° · Vento ${Math.round(lNowW)}`;
+    const slots = buildSlots(lF.hourly, dayISO);
+    $("bands").innerHTML = slots.map(s => `
+      <div class="band">
+        <div class="band-time">${s.time}</div>
+        <div class="band-wx">${wxIconSVG(s.code, wxColor(s.code))} ${s.label}</div>
+        <div class="band-det">${s.temp.toFixed(1)}° · ${Math.round(s.mm)} mm<br/>Vento ${Math.round(s.wind)}</div>
+        <div class="band-risk ${riskClass(s.mm, s.code)}">Rischio ${riskText(s.mm, s.code)}</div>
+      </div>
+    `).join("");
+
+    // 7-day forecast
+    const allTemps = vF.daily.temperature_2m_min.concat(vF.daily.temperature_2m_max);
+    const tMin = Math.min(...allTemps), tMax = Math.max(...allTemps);
+    const range = tMax - tMin || 1;
+
+    $("daysList").innerHTML = vF.daily.time.slice(0, 7).map((iso, i) => {
+      const d = new Date(iso + "T12:00:00");
+      const dow = i === 0 ? "oggi" : i === 1 ? "domani" : DOW[d.getDay()];
+      const code = vF.daily.weather_code[i];
+      const mn = vF.daily.temperature_2m_min[i];
+      const mx = vF.daily.temperature_2m_max[i];
+      const mm = vF.daily.precipitation_sum[i] ?? 0;
+      const left = ((mn - tMin) / range * 100).toFixed(1);
+      const width = ((mx - mn) / range * 100).toFixed(1);
+      return `
+        <div class="day-row">
+          <div class="day-name ${i===0?'today':''}">${dow}</div>
+          <div class="day-ico">${wxIconSVG(code, wxColor(code))}</div>
+          <div class="day-bar-wrap">
+            <div class="day-bar-track">
+              <div class="day-bar-fill" style="left:${left}%;width:${width}%"></div>
+            </div>
+            ${mm > 0 ? `<div class="day-mm">${Math.round(mm)} mm</div>` : '<div class="day-mm" style="opacity:0">0</div>'}
+          </div>
+          <div class="day-temps"><span class="tmin">${Math.round(mn)}°</span> <span class="tmax">${Math.round(mx)}°</span></div>
+        </div>
+      `;
+    }).join("");
+
+    // Updated
+    const now = new Date();
+    $("updated").textContent = `Aggiornato: ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+
+  } catch(e) {
+    console.error(e);
+    $("adviceText").textContent = "Errore nel caricare il meteo.";
+  } finally {
+    $("loader").classList.add("hidden");
+  }
+}
+
+/* ── INIT ── */
+(function init() {
+  const params = new URLSearchParams(location.search);
+  const placeKey = (params.get("place") || "sauze").toLowerCase();
+  const mode = (params.get("mode") || "oggi").toLowerCase();
+
+  // Populate select
+  const ps = $("placeSelect");
+  PLACES.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.key;
+    opt.textContent = p.name;
+    ps.appendChild(opt);
+  });
+  ps.value = placeKey;
+  ps.addEventListener("change", refresh);
+
+  currentMode = ["oggi","domani"].includes(mode) ? mode : "oggi";
+  $("pillOggi").classList.toggle("active", currentMode === "oggi");
+  $("pillDomani").classList.toggle("active", currentMode === "domani");
+
+  // Load Chart.js then refresh
+  const script = document.createElement("script");
+  script.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
+  script.onload = refresh;
+  document.head.appendChild(script);
+})();
+</script>
+</body>
+</html>
