@@ -91,7 +91,9 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
     page.on("pageerror", err => console.error("[PAGEERROR]", err.message));
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
-    await page.waitForSelector("#title", { timeout: 30000 });
+    // Wait for the right element depending on mode
+    const isWelcome = url.includes("welcome=1");
+    await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
     await new Promise(r => setTimeout(r, 1200));
     return await page.screenshot({ type: "png" });
@@ -206,6 +208,41 @@ app.get("/settings", (req, res) => {
       wifiPass:  welcome.wifiPass  || ""
     } : { active: false }
   });
+});
+
+// ── Welcome RAW endpoint ─────────────────────────────────────
+app.get("/welcome-raw", async (req, res) => {
+  const profile   = safe(req.query.profile   || DEFAULT_PROFILE);
+  const place     = safe(req.query.place     || "sauze");
+  const lang      = safe(req.query.lang      || "it");
+  const guestName = req.query.guestName      || "";
+  const wifiSsid  = req.query.wifiSsid       || "";
+  const wifiPass  = req.query.wifiPass       || "";
+  const deviceId  = safe(req.query.id        || "");
+
+  const { w, h } = getProfile(profile);
+  const RAW_SIZE = (w * h) / 8;
+
+  // Cache key for welcome (per device, changes with guest data)
+  const cacheKey = `welcome_${deviceId}_${profile}`;
+  const pPng = path.join(OUT_DIR, `${cacheKey}.png`);
+  const pRaw = path.join(OUT_DIR, `${cacheKey}.raw`);
+
+  try {
+    // Welcome screen is cached for 1 hour
+    if (!isFresh(pPng, 60*60*1000)) {
+      const pngBuffer = await renderPNGBuffer(place, lang, "auto", profile, {guestName, wifiSsid, wifiPass});
+      fs.writeFileSync(pPng, pngBuffer);
+      fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
+    }
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Length", RAW_SIZE);
+    res.setHeader("Cache-Control", "no-store");
+    fs.createReadStream(pRaw).pipe(res);
+  } catch(e) {
+    console.error(e);
+    res.status(500).send("Welcome render error");
+  }
 });
 
 // ── RAW endpoint (used by ESP32) ──────────────────────────────

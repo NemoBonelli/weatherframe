@@ -18,82 +18,99 @@
 
     /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
     .profile-waveshare75 {
-      --w: 480px; --h: 800px; --pad: 11px; --gap: 8px; --r: 11px;
+      --w: 480px; --h: 800px; --pad: 12px; --gap: 8px; --r: 12px;
     }
-    .profile-waveshare75 h1               { font-size: 42px; }
-    .profile-waveshare75 .meta            { font-size: 13px; }
-    .profile-waveshare75 .mainWx          { font-size: 22px; }
-    .profile-waveshare75 .mainTemp        { font-size: 34px; }
-    .profile-waveshare75 .sub             { font-size: 14px; }
-    .profile-waveshare75 .adviceLines     { font-size: 14px; font-weight: 400; line-height: 1.45; }
-    .profile-waveshare75 .adviceLines .line { font-size: 13px; font-weight: 400; }
-    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 800; }
-    .profile-waveshare75 .trendLine       { font-size: 15px; font-weight: 700; }
-    .profile-waveshare75 .time            { font-size: 15px; }
-    .profile-waveshare75 .wx              { font-size: 13px; }
-    .profile-waveshare75 .det             { font-size: 12px; font-weight: 600; }
-    .profile-waveshare75 .risk            { font-size: 11px; font-weight: 700; }
-    .profile-waveshare75 .band            { min-height: 120px; padding: 8px; border-width: 2px; }
-    .profile-waveshare75 .dow             { font-size: 15px; }
-    .profile-waveshare75 .temp            { font-size: 17px; }
-    .profile-waveshare75 .mm              { font-size: 12px; }
-    .profile-waveshare75 .day             { min-height: 96px; padding: 8px 6px; border-width: 2px; }
-    .profile-waveshare75 .icoBox          { width: 44px; height: 44px; }
-    .profile-waveshare75 .hero            { grid-template-columns: 44px 1fr; }
-    .profile-waveshare75 .paese           { min-height: 110px; }
-    .profile-waveshare75 .consigli        { min-height: 110px; }
-    .profile-waveshare75 .kicker          { letter-spacing: 2px; font-size: 10px; font-weight: 900; opacity: 1; }
-    .profile-waveshare75 .panel           { border-width: 2px; }
-    .profile-waveshare75 .rule            { height: 3px; opacity: 1; }
-    .profile-waveshare75 .skiNow          { font-size: 14px; }
+    .profile-waveshare75 h1               { font-size: 44px; }
+    .profile-waveshare75 .meta            { font-size: 13px; font-weight: 700; }
+    .profile-waveshare75 .mainWx          { font-size: 24px; }
+    .profile-waveshare75 .mainTemp        { font-size: 36px; }
+    .profile-waveshare75 .sub             { font-size: 14px; font-weight: 700; }
+    .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 400; line-height: 1.45; }
+    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 400; }
+    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 700; }
+    .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
+    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 800; }
+    .profile-waveshare75 .det             { font-size: 13px; font-weight: 700; }
+    .profile-waveshare75 .risk            { font-size: 12px; font-weight: 800; }
+    .profile-waveshare75 .band            { min-height: 118px; padding: 9px 8px; border: 2px solid var(--ink) !important; border-radius: 12px !important; }
+    .profile-waveshare75 .dow             { font-size: 16px; font-weight: 900; }
+    .profile-waveshare75 .temp            { font-size: 18px; font-weight: 900; }
+    .profile-waveshare75 .mm              { font-size: 13px; font-weight: 700; }
+    .profile-waveshare75 .day             { min-height: 100px; padding: 9px 7px; border: 2px solid var(--ink) !important; border-radius: 12px !important; }
+    .profile-waveshare75 .icoBox          { width: 46px; height: 46px; border: 2px solid var(--soft) !important; }
+    .profile-waveshare75 .hero            { grid-template-columns: 46px 1fr; }
+    .profile-waveshare75 .paese           { min-height: 112px; }
+    .profile-waveshare75 .consigli        { min-height: 112px; }
+    .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; }
+    .profile-waveshare75 .panel           { border: 2px solid var(--soft) !important; }
+    .profile-waveshare75 .rule            { height: 3px; opacity: 1; background: #000; }
+    .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 800; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 8px; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
-    .welcome-screen {
-      display: none;
-      flex-direction: column;
-      height: var(--h);
-      padding: var(--pad);
-      justify-content: space-between;
+    .welcome-wrap { display:none; width:var(--w); height:var(--h); background:#fff; margin:0 auto; padding:var(--pad); overflow:hidden; box-sizing:border-box; }
+    .welcome-wrap.active { display:block; }
+
+    .wl-title { font-size:46px; font-weight:900; line-height:1; letter-spacing:-1px; margin-bottom:4px; }
+    .wl-name  { font-size:26px; font-weight:800; margin-bottom:4px; }
+    .wl-sub   { font-size:14px; font-weight:600; opacity:.7; margin-bottom:12px; }
+    .wl-rule  { height:3px; background:#111; margin-bottom:14px; }
+
+    .wl-wifi {
+      border:2px solid #111;
+      border-radius:14px;
+      padding:12px 14px;
+      margin-bottom:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
     }
-    .welcome-screen.active { display: flex; }
-    .welcome-top { flex: 1; }
-    .welcome-title {
-      font-size: 42px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
+    .wl-wifi-info { flex:1; min-width:0; }
+    .wl-wifi-lbl  { font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:5px; }
+    .wl-wifi-ssid { font-size:20px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wl-wifi-pass { font-size:13px; font-weight:700; opacity:.7; margin-top:3px; }
+    .wl-wifi-qr   { flex-shrink:0; width:110px; height:110px; }
+    .wl-wifi-qr svg, .wl-wifi-qr img { width:110px; height:110px; }
+
+    .wl-rule2 { height:1px; background:#ccc; margin-bottom:12px; }
+
+    .wl-wx-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:8px; }
+    .wl-days {
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:6px;
+      margin-bottom:10px;
     }
-    .welcome-subtitle {
-      font-size: 14px;
-      font-weight: 600;
-      opacity: 0.75;
-      margin-bottom: 16px;
+    .wl-day {
+      border:2px solid #111;
+      border-radius:10px;
+      padding:8px 6px;
+      text-align:center;
     }
-    .welcome-rule { height: 2px; background: var(--ink); margin-bottom: 16px; }
-    .welcome-wx {
-      border: 1px solid var(--soft);
-      border-radius: var(--r);
-      padding: 12px;
-      margin-bottom: 14px;
+    .wl-day-name  { font-size:14px; font-weight:900; text-transform:lowercase; margin-bottom:4px; }
+    .wl-day-ico   { display:flex; justify-content:center; margin-bottom:4px; }
+    .wl-day-temp  { font-size:16px; font-weight:900; }
+    .wl-day-mm    { font-size:11px; font-weight:700; opacity:.7; margin-top:2px; }
+
+    .wl-narrative {
+      font-size:14px;
+      font-weight:400;
+      line-height:1.5;
+      opacity:.85;
+      margin-bottom:12px;
     }
-    .welcome-wx-label { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.55; font-weight: 800; margin-bottom: 6px; }
-    .welcome-wx-text { font-size: 16px; font-weight: 700; }
-    .welcome-wifi {
-      border: 2px solid var(--ink);
-      border-radius: var(--r);
-      padding: 14px;
-      margin-bottom: 14px;
-      display: flex;
-      gap: 14px;
-      align-items: center;
+
+    .wl-footer {
+      position:absolute;
+      bottom:var(--pad);
+      left:var(--pad);
+      right:var(--pad);
+      font-size:18px;
+      font-weight:800;
+      text-align:center;
     }
-    .welcome-wifi-text { flex: 1; }
-    .welcome-wifi-label { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.55; font-weight: 800; margin-bottom: 4px; }
-    .welcome-wifi-ssid { font-size: 18px; font-weight: 900; }
-    .welcome-qr { flex-shrink: 0; }
-    .welcome-footer { font-size: 12px; opacity: 0.6; font-weight: 600; text-align: center; padding-bottom: 8px; }
     /* ─────────────────────────────────────────────────────────────────── */
     *{ box-sizing:border-box; }
     body{
@@ -391,27 +408,31 @@
 </head>
 
 <body>
-  <!-- Welcome screen (shown on arrival day) -->
-  <div class="inkplate" id="welcomeRoot" style="display:none">
-    <div class="welcome-screen active" id="welcomeScreen">
-      <div class="welcome-top">
-        <div class="welcome-title" id="welcomeTitle">Benvenuti</div>
-        <div class="welcome-subtitle" id="welcomeSubtitle">Sauze d'Oulx · Via Lattea</div>
-        <div class="welcome-rule"></div>
-        <div class="welcome-wx" id="welcomeWx" style="display:none">
-          <div class="welcome-wx-label" id="welcomeWxLabel">METEO DOMANI</div>
-          <div class="welcome-wx-text" id="welcomeWxText">Caricamento...</div>
-        </div>
-        <div class="welcome-wifi" id="welcomeWifi" style="display:none">
-          <div class="welcome-wifi-text">
-            <div class="welcome-wifi-label">WIFI · INQUADRA IL QR</div>
-            <div class="welcome-wifi-ssid" id="welcomeWifiSsid"></div>
-          </div>
-          <div class="welcome-qr" id="welcomeQrBox"></div>
-        </div>
+  <!-- Welcome screen (shown on arrival day) — rendered by server via Puppeteer -->
+  <div class="welcome-wrap" id="welcomeRoot" style="position:relative">
+    <div class="wl-title" id="wlGreeting">Benvenuti</div>
+    <div class="wl-name"  id="wlName"></div>
+    <div class="wl-sub"   id="wlSub">Sauze d'Oulx · Via Lattea</div>
+    <div class="wl-rule"></div>
+
+    <!-- WiFi box with QR -->
+    <div class="wl-wifi" id="wlWifi" style="display:none">
+      <div class="wl-wifi-info">
+        <div class="wl-wifi-lbl">WiFi · Inquadra il QR per connetterti</div>
+        <div class="wl-wifi-ssid" id="wlWifiSsid"></div>
+        <div class="wl-wifi-pass" id="wlWifiPass"></div>
       </div>
-      <div class="welcome-footer" id="welcomeFooter">Buona vacanza! 🎿</div>
+      <div class="wl-wifi-qr" id="wlWifiQr"></div>
     </div>
+
+    <div class="wl-rule2"></div>
+
+    <!-- 3-day forecast -->
+    <div class="wl-wx-label" id="wlWxLabel">PROSSIMI 3 GIORNI</div>
+    <div class="wl-days" id="wlDays"></div>
+    <div class="wl-narrative" id="wlNarrative"></div>
+
+    <div class="wl-footer" id="wlFooter">Buona vacanza! 🎿</div>
   </div>
 
   <div class="inkplate" id="root">
@@ -1109,6 +1130,125 @@ async function refresh(){
 }
 
 /* =========================
+   WELCOME SCREEN
+   ========================= */
+async function refreshWelcome(params) {
+  const guestName = decodeURIComponent(params.get("guestName") || "");
+  const wifiSsid  = decodeURIComponent(params.get("wifiSsid")  || "");
+  const wifiPass  = decodeURIComponent(params.get("wifiPass")  || "");
+  const placeKey  = (params.get("place") || "sauze").toLowerCase();
+  const lang      = (params.get("lang")  || "it").toLowerCase();
+
+  // Show welcome div, hide meteo div
+  $("welcomeRoot").classList.add("active");
+  $("root").style.display = "none";
+
+  // Greeting
+  const greet = lang==="en" ? "Welcome" : lang==="fr" ? "Bienvenue" : "Benvenuti";
+  $("wlGreeting").textContent = greet;
+  $("wlName").textContent     = guestName;
+  $("wlSub").textContent      = "Sauze d'Oulx · Via Lattea";
+
+  // WiFi QR
+  if (wifiSsid) {
+    $("wlWifi").style.display = "flex";
+    $("wlWifiSsid").textContent = wifiSsid;
+    $("wlWifiPass").textContent = wifiPass ? `Password: ${wifiPass}` : "";
+
+    // Generate WiFi QR using Google Charts API (works offline too via data URI approach)
+    // Format: WIFI:T:WPA;S:ssid;P:pass;;
+    const wifiStr = `WIFI:T:WPA;S:${wifiSsid};P:${wifiPass};;`;
+    // Use QR server
+    const qrImg = document.createElement("img");
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(wifiStr)}`;
+    qrImg.width = 110; qrImg.height = 110;
+    qrImg.style.display = "block";
+    $("wlWifiQr").innerHTML = "";
+    $("wlWifiQr").appendChild(qrImg);
+    await new Promise(r => { qrImg.onload = r; qrImg.onerror = r; setTimeout(r, 3000); });
+  }
+
+  // Forecast label
+  const wxLbl = lang==="en" ? "NEXT 3 DAYS" : lang==="fr" ? "3 PROCHAINS JOURS" : "PROSSIMI 3 GIORNI";
+  $("wlWxLabel").textContent = wxLbl;
+
+  // Fetch weather for narrative + 3-day grid
+  try {
+    const place = PLACES.find(p=>p.key===placeKey) || PLACES.find(p=>p.key==="sauze");
+    const vF = await fetchForecast(place.lat, place.lon, place.town);
+    const lF = await fetchForecast(place.lat, place.lon, place.lifts);
+
+    const DOW_IT = ["dom","lun","mar","mer","gio","ven","sab"];
+    const DOW_EN = ["sun","mon","tue","wed","thu","fri","sat"];
+    const DOW_FR = ["dim","lun","mar","mer","jeu","ven","sam"];
+    const dowArr = lang==="en" ? DOW_EN : lang==="fr" ? DOW_FR : DOW_IT;
+
+    // 3-day grid (days 1,2,3)
+    const daysEl = $("wlDays");
+    daysEl.innerHTML = "";
+    const dayData = [];
+    for(let k=1;k<=3;k++){
+      const code = vF.daily.weather_code[k] ?? 2;
+      const tmin = vF.daily.temperature_2m_min[k];
+      const tmax = vF.daily.temperature_2m_max[k];
+      const mm   = vF.daily.precipitation_sum[k] ?? 0;
+      const d    = new Date(vF.daily.time[k]+"T12:00:00");
+      const dow  = dowArr[d.getDay()];
+      dayData.push({dow, code, tmin, tmax, mm});
+      const box = document.createElement("div");
+      box.className = "wl-day";
+      box.innerHTML = `
+        <div class="wl-day-name">${dow}</div>
+        <div class="wl-day-ico">${wxIconSVG(code).replace('width="32"','width="24"').replace('height="32"','height="24"')}</div>
+        <div class="wl-day-temp">${Math.round(tmin)}° / ${Math.round(tmax)}°</div>
+        <div class="wl-day-mm">${mm>0?Math.round(mm)+' mm':''}</div>
+      `;
+      daysEl.appendChild(box);
+    }
+
+    // Narrative 3 giorni
+    function wxShort(code, lg) {
+      const isSnow = [71,73,75,77,85,86].includes(code);
+      const isRain = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code);
+      const isThunder = [95,96,99].includes(code);
+      const isSun = code <= 1;
+      const isCloudy = [2,3].includes(code);
+      if(isThunder) return lg==="en"?"thunderstorms":lg==="fr"?"orages":"temporali";
+      if(isSnow)    return lg==="en"?"snow":lg==="fr"?"neige":"neve";
+      if(isRain)    return lg==="en"?"rain":lg==="fr"?"pluie":"pioggia";
+      if(isSun)     return lg==="en"?"clear skies":lg==="fr"?"ciel dégagé":"cielo sereno";
+      if(isCloudy)  return lg==="en"?"partly cloudy":lg==="fr"?"partiellement nuageux":"parzialmente nuvoloso";
+      return lg==="en"?"variable":lg==="fr"?"variable":"variabile";
+    }
+
+    let narrative = "";
+    const [d1,d2,d3] = dayData;
+    if(lang==="en"){
+      narrative = `${d1.dow.charAt(0).toUpperCase()+d1.dow.slice(1)}: ${wxShort(d1.code,"en")}, ${Math.round(d1.tmin)}°/${Math.round(d1.tmax)}°${d1.mm>0?" · "+Math.round(d1.mm)+"mm":""}. `;
+      narrative += `${d2.dow.charAt(0).toUpperCase()+d2.dow.slice(1)}: ${wxShort(d2.code,"en")}, ${Math.round(d2.tmin)}°/${Math.round(d2.tmax)}°${d2.mm>0?" · "+Math.round(d2.mm)+"mm":""}. `;
+      narrative += `${d3.dow.charAt(0).toUpperCase()+d3.dow.slice(1)}: ${wxShort(d3.code,"en")}, ${Math.round(d3.tmin)}°/${Math.round(d3.tmax)}°${d3.mm>0?" · "+Math.round(d3.mm)+"mm":""}.`;
+    } else if(lang==="fr"){
+      narrative = `${d1.dow.charAt(0).toUpperCase()+d1.dow.slice(1)}: ${wxShort(d1.code,"fr")}, min ${Math.round(d1.tmin)}° max ${Math.round(d1.tmax)}°${d1.mm>0?" · "+Math.round(d1.mm)+"mm":""}. `;
+      narrative += `${d2.dow.charAt(0).toUpperCase()+d2.dow.slice(1)}: ${wxShort(d2.code,"fr")}, min ${Math.round(d2.tmin)}° max ${Math.round(d2.tmax)}°${d2.mm>0?" · "+Math.round(d2.mm)+"mm":""}. `;
+      narrative += `${d3.dow.charAt(0).toUpperCase()+d3.dow.slice(1)}: ${wxShort(d3.code,"fr")}, min ${Math.round(d3.tmin)}° max ${Math.round(d3.tmax)}°${d3.mm>0?" · "+Math.round(d3.mm)+"mm":""}.`;
+    } else {
+      narrative = `${d1.dow.charAt(0).toUpperCase()+d1.dow.slice(1)}: ${wxShort(d1.code,"it")}, min ${Math.round(d1.tmin)}° max ${Math.round(d1.tmax)}°${d1.mm>0?" · "+Math.round(d1.mm)+" mm":""}. `;
+      narrative += `${d2.dow.charAt(0).toUpperCase()+d2.dow.slice(1)}: ${wxShort(d2.code,"it")}, min ${Math.round(d2.tmin)}° max ${Math.round(d2.tmax)}°${d2.mm>0?" · "+Math.round(d2.mm)+" mm":""}. `;
+      narrative += `${d3.dow.charAt(0).toUpperCase()+d3.dow.slice(1)}: ${wxShort(d3.code,"it")}, min ${Math.round(d3.tmin)}° max ${Math.round(d3.tmax)}°${d3.mm>0?" · "+Math.round(d3.mm)+" mm":""}.`;
+    }
+    $("wlNarrative").textContent = narrative;
+  } catch(e) {
+    console.error("Welcome weather error", e);
+  }
+
+  // Footer
+  const footer = lang==="en" ? "Enjoy your stay! 🎿" : lang==="fr" ? "Bon séjour! 🎿" : "Buona vacanza! 🎿";
+  $("wlFooter").textContent = footer;
+
+  window.__WF_READY__ = true;
+}
+
+/* =========================
    INIT
    ========================= */
 (function init(){
@@ -1118,15 +1258,23 @@ async function refresh(){
   const mode  = (params.get("mode")  || "auto").toLowerCase();
   const renderFlag = params.get("render")==="1";
 
-  // ── Profile (inkplate6 default, waveshare75 for Waveshare 7.5" V2) ──
+  // ── Profile ──────────────────────────────────────────────────
   const profile = (params.get("profile") || "inkplate6").toLowerCase();
   if (profile === "waveshare75") {
     $("root").classList.add("profile-waveshare75");
-    // Update meta viewport so the browser renders at the right width
+    $("welcomeRoot").classList.add("profile-waveshare75");
     const mv = document.getElementById("metaViewport");
     if (mv) mv.setAttribute("content", "width=480, initial-scale=1");
   }
-  // ────────────────────────────────────────────────────────────────────
+
+  // ── Welcome mode ─────────────────────────────────────────────
+  if (params.get("welcome") === "1") {
+    refreshWelcome(params);
+    return;
+  }
+
+  // ── Normal meteo mode ────────────────────────────────────────
+  if(renderFlag) $("root").classList.add("render");
 
   populateSelects(place, lang);
   $("modeSelect").value = ["auto","oggi","domani"].includes(mode) ? mode : "auto";
