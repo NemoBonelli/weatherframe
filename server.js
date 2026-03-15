@@ -8,7 +8,6 @@ const { PNG } = require("pngjs");
 const WEATHER_CACHE = {};   // key -> { data, ts }
 const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
 
-
 const PLACES = {
   sauze:        { lat:44.9408, lon:6.8614, town:1509, lifts:2300 },
   sestriere:    { lat:44.9570, lon:6.8789, town:2035, lifts:2700 },
