@@ -15,9 +15,20 @@ function safe(s) {
 }
 
 // ── Directories ──────────────────────────────────────────────
+// DATA_DIR: usa /data (Render Persistent Disk) se disponibile,
+// altrimenti la variabile d'ambiente DATA_DIR, altrimenti locale.
 const OUT_DIR = path.join(__dirname, "public", "renders");
-const DATA_DIR = path.join(__dirname, "data");
-fs.mkdirSync(OUT_DIR, { recursive: true });
+
+function resolveDataDir() {
+  // Render Persistent Disk montato su /data
+  if (process.env.DATA_DIR) return process.env.DATA_DIR;
+  try { fs.accessSync("/data", fs.constants.W_OK); return "/data"; } catch {}
+  return path.join(__dirname, "data");
+}
+const DATA_DIR = resolveDataDir();
+console.log(`[WF] DATA_DIR: ${DATA_DIR}`);
+
+fs.mkdirSync(OUT_DIR,  { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ── Display profiles ─────────────────────────────────────────
@@ -379,6 +390,17 @@ app.get("/admin/status", (req, res) => {
   res.json(status);
 });
 
+// ── Admin refresh — invalida cache per un device ─────────────
+app.post("/admin/refresh/:id", (req, res) => {
+  const id = req.params.id;
+  const devices = loadDevices();
+  const device = devices[id];
+  if (!device) return res.status(404).json({ ok: false, error: "not found" });
+  invalidateCache(device.place || "sauze", device.lang || "it", device.profile || DEFAULT_PROFILE);
+  console.log(`[ADMIN] Cache invalidated for ${id}`);
+  res.json({ ok: true, message: "Cache invalidata — al prossimo risveglio scarica dati freschi" });
+});
+
 // ── Admin UI ──────────────────────────────────────────────────
 app.get("/admin", (req, res) => {
   const PLACES_LIST = [
@@ -504,6 +526,7 @@ async function loadDevices() {
       <input id="label-\${id}" value="\${d.label || ''}" placeholder="Es. Soggiorno, Camera ospiti...">
 
       <button class="btn" onclick="saveDevice('\${id}')">Salva impostazioni</button>
+      <button class="btn secondary" onclick="refreshDevice('\${id}')" style="margin-top:8px;">⟳ Forza aggiornamento</button>
 
       <div class="welcome-section">
         <h3>🎉 Schermata benvenuto</h3>
@@ -520,6 +543,13 @@ async function loadDevices() {
       </div>
     </div>\`;
   }).join('');
+}
+
+async function refreshDevice(id) {
+  const res = await fetch('/admin/refresh/'+id, { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) showToast('⟳ Cache invalidata — aggiorna al prossimo risveglio');
+  else showToast('Errore: '+data.error);
 }
 
 async function saveDevice(id) {
