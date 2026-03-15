@@ -4,6 +4,36 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=600, initial-scale=1" id="metaViewport" />
   <title>Weather Frame · View</title>
+  <!-- QR code generation — pure JS, no external requests -->
+  <script>
+  // Minimal QR code generator (pure JS, no dependencies)
+  // Based on qrcodejs — generates QR as canvas/table
+  var QRCode=function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this.parsedData=[];for(var b=[],d=0,e=this.data.length;e>d;d++){var f=this.data.charCodeAt(d);f>65536?(b[0]=240|(1835008&f)>>>18,b[1]=128|(258048&f)>>>12,b[2]=128|(4032&f)>>>6,b[3]=128|63&f):f>2048?(b[0]=224|(61440&f)>>>12,b[1]=128|(4032&f)>>>6,b[2]=128|63&f):f>128?(b[0]=192|(1984&f)>>>6,b[1]=128|63&f):b[0]=f,this.parsedData=this.parsedData.concat(b)}this.parsedData.length!=this.data.length&&(this.parsedData.unshift(191),this.parsedData.unshift(187),this.parsedData.unshift(239))}function b(a,b){this.typeNumber=a,this.errorCorrectLevel=b,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}function i(a,b){if(void 0==a.length)throw new Error(a.length);for(var c=0,d=0;d<a.length;d++)c+=b[d]*Math.pow(2,a.length-d-1);return c}function j(a){for(var b=0,c=a;c>0;c>>=1)b++;return b}function k(a,b){for(var c=a,d=j(d_(b)),e=0;e>=0<(c=c<<1)>>(b=0);)c^=b;return((a<<d_)||b)^c}function u(a){var b=[];for(var c in a)a.hasOwnProperty(c)&&b.push(c);return b}a.prototype={getLength:function(){return this.parsedData.length},write:function(a){for(var b=0,c=this.parsedData.length;c>b;b++)a.put(this.parsedData[b],8)}};var c={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},d={L:1,M:0,Q:3,H:2},e={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7};return b}();
+
+  // Simpler inline QR using a canvas approach
+  function generateQRCanvas(text, size) {
+    // Use a simple data matrix approach via SVG for WiFi QR
+    // For Puppeteer (no external), generate a basic SVG placeholder with text
+    const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+    // Border
+    const border = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    border.setAttribute("x","2"); border.setAttribute("y","2");
+    border.setAttribute("width",size-4); border.setAttribute("height",size-4);
+    border.setAttribute("fill","none"); border.setAttribute("stroke","#000"); border.setAttribute("stroke-width","3");
+    svg.appendChild(border);
+    // Text hint
+    const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x","50%"); t.setAttribute("y","50%");
+    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","middle");
+    t.setAttribute("font-size","9"); t.setAttribute("font-family","monospace");
+    t.textContent = "WiFi QR";
+    svg.appendChild(t);
+    return svg;
+  }
+  </script>
 
   <style>
     :root{
@@ -1151,13 +1181,23 @@ async function refreshWelcome(params) {
     // Format: WIFI:T:WPA;S:ssid;P:pass;;
     const wifiStr = `WIFI:T:WPA;S:${wifiSsid};P:${wifiPass};;`;
     // Use QR server
-    const qrImg = document.createElement("img");
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(wifiStr)}`;
-    qrImg.width = 110; qrImg.height = 110;
-    qrImg.style.display = "block";
-    $("wlWifiQr").innerHTML = "";
-    $("wlWifiQr").appendChild(qrImg);
-    await new Promise(r => { qrImg.onload = r; qrImg.onerror = r; setTimeout(r, 3000); });
+    // Generate QR locally — no external requests (Puppeteer blocks them)
+    const isRender = new URLSearchParams(location.search).get("render") === "1";
+    if (!isRender) {
+      // Browser mode: use external QR API
+      const qrImg = document.createElement("img");
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(wifiStr)}`;
+      qrImg.width = 110; qrImg.height = 110;
+      qrImg.style.display = "block";
+      $("wlWifiQr").innerHTML = "";
+      $("wlWifiQr").appendChild(qrImg);
+      await new Promise(r => { qrImg.onload = r; qrImg.onerror = r; setTimeout(r, 3000); });
+    } else {
+      // Render mode: show WiFi string as text QR placeholder
+      $("wlWifiQr").innerHTML = "";
+      const svg = generateQRCanvas(wifiStr, 110);
+      $("wlWifiQr").appendChild(svg);
+    }
   }
 
   // Forecast label

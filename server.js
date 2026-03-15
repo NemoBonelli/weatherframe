@@ -51,10 +51,10 @@ async function fetchOpenMeteo(lat, lon, elevation) {
 
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
-  const [vF, lF] = await Promise.all([
-    fetchOpenMeteo(p.lat, p.lon, p.town),
-    fetchOpenMeteo(p.lat, p.lon, p.lifts),
-  ]);
+  // Sequential with delay — avoids 429 from Open-Meteo on parallel requests
+  const vF = await fetchOpenMeteo(p.lat, p.lon, p.town);
+  await new Promise(r => setTimeout(r, 1000));
+  const lF = await fetchOpenMeteo(p.lat, p.lon, p.lifts);
   return { village: vF, lifts: lF };
 }
 
@@ -157,6 +157,19 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
     const page = await browser.newPage();
     page.on("console", msg => console.log("[PAGE]", msg.text()));
     page.on("pageerror", err => console.error("[PAGEERROR]", err.message));
+
+    // Block all external requests — weather data is already injected,
+    // fonts/QR/APIs from internet would cause 404/429 in headless Chrome
+    await page.setRequestInterception(true);
+    page.on("request", req => {
+      const url = req.url();
+      // Allow only localhost
+      if (url.startsWith("http://127.0.0.1") || url.startsWith("http://localhost")) {
+        req.continue();
+      } else {
+        req.abort();
+      }
+    });
 
     // Inject weather data before page loads — view.html reads window.__WF_WEATHER__
     await page.evaluateOnNewDocument((json) => {
