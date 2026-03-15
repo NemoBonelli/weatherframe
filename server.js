@@ -49,6 +49,20 @@ function saveWelcome(d) {
   fs.writeFileSync(WELCOME_FILE, JSON.stringify(d, null, 2));
 }
 
+// ── Error log ─────────────────────────────────────────────────
+const LOG_FILE = path.join(DATA_DIR, "errors.json");
+const MAX_LOGS = 100;
+function loadLogs() {
+  try { return JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
+  catch { return []; }
+}
+function addLog(deviceId, type, message) {
+  const logs = loadLogs();
+  logs.unshift({ ts: new Date().toISOString(), deviceId, type, message });
+  if (logs.length > MAX_LOGS) logs.splice(MAX_LOGS);
+  try { fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2)); } catch {}
+}
+
 // ── Cache helpers ─────────────────────────────────────────────
 // Smart cache: TTL 60 min, but can be invalidated per device
 const TTL = 60 * 60 * 1000; // 60 min
@@ -161,20 +175,25 @@ app.get("/register", (req, res) => {
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
   const devices = loadDevices();
 
+  const fw = safe(req.query.fw || "");
   if (!devices[id]) {
     devices[id] = {
       id, profile,
       place: "sauze", lang: "it",
       label: `Display ${Object.keys(devices).length + 1}`,
       registeredAt: new Date().toISOString(),
-      lastSeen: new Date().toISOString()
+      lastSeen: new Date().toISOString(),
+      bootCount: 1,
+      firmware: fw
     };
   } else {
     devices[id].lastSeen = new Date().toISOString();
-    devices[id].profile = profile;
+    devices[id].profile  = profile;
+    devices[id].bootCount = (devices[id].bootCount || 0) + 1;
+    if (fw) devices[id].firmware = fw;
   }
   saveDevices(devices);
-  console.log(`[REG] Device ${id} registered`);
+  console.log(`[REG] Device ${id} boot #${devices[id].bootCount}`);
   res.json({ ok: true, device: devices[id] });
 });
 
@@ -261,6 +280,7 @@ app.get("/raw", async (req, res) => {
     fs.createReadStream(files.raw).pipe(res);
   } catch (e) {
     console.error(e);
+    addLog(safe(req.query.id||"unknown"), "render_error", e.toString().slice(0,200));
     res.status(500).send("RAW render error");
   }
 });
@@ -338,6 +358,27 @@ app.delete("/admin/welcome/:id", (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Admin log endpoint ───────────────────────────────────────
+app.get("/admin/logs", (req, res) => {
+  res.json(loadLogs());
+});
+
+// ── Admin status — device offline check ──────────────────────
+// A device is "offline" if last seen > 3h (should wake every hour)
+app.get("/admin/status", (req, res) => {
+  const devices = loadDevices();
+  const now = Date.now();
+  const status = Object.values(devices).map(d => ({
+    id: d.id,
+    label: d.label,
+    online: (now - new Date(d.lastSeen||0).getTime()) < 3 * 60 * 60 * 1000,
+    lastSeen: d.lastSeen,
+    bootCount: d.bootCount || 0,
+    firmware: d.firmware || "unknown"
+  }));
+  res.json(status);
+});
+
 // ── Admin UI ──────────────────────────────────────────────────
 app.get("/admin", (req, res) => {
   const PLACES_LIST = [
@@ -391,6 +432,11 @@ app.get("/admin", (req, res) => {
   <div id="deviceList"><div class="empty">Caricamento...</div></div>
 </div>
 
+<div class="section">
+  <h2>Log errori recenti</h2>
+  <div id="logList"><div class="empty">Caricamento...</div></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -437,7 +483,7 @@ async function loadDevices() {
       <div class="card-header">
         <div>
           <div class="device-name">\${d.label || id}</div>
-          <div class="device-meta">ID: \${id} · \${d.profile || 'inkplate6'} · Visto: \${formatDate(d.lastSeen)}</div>
+          <div class="device-meta">ID: \${id} · \${d.profile||'inkplate6'} · FW: \${d.firmware||'?'} · Boot: \${d.bootCount||0} · Visto: \${formatDate(d.lastSeen)}</div>
         </div>
         <span class="badge \${online?'online':''}">
           \${online ? '● Online' : '○ Offline'}
@@ -510,7 +556,28 @@ async function clearWelcome(id) {
   showToast('Benvenuto rimosso');
 }
 
+async function loadLogs() {
+  const res = await fetch('/admin/logs');
+  const logs = await res.json();
+  const list = document.getElementById('logList');
+  if (!logs.length) {
+    list.innerHTML = '<div class="empty">Nessun errore registrato.</div>';
+    return;
+  }
+  list.innerHTML = logs.slice(0,20).map(l => \`
+    <div class="card" style="padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;font-weight:800;color:#b03030;">\${l.type}</span>
+        <span style="font-size:11px;color:#aaa;">\${formatDate(l.ts)}</span>
+      </div>
+      <div style="font-size:12px;color:#555;margin-top:4px;">\${l.deviceId} — \${l.message}</div>
+    </div>
+  \`).join('');
+}
+
 loadDevices();
+loadLogs();
+setInterval(loadDevices, 60000);  // auto-refresh ogni minuto
 </script>
 </body>
 </html>`);
