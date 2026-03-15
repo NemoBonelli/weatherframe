@@ -4,6 +4,60 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const { PNG } = require("pngjs");
 
+// ── Open-Meteo fetch (server-side, with cache) ───────────────
+const WEATHER_CACHE = {};   // key -> { data, ts }
+const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
+
+const PLACES = {
+  sauze:        { lat:44.9408, lon:6.8614, town:1509, lifts:2300 },
+  sestriere:    { lat:44.9570, lon:6.8789, town:2035, lifts:2700 },
+  sansicario:   { lat:44.9810, lon:6.8040, town:1700, lifts:2550 },
+  cesana:       { lat:44.9543, lon:6.7923, town:1354, lifts:2300 },
+  claviere:     { lat:44.9369, lon:6.6615, town:1766, lifts:2500 },
+  monginevro:   { lat:44.9319, lon:6.7209, town:1860, lifts:2700 },
+  bardonecchia: { lat:45.0760, lon:6.7030, town:1312, lifts:2400 },
+  oulx:         { lat:45.0333, lon:6.8333, town:1100, lifts:2550 },
+  pragelato:    { lat:45.0173, lon:6.9422, town:1518, lifts:2500 },
+  sanmarco:     { lat:45.0444, lon:6.7917, town:1212, lifts:2550 },
+};
+
+async function fetchOpenMeteo(lat, lon, elevation) {
+  const key = `${lat},${lon},${elevation}`;
+  const cached = WEATHER_CACHE[key];
+  if (cached && Date.now() - cached.ts < WEATHER_TTL) {
+    console.log(`[WX] Cache hit for ${key}`);
+    return cached.data;
+  }
+
+  const url = new URL("https://api.open-meteo.com/v1/forecast");
+  url.searchParams.set("latitude",     String(lat));
+  url.searchParams.set("longitude",    String(lon));
+  url.searchParams.set("elevation",    String(elevation));
+  url.searchParams.set("timezone",     "Europe/Rome");
+  url.searchParams.set("forecast_days","7");
+  url.searchParams.set("current", "temperature_2m,weather_code,precipitation,wind_speed_10m");
+  url.searchParams.set("hourly",  "temperature_2m,weather_code,precipitation,wind_speed_10m");
+  url.searchParams.set("daily",   "weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum");
+
+  console.log(`[WX] Fetching ${key}`);
+  const r = await fetch(url.toString());
+  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status} for ${key}`);
+  const data = await r.json();
+  if (!data.current || !data.daily || !data.hourly) throw new Error(`Open-Meteo incomplete data for ${key}`);
+
+  WEATHER_CACHE[key] = { data, ts: Date.now() };
+  return data;
+}
+
+async function fetchWeatherForPlace(placeKey) {
+  const p = PLACES[placeKey] || PLACES.sauze;
+  const [vF, lF] = await Promise.all([
+    fetchOpenMeteo(p.lat, p.lon, p.town),
+    fetchOpenMeteo(p.lat, p.lon, p.lifts),
+  ]);
+  return { village: vF, lifts: lF };
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -15,20 +69,9 @@ function safe(s) {
 }
 
 // ── Directories ──────────────────────────────────────────────
-// DATA_DIR: usa /data (Render Persistent Disk) se disponibile,
-// altrimenti la variabile d'ambiente DATA_DIR, altrimenti locale.
 const OUT_DIR = path.join(__dirname, "public", "renders");
-
-function resolveDataDir() {
-  // Render Persistent Disk montato su /data
-  if (process.env.DATA_DIR) return process.env.DATA_DIR;
-  try { fs.accessSync("/data", fs.constants.W_OK); return "/data"; } catch {}
-  return path.join(__dirname, "data");
-}
-const DATA_DIR = resolveDataDir();
-console.log(`[WF] DATA_DIR: ${DATA_DIR}`);
-
-fs.mkdirSync(OUT_DIR,  { recursive: true });
+const DATA_DIR = path.join(__dirname, "data");
+fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 // ── Display profiles ─────────────────────────────────────────
@@ -60,20 +103,6 @@ function saveWelcome(d) {
   fs.writeFileSync(WELCOME_FILE, JSON.stringify(d, null, 2));
 }
 
-// ── Error log ─────────────────────────────────────────────────
-const LOG_FILE = path.join(DATA_DIR, "errors.json");
-const MAX_LOGS = 100;
-function loadLogs() {
-  try { return JSON.parse(fs.readFileSync(LOG_FILE, "utf8")); }
-  catch { return []; }
-}
-function addLog(deviceId, type, message) {
-  const logs = loadLogs();
-  logs.unshift({ ts: new Date().toISOString(), deviceId, type, message });
-  if (logs.length > MAX_LOGS) logs.splice(MAX_LOGS);
-  try { fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2)); } catch {}
-}
-
 // ── Cache helpers ─────────────────────────────────────────────
 // Smart cache: TTL 60 min, but can be invalidated per device
 const TTL = 60 * 60 * 1000; // 60 min
@@ -101,6 +130,20 @@ function invalidateCache(place, lang, profile) {
 // ── Puppeteer render ─────────────────────────────────────────
 async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
   const { w, h } = getProfile(profile);
+
+  // ── Fetch weather SERVER-SIDE (cached) — Puppeteer gets static JSON ──
+  // This avoids 429 from Open-Meteo and 404 on Google Fonts inside headless Chrome
+  let weatherJson = "null";
+  if (!welcomeData) {
+    try {
+      const wx = await fetchWeatherForPlace(place);
+      weatherJson = JSON.stringify(wx);
+      console.log("[WX] Weather ready for", place);
+    } catch(e) {
+      console.error("[WX] Fetch failed:", e.message);
+    }
+  }
+
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
@@ -114,13 +157,19 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
     const page = await browser.newPage();
     page.on("console", msg => console.log("[PAGE]", msg.text()));
     page.on("pageerror", err => console.error("[PAGEERROR]", err.message));
+
+    // Inject weather data before page loads — view.html reads window.__WF_WEATHER__
+    await page.evaluateOnNewDocument((json) => {
+      window.__WF_WEATHER__ = json ? JSON.parse(json) : null;
+    }, weatherJson);
+
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
-    // Wait for the right element depending on mode
+
     const isWelcome = url.includes("welcome=1");
     await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 800));
     return await page.screenshot({ type: "png" });
   } finally {
     await browser.close();
@@ -186,25 +235,20 @@ app.get("/register", (req, res) => {
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
   const devices = loadDevices();
 
-  const fw = safe(req.query.fw || "");
   if (!devices[id]) {
     devices[id] = {
       id, profile,
       place: "sauze", lang: "it",
       label: `Display ${Object.keys(devices).length + 1}`,
       registeredAt: new Date().toISOString(),
-      lastSeen: new Date().toISOString(),
-      bootCount: 1,
-      firmware: fw
+      lastSeen: new Date().toISOString()
     };
   } else {
     devices[id].lastSeen = new Date().toISOString();
-    devices[id].profile  = profile;
-    devices[id].bootCount = (devices[id].bootCount || 0) + 1;
-    if (fw) devices[id].firmware = fw;
+    devices[id].profile = profile;
   }
   saveDevices(devices);
-  console.log(`[REG] Device ${id} boot #${devices[id].bootCount}`);
+  console.log(`[REG] Device ${id} registered`);
   res.json({ ok: true, device: devices[id] });
 });
 
@@ -240,41 +284,6 @@ app.get("/settings", (req, res) => {
   });
 });
 
-// ── Welcome RAW endpoint ─────────────────────────────────────
-app.get("/welcome-raw", async (req, res) => {
-  const profile   = safe(req.query.profile   || DEFAULT_PROFILE);
-  const place     = safe(req.query.place     || "sauze");
-  const lang      = safe(req.query.lang      || "it");
-  const guestName = req.query.guestName      || "";
-  const wifiSsid  = req.query.wifiSsid       || "";
-  const wifiPass  = req.query.wifiPass       || "";
-  const deviceId  = safe(req.query.id        || "");
-
-  const { w, h } = getProfile(profile);
-  const RAW_SIZE = (w * h) / 8;
-
-  // Cache key for welcome (per device, changes with guest data)
-  const cacheKey = `welcome_${deviceId}_${profile}`;
-  const pPng = path.join(OUT_DIR, `${cacheKey}.png`);
-  const pRaw = path.join(OUT_DIR, `${cacheKey}.raw`);
-
-  try {
-    // Welcome screen is cached for 1 hour
-    if (!isFresh(pPng, 60*60*1000)) {
-      const pngBuffer = await renderPNGBuffer(place, lang, "auto", profile, {guestName, wifiSsid, wifiPass});
-      fs.writeFileSync(pPng, pngBuffer);
-      fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
-    }
-    res.setHeader("Content-Type", "application/octet-stream");
-    res.setHeader("Content-Length", RAW_SIZE);
-    res.setHeader("Cache-Control", "no-store");
-    fs.createReadStream(pRaw).pipe(res);
-  } catch(e) {
-    console.error(e);
-    res.status(500).send("Welcome render error");
-  }
-});
-
 // ── RAW endpoint (used by ESP32) ──────────────────────────────
 app.get("/raw", async (req, res) => {
   const place   = safe(req.query.place   || "sauze");
@@ -291,7 +300,6 @@ app.get("/raw", async (req, res) => {
     fs.createReadStream(files.raw).pipe(res);
   } catch (e) {
     console.error(e);
-    addLog(safe(req.query.id||"unknown"), "render_error", e.toString().slice(0,200));
     res.status(500).send("RAW render error");
   }
 });
@@ -369,38 +377,6 @@ app.delete("/admin/welcome/:id", (req, res) => {
   res.json({ ok: true });
 });
 
-// ── Admin log endpoint ───────────────────────────────────────
-app.get("/admin/logs", (req, res) => {
-  res.json(loadLogs());
-});
-
-// ── Admin status — device offline check ──────────────────────
-// A device is "offline" if last seen > 3h (should wake every hour)
-app.get("/admin/status", (req, res) => {
-  const devices = loadDevices();
-  const now = Date.now();
-  const status = Object.values(devices).map(d => ({
-    id: d.id,
-    label: d.label,
-    online: (now - new Date(d.lastSeen||0).getTime()) < 3 * 60 * 60 * 1000,
-    lastSeen: d.lastSeen,
-    bootCount: d.bootCount || 0,
-    firmware: d.firmware || "unknown"
-  }));
-  res.json(status);
-});
-
-// ── Admin refresh — invalida cache per un device ─────────────
-app.post("/admin/refresh/:id", (req, res) => {
-  const id = req.params.id;
-  const devices = loadDevices();
-  const device = devices[id];
-  if (!device) return res.status(404).json({ ok: false, error: "not found" });
-  invalidateCache(device.place || "sauze", device.lang || "it", device.profile || DEFAULT_PROFILE);
-  console.log(`[ADMIN] Cache invalidated for ${id}`);
-  res.json({ ok: true, message: "Cache invalidata — al prossimo risveglio scarica dati freschi" });
-});
-
 // ── Admin UI ──────────────────────────────────────────────────
 app.get("/admin", (req, res) => {
   const PLACES_LIST = [
@@ -454,11 +430,6 @@ app.get("/admin", (req, res) => {
   <div id="deviceList"><div class="empty">Caricamento...</div></div>
 </div>
 
-<div class="section">
-  <h2>Log errori recenti</h2>
-  <div id="logList"><div class="empty">Caricamento...</div></div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -505,7 +476,7 @@ async function loadDevices() {
       <div class="card-header">
         <div>
           <div class="device-name">\${d.label || id}</div>
-          <div class="device-meta">ID: \${id} · \${d.profile||'inkplate6'} · FW: \${d.firmware||'?'} · Boot: \${d.bootCount||0} · Visto: \${formatDate(d.lastSeen)}</div>
+          <div class="device-meta">ID: \${id} · \${d.profile || 'inkplate6'} · Visto: \${formatDate(d.lastSeen)}</div>
         </div>
         <span class="badge \${online?'online':''}">
           \${online ? '● Online' : '○ Offline'}
@@ -526,7 +497,6 @@ async function loadDevices() {
       <input id="label-\${id}" value="\${d.label || ''}" placeholder="Es. Soggiorno, Camera ospiti...">
 
       <button class="btn" onclick="saveDevice('\${id}')">Salva impostazioni</button>
-      <button class="btn secondary" onclick="refreshDevice('\${id}')" style="margin-top:8px;">⟳ Forza aggiornamento</button>
 
       <div class="welcome-section">
         <h3>🎉 Schermata benvenuto</h3>
@@ -543,13 +513,6 @@ async function loadDevices() {
       </div>
     </div>\`;
   }).join('');
-}
-
-async function refreshDevice(id) {
-  const res = await fetch('/admin/refresh/'+id, { method: 'POST' });
-  const data = await res.json();
-  if (data.ok) showToast('⟳ Cache invalidata — aggiorna al prossimo risveglio');
-  else showToast('Errore: '+data.error);
 }
 
 async function saveDevice(id) {
@@ -586,28 +549,7 @@ async function clearWelcome(id) {
   showToast('Benvenuto rimosso');
 }
 
-async function loadLogs() {
-  const res = await fetch('/admin/logs');
-  const logs = await res.json();
-  const list = document.getElementById('logList');
-  if (!logs.length) {
-    list.innerHTML = '<div class="empty">Nessun errore registrato.</div>';
-    return;
-  }
-  list.innerHTML = logs.slice(0,20).map(l => \`
-    <div class="card" style="padding:12px;margin-bottom:8px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;font-weight:800;color:#b03030;">\${l.type}</span>
-        <span style="font-size:11px;color:#aaa;">\${formatDate(l.ts)}</span>
-      </div>
-      <div style="font-size:12px;color:#555;margin-top:4px;">\${l.deviceId} — \${l.message}</div>
-    </div>
-  \`).join('');
-}
-
 loadDevices();
-loadLogs();
-setInterval(loadDevices, 60000);  // auto-refresh ogni minuto
 </script>
 </body>
 </html>`);
