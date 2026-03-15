@@ -4,24 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=600, initial-scale=1" id="metaViewport" />
   <title>Weather Frame · View</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
       --w:600px; --h:800px;
       --pad:14px;
       --gap:10px;
-      --ink:#000;
-      --soft:#c0c0c0;
-      --mist:#f0f0f0;
+      --ink:#111;
+      --soft:#c9c9c9;
+      --mist:#f2f2f2;
       --r:14px;
     }
 
     /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
     .profile-waveshare75 {
-      --w: 480px; --h: 800px; --pad: 13px; --gap: 8px; --r: 12px;
+      --w: 480px; --h: 800px; --pad: 14px; --gap: 11px; --r: 12px;
       --ink: #000;
     }
     .profile-waveshare75 h1               { font-size: 44px; }
@@ -30,8 +27,8 @@
     .profile-waveshare75 .mainWx          { font-size: 24px; }
     .profile-waveshare75 .mainTemp        { font-size: 36px; }
     .profile-waveshare75 .sub             { font-size: 14px; font-weight: 800; opacity: 1; }
-    .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 700; line-height: 1.5; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 700; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 500; line-height: 1.5; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 500; color: #000; opacity: 1; }
     .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; }
     .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
     .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
@@ -45,18 +42,17 @@
     .profile-waveshare75 .day             { min-height: 112px; padding: 11px 7px; border: 2px solid #000 !important; border-radius: 12px !important; }
     .profile-waveshare75 .icoBox          { width: 46px; height: 46px; border: 2px solid #888 !important; }
     .profile-waveshare75 .hero            { grid-template-columns: 46px 1fr; gap: 12px; }
-    .profile-waveshare75 .paese           { min-height: 118px; padding: 10px 12px; }
-    .profile-waveshare75 .consigli        { min-height: 118px; padding: 10px 14px; }
+    .profile-waveshare75 .paese           { min-height: 130px; padding: 14px; }
+    .profile-waveshare75 .consigli        { min-height: 130px; padding: 14px; }
     .profile-waveshare75 .trend           { padding: 12px 14px; min-height: 90px; }
     .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
     .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
-    .profile-waveshare75 .ski             { padding: 12px 14px; }
+    .profile-waveshare75 .ski             { padding: 14px; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 8px; }
-    .profile-waveshare75 .forecast        { padding: 5px 14px 8px; margin-top: -4px; }
-    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 6px; padding-bottom: 0; }
-    .profile-waveshare75 .days            { margin-top: 4px; }
-    .profile-waveshare75 .ski + .panel    { margin-top: 4px; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 10px; }
+    .profile-waveshare75 .forecast        { padding: 14px; }
+    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 12px; }
+    .profile-waveshare75 .days            { margin-top: 10px; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
@@ -126,7 +122,7 @@
     body{
       margin:0;
       background:#cfcfcf;
-      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
     }
     .inkplate{
@@ -141,18 +137,17 @@
     /* HEADER */
     h1{
       margin:0;
-      font-family: 'Inter', sans-serif;
       font-size:50px;
       line-height:1;
-      letter-spacing:-1px;
+      letter-spacing:-0.6px;
       font-weight:900;
     }
     .meta{
       margin-top:6px;
       font-size:15px;
       line-height:1.2;
-      opacity:1;
-      font-weight:700;
+      opacity:.92;
+      font-weight:600;
     }
     .rule{
       height:2px;
@@ -187,18 +182,17 @@
       background:#fff;
     }
     .kicker{
-      font-size:10px;
-      letter-spacing:4px;
+      font-size:11px;
+      letter-spacing:6px;
       text-transform:uppercase;
-      opacity:1;
-      font-weight:900;
-      color:#000;
+      opacity:.62;
+      font-weight:800;
     }
 
     /* GRID TOP */
     .grid2{
       display:grid;
-      grid-template-columns: .9fr 1.1fr;
+      grid-template-columns: 1.1fr .9fr;
       gap:var(--gap);
       margin-bottom:var(--gap);
     }
@@ -235,40 +229,38 @@
       white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
     }
     .mainTemp{
-      font-family: 'Inter', sans-serif;
       font-size:40px;
-      font-weight:900;
+      font-weight:950;
       line-height:1.05;
-      letter-spacing:-1px;
+      letter-spacing:-0.2px;
       white-space:nowrap;
     }
     .sub{
       margin-top:6px;
       font-size:16px;
-      font-weight:800;
-      opacity:1;
+      font-weight:700;
+      opacity:.95;
     }
 
     .adviceTitle{
-      font-size:10px;
-      letter-spacing:4px;
+      font-size:11px;
+      letter-spacing:6px;
       text-transform:uppercase;
-      opacity:1;
-      font-weight:900;
+      opacity:.62;
+      font-weight:800;
       margin-bottom:8px;
-      color:#000;
     }
     .adviceLines{
-      font-size:15px;
-      font-weight:500;
-      line-height:1.55;
+      font-size:18px;
+      font-weight:800;
+      line-height:1.22;
       white-space:pre-line;
     }
     .adviceLines .line{
       display:block;
       margin-top:6px;
-      font-size:14px;
-      font-weight:500;
+      font-size:16px;
+      font-weight:700;
     }
 
     /* TRENDS */
@@ -291,7 +283,7 @@
       align-items:center;
       gap:8px;
       font-size:18px;
-      font-weight:900;
+      font-weight:850;
       line-height:1.15;
     }
 
@@ -308,11 +300,10 @@
       margin-bottom:10px;
     }
     .skiNow{
-      font-family: 'Inter', sans-serif;
       font-size:16px;
-      font-weight:900;
+      font-weight:850;
       white-space:nowrap;
-      opacity:1;
+      opacity:.95;
     }
 
     .bands{
@@ -332,10 +323,9 @@
       justify-content:flex-start;
     }
     .time{
-      font-family: 'Inter', sans-serif;
       font-size:18px;
-      font-weight:900;
-      letter-spacing:-.2px;
+      font-weight:950;
+      letter-spacing:.2px;
     }
     .wx{
       margin-top:6px;
@@ -350,16 +340,15 @@
     .det{
       margin-top:8px;
       font-size:14px;
-      font-weight:800;
+      font-weight:750;
       line-height:1.22;
-      opacity:1;
     }
     .risk{
       margin-top:auto;
       padding-top:8px;
       font-size:12px;
-      font-weight:900;
-      opacity:1;
+      font-weight:800;
+      opacity:.95;
     }
 
     /* FORECAST */
@@ -382,9 +371,8 @@
       justify-content:flex-start;
     }
     .dow{
-      font-family: 'Inter', sans-serif;
       font-size:18px;
-      font-weight:900;
+      font-weight:950;
       text-transform:lowercase;
       line-height:1;
       margin-bottom:6px;
@@ -395,16 +383,15 @@
       margin-bottom:6px;
     }
     .temp{
-      font-family: 'Inter', sans-serif;
       font-size:20px;
-      font-weight:900;
-      letter-spacing:-0.5px;
+      font-weight:950;
+      letter-spacing:-0.2px;
     }
     .mm{
       margin-top:6px;
       font-size:13px;
-      font-weight:800;
-      opacity:1;
+      font-weight:850;
+      opacity:.95;
     }
     .footer{
       display:flex;
@@ -413,13 +400,13 @@
       gap:12px;
       margin-top:8px;
       font-size:12px;
-      font-weight:800;
-      opacity:1;
+      font-weight:750;
+      opacity:.78;
     }
 
     /* SVG ICONS */
     svg{ display:block; }
-    .icoStroke{ stroke:#000; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+    .icoStroke{ stroke:#111; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 
     /* per render: nascondi i controlli se ?render=1 */
     .render .controls{ display:none; margin:0; }
@@ -503,7 +490,7 @@
       </div>
     </div>
 
-    <div class="rule" style="margin:8px 0 10px 0;"></div>
+    <div class="rule" style="margin:10px 0 12px 0;"></div>
 
     <div class="trends">
       <div class="panel trend">
@@ -520,8 +507,6 @@
         </div>
       </div>
     </div>
-
-    <div class="rule" style="margin:8px 0 10px 0;"></div>
 
     <div class="panel ski">
       <div class="skiHead">
@@ -915,14 +900,16 @@ async function fetchForecast(lat, lon, elevation){
     "weather_code",
     "temperature_2m_min",
     "temperature_2m_max",
-    "precipitation_sum",
-    "sunrise",
-    "sunset"
+    "precipitation_sum"
   ].join(","));
 
+  url.searchParams.set("forecast_days", "7");
+
   const r = await fetch(url.toString());
-  if(!r.ok) throw new Error("Forecast failed");
-  return await r.json();
+  if(!r.ok) throw new Error(`Forecast HTTP ${r.status} for elevation ${elevation}`);
+  const data = await r.json();
+  if(!data.current || !data.daily || !data.hourly) throw new Error("Forecast data incomplete");
+  return data;
 }
 
 function buildSlots(hourly, lang, dayISO){
@@ -1109,18 +1096,6 @@ async function refresh(){
       lDayMm
     });
     $("advice").textContent = advice;
-
-    // SUNRISE / SUNSET (estate: mag-ott)
-    const month = new Date().getMonth() + 1;
-    const showSunTimes = (month >= 5 && month <= 10);
-    if(showSunTimes && vF.daily.sunrise && vF.daily.sunset){
-      const sunriseStr = vF.daily.sunrise[dayIdx] ? new Date(vF.daily.sunrise[dayIdx]).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}) : null;
-      const sunsetStr  = vF.daily.sunset[dayIdx]  ? new Date(vF.daily.sunset[dayIdx]).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"})  : null;
-      if(sunriseStr && sunsetStr){
-        const sunLabel = lang==="en" ? `☀ ${sunriseStr} · ☾ ${sunsetStr}` : lang==="fr" ? `☀ ${sunriseStr} · ☾ ${sunsetStr}` : `☀ ${sunriseStr} · ☾ ${sunsetStr}`;
-        $("updated").textContent = `${t.updated}: ${pad2(now.getHours())}:${pad2(now.getMinutes())} · ${sunLabel}`;
-      }
-    }
 
     // NEXT 3 DAYS (dal giorno base)
     const next = buildNext3(vF.daily, lang, dayIdx);
