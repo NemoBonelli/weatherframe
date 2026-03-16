@@ -4,6 +4,27 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const { PNG } = require("pngjs");
 
+// Downscale 2x PNG to target size using box filter (average 2×2 pixels)
+// This gives much sharper text than rendering at 1x
+function downsample2x(pngBuffer, targetW, targetH) {
+  const src = PNG.sync.read(pngBuffer);
+  const dst = new PNG({ width: targetW, height: targetH });
+  for (let y = 0; y < targetH; y++) {
+    for (let x = 0; x < targetW; x++) {
+      let r=0, g=0, b=0, a=0;
+      for (let dy=0; dy<2; dy++) for (let dx=0; dx<2; dx++) {
+        const si = ((y*2+dy)*src.width + (x*2+dx)) * 4;
+        r += src.data[si]; g += src.data[si+1];
+        b += src.data[si+2]; a += src.data[si+3];
+      }
+      const di = (y*targetW + x) * 4;
+      dst.data[di]=r/4; dst.data[di+1]=g/4;
+      dst.data[di+2]=b/4; dst.data[di+3]=a/4;
+    }
+  }
+  return PNG.sync.write(dst);
+}
+
 // ── Open-Meteo fetch (server-side, with cache) ───────────────
 const WEATHER_CACHE = {};   // key -> { data, ts }
 const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
@@ -176,7 +197,7 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
       window.__WF_WEATHER__ = json ? JSON.parse(json) : null;
     }, weatherJson);
 
-    await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
+    await page.setViewport({ width: w, height: h, deviceScaleFactor: 2 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
@@ -203,7 +224,7 @@ function pngToRaw1Bit(pngBuffer, profile) {
       const r = png.data[idx], g = png.data[idx+1], b = png.data[idx+2], a = png.data[idx+3];
       let gray = 255;
       if (a > 0) gray = Math.round(0.299*r + 0.587*g + 0.114*b);
-      if (gray < 128) {
+      if (gray < 100) {  // soglia 100 invece di 128 — testo più netto sull'e-ink
         raw[y*(IMG_W/8) + Math.floor(x/8)] |= (1 << (7-(x%8)));
       }
     }
@@ -215,7 +236,10 @@ async function ensureRendered(place, lang, mode, profile) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
   if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw };
-  const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
+  const { w, h } = getProfile(profile);
+  const pngBuffer2x = await renderPNGBuffer(place, lang, mode, profile);
+  // Downsample from 2x to target resolution before binarization
+  const pngBuffer = downsample2x(pngBuffer2x, w, h);
   fs.writeFileSync(pPng, pngBuffer);
   fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
   return { png: pPng, raw: pRaw };
