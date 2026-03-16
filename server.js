@@ -224,7 +224,7 @@ function pngToRaw1Bit(pngBuffer, profile) {
       const r = png.data[idx], g = png.data[idx+1], b = png.data[idx+2], a = png.data[idx+3];
       let gray = 255;
       if (a > 0) gray = Math.round(0.299*r + 0.587*g + 0.114*b);
-      if (gray < 85) {  // soglia 85 — cattura anche i grigi chiari del testo leggero
+      if (gray < 90) {  // 90: testo e icone netti, evita artefatti sui bordi
         raw[y*(IMG_W/8) + Math.floor(x/8)] |= (1 << (7-(x%8)));
       }
     }

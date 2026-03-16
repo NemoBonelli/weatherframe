@@ -59,7 +59,7 @@
     .profile-waveshare75 .sub             { font-size: 14px; font-weight: 800; opacity: 1; }
     .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 600; line-height: 1.5; color: #000; opacity: 1; }
     .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 600; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; }
+    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; }
     .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
     .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
     .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; }
@@ -77,11 +77,11 @@
     .profile-waveshare75 .trend           { padding: 12px 14px; min-height: 90px; }
     .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
     .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
-    .profile-waveshare75 .ski             { padding: 14px; }
+    .profile-waveshare75 .ski             { padding: 10px 14px 12px; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
     .profile-waveshare75 .skiHead         { margin-bottom: 10px; }
-    .profile-waveshare75 .forecast        { padding: 14px; }
-    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 12px; }
+    .profile-waveshare75 .forecast        { padding: 8px 14px 14px; }
+    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 900; opacity: 1; color: #000; margin-top: 10px; }
     .profile-waveshare75 .days            { margin-top: 10px; }
     /* ───────────────────────────────────────────────────────────────────── */
 
@@ -436,7 +436,7 @@
 
     /* SVG ICONS */
     svg{ display:block; }
-    .icoStroke{ stroke:#000; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+    .icoStroke{ stroke:#000; fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; stroke-opacity:1; }
 
     /* per render: nascondi i controlli se ?render=1 */
     .render .controls{ display:none; margin:0; }
@@ -589,12 +589,12 @@ const I18N = {
     village:"PAESE",
     adviceToday:"CONSIGLI PER OGGI",
     adviceTomorrow:"CONSIGLI PER DOMANI",
-    trendVillageToday:"ANDAMENTO PAESE OGGI",
-    trendVillageTomorrow:"ANDAMENTO PAESE DOMANI",
-    trendLiftToday:"ANDAMENTO QUOTA IMPIANTI OGGI",
-    trendLiftTomorrow:"ANDAMENTO QUOTA IMPIANTI DOMANI",
-    liftToday:"QUOTA IMPIANTI OGGI",
-    liftTomorrow:"QUOTA IMPIANTI DOMANI",
+    trendVillageToday:"ANDAMENTO PAESE",
+    trendVillageTomorrow:"ANDAMENTO PAESE",
+    trendLiftToday:"ANDAMENTO QUOTA IMPIANTI",
+    trendLiftTomorrow:"ANDAMENTO QUOTA IMPIANTI",
+    liftToday:"QUOTA IMPIANTI",
+    liftTomorrow:"QUOTA IMPIANTI",
     next3:"PROSSIMI 3 GIORNI (PAESE)",
     updated:"Aggiornato",
     source:"Fonte: Open-Meteo",
@@ -611,12 +611,12 @@ const I18N = {
     village:"VILLAGE",
     adviceToday:"TIPS FOR TODAY",
     adviceTomorrow:"TIPS FOR TOMORROW",
-    trendVillageToday:"VILLAGE TREND · TODAY",
-    trendVillageTomorrow:"VILLAGE TREND · TOMORROW",
-    trendLiftToday:"LIFT ALTITUDE TREND · TODAY",
-    trendLiftTomorrow:"LIFT ALTITUDE TREND · TOMORROW",
-    liftToday:"LIFT ALTITUDE · TODAY",
-    liftTomorrow:"LIFT ALTITUDE · TOMORROW",
+    trendVillageToday:"VILLAGE TREND",
+    trendVillageTomorrow:"VILLAGE TREND",
+    trendLiftToday:"LIFT ALTITUDE TREND",
+    trendLiftTomorrow:"LIFT ALTITUDE TREND",
+    liftToday:"LIFT ALTITUDE",
+    liftTomorrow:"LIFT ALTITUDE",
     next3:"NEXT 3 DAYS (VILLAGE)",
     updated:"Updated",
     source:"Source: Open-Meteo",
@@ -634,11 +634,11 @@ const I18N = {
     adviceToday:"CONSEILS POUR AUJOURD’HUI",
     adviceTomorrow:"CONSEILS POUR DEMAIN",
     trendVillageToday:"TENDANCE VILLAGE · AUJOURD’HUI",
-    trendVillageTomorrow:"TENDANCE VILLAGE · DEMAIN",
+    trendVillageTomorrow:"TENDANCE VILLAGE",
     trendLiftToday:"TENDANCE ALTITUDE · AUJOURD’HUI",
-    trendLiftTomorrow:"TENDANCE ALTITUDE · DEMAIN",
+    trendLiftTomorrow:"TENDANCE ALTITUDE",
     liftToday:"ALTITUDE · AUJOURD’HUI",
-    liftTomorrow:"ALTITUDE · DEMAIN",
+    liftTomorrow:"ALTITUDE",
     next3:"3 PROCHAINS JOURS (VILLAGE)",
     updated:"Mis à jour",
     source:"Source: Open-Meteo",
@@ -1088,7 +1088,7 @@ async function refresh(){
     // SKI NOW
     const lNowT = lF.current.temperature_2m;
     const lNowW = lF.current.wind_speed_10m ?? 0;
-    $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)}`;
+    $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
 
     // BANDS
     const slots = buildSlots(lF.hourly, lang, dayISO);
