@@ -197,7 +197,7 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
       window.__WF_WEATHER__ = json ? JSON.parse(json) : null;
     }, weatherJson);
 
-    await page.setViewport({ width: w, height: h, deviceScaleFactor: 2 });
+    await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
@@ -224,7 +224,7 @@ function pngToRaw1Bit(pngBuffer, profile) {
       const r = png.data[idx], g = png.data[idx+1], b = png.data[idx+2], a = png.data[idx+3];
       let gray = 255;
       if (a > 0) gray = Math.round(0.299*r + 0.587*g + 0.114*b);
-      if (gray < 90) {  // 90: testo e icone netti, evita artefatti sui bordi
+      if (gray < 110) {
         raw[y*(IMG_W/8) + Math.floor(x/8)] |= (1 << (7-(x%8)));
       }
     }
@@ -236,10 +236,7 @@ async function ensureRendered(place, lang, mode, profile) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
   if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw };
-  const { w, h } = getProfile(profile);
-  const pngBuffer2x = await renderPNGBuffer(place, lang, mode, profile);
-  // Downsample from 2x to target resolution before binarization
-  const pngBuffer = downsample2x(pngBuffer2x, w, h);
+  const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
   fs.writeFileSync(pPng, pngBuffer);
   fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
   return { png: pPng, raw: pRaw };
