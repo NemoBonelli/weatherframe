@@ -60,14 +60,26 @@ async function fetchOpenMeteo(lat, lon, elevation) {
   url.searchParams.set("hourly",  "temperature_2m,weather_code,precipitation,wind_speed_10m");
   url.searchParams.set("daily",   "weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum");
 
-  console.log(`[WX] Fetching ${key}`);
-  const r = await fetch(url.toString());
-  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status} for ${key}`);
-  const data = await r.json();
-  if (!data.current || !data.daily || !data.hourly) throw new Error(`Open-Meteo incomplete data for ${key}`);
-
-  WEATHER_CACHE[key] = { data, ts: Date.now() };
-  return data;
+  // Retry up to 4 times with increasing delay on 429
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) {
+      const delay = attempt * 3000; // 3s, 6s, 9s
+      console.log(`[WX] Retry ${attempt} for ${key} after ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+    console.log(`[WX] Fetching ${key} (attempt ${attempt + 1})`);
+    const r = await fetch(url.toString());
+    if (r.status === 429) {
+      console.warn(`[WX] 429 rate limit for ${key}`);
+      continue; // retry
+    }
+    if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status} for ${key}`);
+    const data = await r.json();
+    if (!data.current || !data.daily || !data.hourly) throw new Error(`Open-Meteo incomplete data for ${key}`);
+    WEATHER_CACHE[key] = { data, ts: Date.now() };
+    return data;
+  }
+  throw new Error(`Open-Meteo 429 persists after retries for ${key}`);
 }
 
 async function fetchWeatherForPlace(placeKey) {
