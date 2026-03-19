@@ -453,6 +453,9 @@ app.get("/admin", (req, res) => {
   .device-meta{font-size:11px;color:#999;margin-top:2px;}
   .badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:#f0f0ee;color:#555;}
   .badge.online{background:#e8f8ef;color:#1a7a40;}
+  .profile-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-top:5px;}
+  .profile-badge.inkplate{background:#eef4ff;color:#2255cc;border:1px solid #c5d8ff;}
+  .profile-badge.waveshare{background:#f5f0ff;color:#6622cc;border:1px solid #ddc5ff;}
   label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px;margin-top:12px;}
   select,input{width:100%;padding:10px;font-size:15px;border:1px solid var(--soft);border-radius:10px;background:var(--white);}
   .btn{display:block;width:100%;padding:13px;font-size:15px;font-weight:700;background:var(--ink);color:#fff;border:none;border-radius:10px;cursor:pointer;margin-top:14px;}
@@ -488,6 +491,16 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function profileBadge(profile) {
+  if (profile === 'inkplate6') {
+    return '<span class="profile-badge inkplate">▦ Inkplate 6</span>';
+  }
+  if (profile === 'waveshare75') {
+    return '<span class="profile-badge waveshare">▩ Waveshare 7.5"</span>';
+  }
+  return '<span class="profile-badge">' + (profile || 'unknown') + '</span>';
+}
+
 function isOnline(lastSeen) {
   if (!lastSeen) return false;
   return Date.now() - new Date(lastSeen).getTime() < 2 * 60 * 60 * 1000; // 2h
@@ -511,7 +524,7 @@ async function loadDevices() {
   const list = document.getElementById('deviceList');
   const keys = Object.keys(devices);
   if (!keys.length) {
-    list.innerHTML = '<div class="empty">Nessun display registrato ancora.<br>Accendi il Waveshare per registrarlo.</div>';
+    list.innerHTML = '<div class="empty">Nessun display registrato ancora.<br>Accendi un display per registrarlo.</div>';
     return;
   }
   list.innerHTML = keys.map(id => {
@@ -522,7 +535,8 @@ async function loadDevices() {
       <div class="card-header">
         <div>
           <div class="device-name">\${d.label || id}</div>
-          <div class="device-meta">ID: \${id} · \${d.profile || 'inkplate6'} · Visto: \${formatDate(d.lastSeen)}</div>
+          <div class="device-meta">ID: \${id} · Visto: \${formatDate(d.lastSeen)}</div>
+          \${profileBadge(d.profile)}
         </div>
         <span class="badge \${online?'online':''}">
           \${online ? '● Online' : '○ Offline'}
