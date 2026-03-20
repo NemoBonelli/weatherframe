@@ -215,6 +215,9 @@ const TTL = 60 * 60 * 1000; // 60 min
 function pngPath(place, lang, mode, profile) {
   return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.png`);
 }
+function jpgPath(place, lang, mode, profile) {
+  return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.jpg`);
+}
 function rawPath(place, lang, mode, profile) {
   return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.raw`);
 }
@@ -233,7 +236,7 @@ function invalidateCache(place, lang, profile) {
 }
 
 // ── Puppeteer render ─────────────────────────────────────────
-async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
+async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, format = "png") {
   const { w, h } = getProfile(profile);
 
   // ── Fetch weather SERVER-SIDE (cached) — Puppeteer gets static JSON ──
@@ -288,7 +291,7 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null) {
     await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
     await new Promise(r => setTimeout(r, 800));
-    return await page.screenshot({ type: "png" });
+    return await page.screenshot({ type: format, ...(format === "jpeg" ? { quality: 90 } : {}) });
   } finally {
     await browser.close();
   }
@@ -319,11 +322,20 @@ function pngToRaw1Bit(pngBuffer, profile) {
 async function ensureRendered(place, lang, mode, profile) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
-  if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw };
+  const pJpg = jpgPath(place, lang, mode, profile);
+  if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw, jpg: pJpg };
   const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
   fs.writeFileSync(pPng, pngBuffer);
   fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
-  return { png: pPng, raw: pRaw };
+  // Genera anche JPEG per Inkplate (supporta JPEG da URL, non PNG)
+  const jpgBuffer = await renderJpgBuffer(place, lang, mode, profile);
+  fs.writeFileSync(pJpg, jpgBuffer);
+  return { png: pPng, raw: pRaw, jpg: pJpg };
+}
+
+async function renderJpgBuffer(place, lang, mode, profile) {
+  // Riusa renderPNGBuffer ma con screenshot JPEG
+  return await renderPNGBuffer(place, lang, mode, profile, null, "jpeg");
 }
 
 // ── Welcome screen helpers ────────────────────────────────────
@@ -437,6 +449,25 @@ app.get("/img", async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).send("PNG render error");
+  }
+});
+
+// ── JPEG endpoint for Inkplate (supports JPEG from URL, not PNG) ──
+app.get("/jpg", async (req, res) => {
+  const place   = safe(req.query.place   || "sauze");
+  const lang    = safe(req.query.lang    || "it");
+  const mode    = safe(req.query.mode    || "auto");
+  const profile = safe(req.query.profile || DEFAULT_PROFILE);
+  try {
+    const files = await ensureRendered(place, lang, mode, profile);
+    const stat = fs.statSync(files.jpg);
+    res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Content-Length", stat.size);
+    res.setHeader("Cache-Control", "no-store");
+    fs.createReadStream(files.jpg).pipe(res);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("JPEG render error");
   }
 });
 
