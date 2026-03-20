@@ -414,7 +414,37 @@ app.get("/settings", (req, res) => {
   });
 });
 
-// ── RAW endpoint (used by ESP32) ──────────────────────────────
+// ── Welcome JPG endpoint for Inkplate ────────────────────────
+app.get("/welcome-jpg", async (req, res) => {
+  const profile    = safe(req.query.profile   || DEFAULT_PROFILE);
+  const place      = safe(req.query.place     || "sauze");
+  const lang       = safe(req.query.lang      || "it");
+  const guestName  = req.query.guestName      || "";
+  const wifiSsid   = req.query.wifiSsid       || "";
+  const wifiPass   = req.query.wifiPass       || "";
+  const deviceId   = safe(req.query.id        || "");
+
+  const cacheKey = `welcome_${deviceId}_${profile}`;
+  const pJpg = path.join(OUT_DIR, `${cacheKey}.jpg`);
+
+  try {
+    if (!isFresh(pJpg, 60*60*1000)) {
+      const jpgBuffer = await renderPNGBuffer(place, lang, "auto", profile,
+        { guestName, wifiSsid, wifiPass }, "jpeg");
+      fs.writeFileSync(pJpg, jpgBuffer);
+    }
+    const stat = fs.statSync(pJpg);
+    res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Content-Length", stat.size);
+    res.setHeader("Cache-Control", "no-store");
+    fs.createReadStream(pJpg).pipe(res);
+  } catch(e) {
+    console.error(e);
+    res.status(500).send("Welcome JPEG error");
+  }
+});
+
+// ── Welcome RAW endpoint for Waveshare ───────────────────────
 app.get("/raw", async (req, res) => {
   const place   = safe(req.query.place   || "sauze");
   const lang    = safe(req.query.lang    || "it");
