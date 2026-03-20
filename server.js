@@ -26,8 +26,9 @@ function downsample2x(pngBuffer, targetW, targetH) {
 }
 
 // ── Open-Meteo fetch (server-side, with cache) ───────────────
-const WEATHER_CACHE = {};   // key -> { data, ts }
+const WEATHER_CACHE = {};
 const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
+const WEATHERAPI_KEY = "5b14deeb26e5493f9ee211416262003";
 
 const PLACES = {
   sauze:        { lat:44.9408, lon:6.8614, town:1509, lifts:2300 },
@@ -42,59 +43,125 @@ const PLACES = {
   sanmarco:     { lat:45.0444, lon:6.7917, town:1212, lifts:2550 },
 };
 
-async function fetchOpenMeteo(lat, lon, elevation) {
-  const key = `${lat},${lon},${elevation}`;
+// ── WeatherAPI.com fetch ─────────────────────────────────────────
+// Converte risposta WeatherAPI nel formato Open-Meteo usato da view.html
+async function fetchWeatherAPI(lat, lon) {
+  const key = `${lat},${lon}`;
   const cached = WEATHER_CACHE[key];
   if (cached && Date.now() - cached.ts < WEATHER_TTL) {
     console.log(`[WX] Cache hit for ${key}`);
     return cached.data;
   }
 
-  const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.searchParams.set("latitude",     String(lat));
-  url.searchParams.set("longitude",    String(lon));
-  url.searchParams.set("elevation",    String(elevation));
-  url.searchParams.set("timezone",     "Europe/Rome");
-  url.searchParams.set("forecast_days","7");
-  url.searchParams.set("current", "temperature_2m,weather_code,precipitation,wind_speed_10m");
-  url.searchParams.set("hourly",  "temperature_2m,weather_code,precipitation,wind_speed_10m");
-  url.searchParams.set("daily",   "weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum");
+  const url = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${lat},${lon}&days=7&aqi=no&alerts=no`;
+  console.log(`[WX] Fetching WeatherAPI for ${key}`);
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`WeatherAPI HTTP ${r.status}`);
+  const raw = await r.json();
 
-  // Retry up to 5 times with longer delays on 429
-  const delays = [0, 15000, 30000, 60000, 120000]; // 0, 15s, 30s, 1min, 2min
-  for (let attempt = 0; attempt < delays.length; attempt++) {
-    if (delays[attempt] > 0) {
-      console.log(`[WX] Retry ${attempt} for ${key} after ${delays[attempt]/1000}s`);
-      await new Promise(r => setTimeout(r, delays[attempt]));
-    }
-    console.log(`[WX] Fetching ${key} (attempt ${attempt + 1})`);
-    const r = await fetch(url.toString(), {
-      headers: {
-        "User-Agent": "WeatherFrame/1.0 (vacation rental display; contact: weatherframe@gmail.com)"
-      }
-    });
-    if (r.status === 429) {
-      console.warn(`[WX] 429 rate limit for ${key}`);
-      continue;
-    }
-    if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status} for ${key}`);
-    const data = await r.json();
-    if (!data.current || !data.daily || !data.hourly) throw new Error(`Open-Meteo incomplete data for ${key}`);
-    WEATHER_CACHE[key] = { data, ts: Date.now() };
-    console.log(`[WX] Success for ${key}`);
-    return data;
+  // Converti in formato compatibile con view.html (Open-Meteo style)
+  const data = convertWeatherAPI(raw);
+  WEATHER_CACHE[key] = { data, ts: Date.now() };
+  console.log(`[WX] WeatherAPI OK for ${key}`);
+  return data;
+}
+
+function convertWeatherAPI(raw) {
+  // Mappa i condition codes di WeatherAPI ai WMO codes di Open-Meteo
+  function toWMO(code, isDay) {
+    if (code === 1000) return isDay ? 0 : 0;           // Sunny/Clear
+    if (code === 1003) return 2;                        // Partly cloudy
+    if ([1006,1009].includes(code)) return 3;           // Cloudy/Overcast
+    if ([1030,1135,1147].includes(code)) return 45;     // Fog/Mist
+    if ([1063,1180,1183,1186,1189,1192,1195,1240,1243,1246].includes(code)) return 61; // Rain
+    if ([1066,1114,1117,1210,1213,1216,1219,1222,1225,1255,1258].includes(code)) return 71; // Snow
+    if ([1069,1204,1207,1249,1252].includes(code)) return 77; // Sleet
+    if ([1087,1273,1276,1279,1282].includes(code)) return 95; // Thunder
+    if ([1072,1150,1153,1168,1171].includes(code)) return 51; // Drizzle
+    return 2;
   }
-  throw new Error(`Open-Meteo 429 persists after all retries for ${key}`);
+
+  const current = raw.current;
+  const forecast = raw.forecast.forecastday;
+
+  // Build hourly arrays from forecast days
+  const hourlyTime = [], hourlyTemp = [], hourlyCode = [], hourlyPrec = [], hourlyWind = [];
+  for (const day of forecast) {
+    for (const h of day.hour) {
+      hourlyTime.push(h.time.replace(" ", "T"));
+      hourlyTemp.push(h.temp_c);
+      hourlyCode.push(toWMO(h.condition.code, h.is_day));
+      hourlyPrec.push(h.precip_mm);
+      hourlyWind.push(h.wind_kph);
+    }
+  }
+
+  // Build daily arrays
+  const dailyTime = [], dailyCodeArr = [], dailyMin = [], dailyMax = [], dailyPrec = [];
+  for (const day of forecast) {
+    dailyTime.push(day.date);
+    dailyCodeArr.push(toWMO(day.day.condition.code, 1));
+    dailyMin.push(day.day.mintemp_c);
+    dailyMax.push(day.day.maxtemp_c);
+    dailyPrec.push(day.day.totalprecip_mm);
+  }
+
+  return {
+    current: {
+      temperature_2m:  current.temp_c,
+      weather_code:    toWMO(current.condition.code, current.is_day),
+      precipitation:   current.precip_mm,
+      wind_speed_10m:  current.wind_kph
+    },
+    hourly: {
+      time:              hourlyTime,
+      temperature_2m:    hourlyTemp,
+      weather_code:      hourlyCode,
+      precipitation:     hourlyPrec,
+      wind_speed_10m:    hourlyWind
+    },
+    daily: {
+      time:                    dailyTime,
+      weather_code:            dailyCodeArr,
+      temperature_2m_min:      dailyMin,
+      temperature_2m_max:      dailyMax,
+      precipitation_sum:       dailyPrec
+    }
+  };
 }
 
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
-  // Sequential with delay — avoids 429 from Open-Meteo on parallel requests
-  const vF = await fetchOpenMeteo(p.lat, p.lon, p.town);
+  // WeatherAPI non supporta elevation — fetch per paese e quota separatamente
+  // Per ora usa le stesse coordinate con 1s di delay
+  const vF = await fetchWeatherAPI(p.lat, p.lon);
   await new Promise(r => setTimeout(r, 1000));
-  const lF = await fetchOpenMeteo(p.lat, p.lon, p.lifts);
+  // Per la quota usiamo le stesse coords — WeatherAPI non ha parametro elevation
+  // La differenza temp è simulata con -0.6°C ogni 100m di dislivello
+  const lF = adjustForElevation(vF, p.lifts - p.town);
   return { village: vF, lifts: lF };
 }
+
+function adjustForElevation(data, elevDiff) {
+  // Lapse rate: ~0.6°C per 100m di salita
+  const tempOffset = -(elevDiff / 100) * 0.6;
+  return {
+    current: {
+      ...data.current,
+      temperature_2m: data.current.temperature_2m + tempOffset
+    },
+    hourly: {
+      ...data.hourly,
+      temperature_2m: data.hourly.temperature_2m.map(t => t + tempOffset)
+    },
+    daily: {
+      ...data.daily,
+      temperature_2m_min: data.daily.temperature_2m_min.map(t => t + tempOffset),
+      temperature_2m_max: data.daily.temperature_2m_max.map(t => t + tempOffset)
+    }
+  };
+}
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
