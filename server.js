@@ -357,7 +357,9 @@ app.get("/img", async (req, res) => {
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
   try {
     const files = await ensureRendered(place, lang, mode, profile);
+    const stat = fs.statSync(files.png);
     res.setHeader("Content-Type", "image/png");
+    res.setHeader("Content-Length", stat.size);
     res.setHeader("Cache-Control", "no-store");
     fs.createReadStream(files.png).pipe(res);
   } catch (e) {
