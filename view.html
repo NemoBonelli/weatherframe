@@ -557,7 +557,7 @@
 
       <div class="footer">
         <div id="updated">Aggiornato: --:--</div>
-        <div id="source">Fonte: Open-Meteo</div>
+        <div id="source">Fonte: WeatherAPI</div>
       </div>
     </div>
 
@@ -597,7 +597,7 @@ const I18N = {
     liftTomorrow:"QUOTA IMPIANTI",
     next3:"PROSSIMI 3 GIORNI (PAESE)",
     updated:"Aggiornato",
-    source:"Fonte: Open-Meteo",
+    source:"Fonte: WeatherAPI",
     now:"Ora",
     min:"Min",
     max:"Max",
@@ -619,7 +619,7 @@ const I18N = {
     liftTomorrow:"LIFT ALTITUDE",
     next3:"NEXT 3 DAYS (VILLAGE)",
     updated:"Updated",
-    source:"Source: Open-Meteo",
+    source:"Source: WeatherAPI",
     now:"Now",
     min:"Min",
     max:"Max",
@@ -641,7 +641,7 @@ const I18N = {
     liftTomorrow:"ALTITUDE",
     next3:"3 PROCHAINS JOURS (VILLAGE)",
     updated:"Mis à jour",
-    source:"Source: Open-Meteo",
+    source:"Source: WeatherAPI",
     now:"Actuel",
     min:"Min",
     max:"Max",
@@ -1100,7 +1100,7 @@ async function refresh(){
       div.innerHTML = `
         <div class="time">${s.time}</div>
         <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')} ${s.label}</div>
-        <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)}</div>
+        <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
         <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
       `;
       bands.appendChild(div);
