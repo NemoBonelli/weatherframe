@@ -60,26 +60,31 @@ async function fetchOpenMeteo(lat, lon, elevation) {
   url.searchParams.set("hourly",  "temperature_2m,weather_code,precipitation,wind_speed_10m");
   url.searchParams.set("daily",   "weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum");
 
-  // Retry up to 4 times with increasing delay on 429
-  for (let attempt = 0; attempt < 4; attempt++) {
-    if (attempt > 0) {
-      const delay = attempt * 3000; // 3s, 6s, 9s
-      console.log(`[WX] Retry ${attempt} for ${key} after ${delay}ms`);
-      await new Promise(r => setTimeout(r, delay));
+  // Retry up to 5 times with longer delays on 429
+  const delays = [0, 15000, 30000, 60000, 120000]; // 0, 15s, 30s, 1min, 2min
+  for (let attempt = 0; attempt < delays.length; attempt++) {
+    if (delays[attempt] > 0) {
+      console.log(`[WX] Retry ${attempt} for ${key} after ${delays[attempt]/1000}s`);
+      await new Promise(r => setTimeout(r, delays[attempt]));
     }
     console.log(`[WX] Fetching ${key} (attempt ${attempt + 1})`);
-    const r = await fetch(url.toString());
+    const r = await fetch(url.toString(), {
+      headers: {
+        "User-Agent": "WeatherFrame/1.0 (vacation rental display; contact: weatherframe@gmail.com)"
+      }
+    });
     if (r.status === 429) {
       console.warn(`[WX] 429 rate limit for ${key}`);
-      continue; // retry
+      continue;
     }
     if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status} for ${key}`);
     const data = await r.json();
     if (!data.current || !data.daily || !data.hourly) throw new Error(`Open-Meteo incomplete data for ${key}`);
     WEATHER_CACHE[key] = { data, ts: Date.now() };
+    console.log(`[WX] Success for ${key}`);
     return data;
   }
-  throw new Error(`Open-Meteo 429 persists after retries for ${key}`);
+  throw new Error(`Open-Meteo 429 persists after all retries for ${key}`);
 }
 
 async function fetchWeatherForPlace(placeKey) {
@@ -619,4 +624,14 @@ loadDevices();
 
 app.listen(PORT, () => {
   console.log(`WeatherFrame running on port ${PORT}`);
+  // Pre-warm weather cache after 5 minutes — avoids 429 on cold start
+  setTimeout(async () => {
+    console.log("[WX] Pre-warming cache for sauze...");
+    try {
+      await fetchWeatherForPlace("sauze");
+      console.log("[WX] Cache warmed successfully");
+    } catch(e) {
+      console.warn("[WX] Warmup failed:", e.message);
+    }
+  }, 5 * 60 * 1000); // 5 minuti
 });
