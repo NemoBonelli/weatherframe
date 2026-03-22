@@ -271,18 +271,22 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await page.setRequestInterception(true);
     page.on("request", req => {
       const url = req.url();
-      // Allow only localhost
-      if (url.startsWith("http://127.0.0.1") || url.startsWith("http://localhost")) {
+      // Allow localhost + cdnjs for QR library
+      if (url.startsWith("http://127.0.0.1") || 
+          url.startsWith("http://localhost") ||
+          url.includes("cdnjs.cloudflare.com")) {
         req.continue();
       } else {
         req.abort();
       }
     });
 
-    // Inject weather data before page loads — view.html reads window.__WF_WEATHER__
-    await page.evaluateOnNewDocument((json) => {
+    // Inject weather data + welcome QR data
+    const qrData = welcomeData ? `WIFI:T:WPA;S:${welcomeData.wifiSsid || ""};P:${welcomeData.wifiPass || ""};;` : null;
+    await page.evaluateOnNewDocument((json, qr) => {
       window.__WF_WEATHER__ = json ? JSON.parse(json) : null;
-    }, weatherJson);
+      window.__WF_QR__ = qr; // WiFi QR string for welcome screen
+    }, weatherJson, qrData);
 
     await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
