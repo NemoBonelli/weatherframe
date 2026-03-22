@@ -3,6 +3,12 @@ const path = require("path");
 const fs = require("fs");
 const puppeteer = require("puppeteer");
 const { PNG } = require("pngjs");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+
+const JWT_SECRET = process.env.JWT_SECRET || "wf-dev-secret-change-in-production";
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "superadmin2025";
 
 // Downscale 2x PNG to target size using box filter (average 2×2 pixels)
 // This gives much sharper text than rendering at 1x
@@ -167,6 +173,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use("/public", express.static(path.join(__dirname, "public")));
 
 function safe(s) {
@@ -196,6 +203,59 @@ function loadDevices() {
 }
 function saveDevices(d) {
   fs.writeFileSync(DEVICES_FILE, JSON.stringify(d, null, 2));
+}
+
+// ── Users store ───────────────────────────────────────────────
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+function loadUsers() {
+  try { return JSON.parse(fs.readFileSync(USERS_FILE, "utf8")); }
+  catch { return {}; }
+}
+function saveUsers(u) {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(u, null, 2));
+}
+
+// ── Auth helpers ─────────────────────────────────────────────
+function generateUserId() {
+  return "usr_" + Math.random().toString(36).substr(2, 9);
+}
+
+function createToken(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
+}
+
+function requireAuth(req, res, next) {
+  const token = req.cookies?.wf_token;
+  if (!token) return res.redirect("/login");
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    res.clearCookie("wf_token");
+    res.redirect("/login");
+  }
+}
+
+function requireSuperAdmin(req, res, next) {
+  const token = req.cookies?.wf_super_token;
+  if (!token) return res.redirect("/superadmin/login");
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    if (!payload.superadmin) return res.redirect("/superadmin/login");
+    req.superadmin = true;
+    next();
+  } catch {
+    res.clearCookie("wf_super_token");
+    res.redirect("/superadmin/login");
+  }
+}
+
+// Filter devices by owner
+function getDevicesForUser(userId) {
+  const all = loadDevices();
+  return Object.fromEntries(
+    Object.entries(all).filter(([,d]) => d.owner === userId)
+  );
 }
 
 // ── Welcome store ─────────────────────────────────────────────
@@ -372,6 +432,7 @@ app.get("/register", (req, res) => {
   if (!devices[id]) {
     devices[id] = {
       id, profile,
+      owner: null,  // assigned by superadmin or claimed by user
       place: "sauze", lang: "it",
       label: `Display ${Object.keys(devices).length + 1}`,
       registeredAt: new Date().toISOString(),
@@ -529,24 +590,163 @@ app.get("/admin/devices", (req, res) => {
   res.json(loadDevices());
 });
 
-// POST /admin/devices/:id — update device settings
-app.post("/admin/devices/:id", (req, res) => {
+// ── Auth routes ──────────────────────────────────────────────
+
+// GET /login
+app.get("/login", (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeatherFrame — Login</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,Arial,sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{background:#fff;border-radius:20px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+  h1{font-size:26px;font-weight:900;letter-spacing:-0.5px;margin-bottom:4px;}
+  .sub{font-size:13px;color:#888;margin-bottom:28px;}
+  label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px;margin-top:18px;}
+  input{width:100%;padding:12px;font-size:16px;border:1.5px solid #ddd;border-radius:10px;}
+  input:focus{outline:none;border-color:#111;}
+  button{margin-top:24px;width:100%;padding:14px;font-size:16px;font-weight:700;background:#111;color:#fff;border:none;border-radius:10px;cursor:pointer;}
+  .err{margin-top:14px;padding:10px;background:#fef0f0;color:#b03030;border-radius:8px;font-size:13px;display:none;}
+  .signup{margin-top:16px;text-align:center;font-size:13px;color:#888;}
+  .signup a{color:#111;font-weight:700;text-decoration:none;}
+</style></head><body>
+<div class="card">
+  <h1>WeatherFrame</h1>
+  <div class="sub">Accedi al tuo account</div>
+  <div class="err" id="err"></div>
+  <label>Email</label>
+  <input id="email" type="email" placeholder="nome@email.com" autocomplete="email">
+  <label>Password</label>
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">Accedi</button>
+  <div class="signup">Non hai un account? <a href="/signup">Registrati</a></div>
+</div>
+<script>
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const r = await fetch('/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,pass})});
+  const d = await r.json();
+  if (d.ok) location.href = '/admin';
+  else { const e = document.getElementById('err'); e.textContent = d.error; e.style.display='block'; }
+}
+document.addEventListener('keydown', e => e.key==='Enter' && login());
+</script></body></html>`);
+});
+
+// GET /signup
+app.get("/signup", (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeatherFrame — Registrazione</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,Arial,sans-serif;background:#f5f5f3;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{background:#fff;border-radius:20px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+  h1{font-size:26px;font-weight:900;letter-spacing:-0.5px;margin-bottom:4px;}
+  .sub{font-size:13px;color:#888;margin-bottom:28px;}
+  label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px;margin-top:18px;}
+  input{width:100%;padding:12px;font-size:16px;border:1.5px solid #ddd;border-radius:10px;}
+  input:focus{outline:none;border-color:#111;}
+  button{margin-top:24px;width:100%;padding:14px;font-size:16px;font-weight:700;background:#111;color:#fff;border:none;border-radius:10px;cursor:pointer;}
+  .err{margin-top:14px;padding:10px;background:#fef0f0;color:#b03030;border-radius:8px;font-size:13px;display:none;}
+  .ok{margin-top:14px;padding:10px;background:#e8f8ef;color:#1a7a40;border-radius:8px;font-size:13px;display:none;}
+  .login{margin-top:16px;text-align:center;font-size:13px;color:#888;}
+  .login a{color:#111;font-weight:700;text-decoration:none;}
+</style></head><body>
+<div class="card">
+  <h1>WeatherFrame</h1>
+  <div class="sub">Crea il tuo account</div>
+  <div class="err" id="err"></div>
+  <div class="ok" id="ok"></div>
+  <label>Nome</label>
+  <input id="name" placeholder="Mario Rossi">
+  <label>Email</label>
+  <input id="email" type="email" placeholder="nome@email.com">
+  <label>Password</label>
+  <input id="pass" type="password" placeholder="Minimo 8 caratteri">
+  <button onclick="signup()">Crea account</button>
+  <div class="login">Hai già un account? <a href="/login">Accedi</a></div>
+</div>
+<script>
+async function signup() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const r = await fetch('/auth/signup', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,pass})});
+  const d = await r.json();
+  if (d.ok) { document.getElementById('ok').textContent='Account creato! Reindirizzamento...'; document.getElementById('ok').style.display='block'; setTimeout(()=>location.href='/admin',1500); }
+  else { const e = document.getElementById('err'); e.textContent = d.error; e.style.display='block'; }
+}
+</script></body></html>`);
+});
+
+// POST /auth/login
+app.post("/auth/login", async (req, res) => {
+  const { email, pass } = req.body;
+  if (!email || !pass) return res.json({ ok: false, error: "Email e password richieste" });
+  const users = loadUsers();
+  const user = Object.values(users).find(u => u.email === email.toLowerCase());
+  if (!user) return res.json({ ok: false, error: "Email o password non corretti" });
+  const match = await bcrypt.compare(pass, user.password);
+  if (!match) return res.json({ ok: false, error: "Email o password non corretti" });
+  const token = createToken({ userId: user.id, email: user.email, name: user.name });
+  res.cookie("wf_token", token, { httpOnly: true, maxAge: 30*24*60*60*1000, sameSite: "lax" });
+  res.json({ ok: true });
+});
+
+// POST /auth/signup
+app.post("/auth/signup", async (req, res) => {
+  const { name, email, pass } = req.body;
+  if (!name || !email || !pass) return res.json({ ok: false, error: "Tutti i campi sono richiesti" });
+  if (pass.length < 8) return res.json({ ok: false, error: "Password minimo 8 caratteri" });
+  const users = loadUsers();
+  if (Object.values(users).find(u => u.email === email.toLowerCase())) {
+    return res.json({ ok: false, error: "Email già registrata" });
+  }
+  const id = generateUserId();
+  const hashed = await bcrypt.hash(pass, 10);
+  users[id] = { id, name, email: email.toLowerCase(), password: hashed, createdAt: new Date().toISOString() };
+  saveUsers(users);
+  const token = createToken({ userId: id, email: email.toLowerCase(), name });
+  res.cookie("wf_token", token, { httpOnly: true, maxAge: 30*24*60*60*1000, sameSite: "lax" });
+  res.json({ ok: true });
+});
+
+// POST /auth/logout
+app.post("/auth/logout", (req, res) => {
+  res.clearCookie("wf_token");
+  res.redirect("/login");
+});
+
+// ── Admin API (auth-protected) ────────────────────────────────
+
+// GET /admin/devices — only user's own devices
+app.get("/admin/devices", requireAuth, (req, res) => {
+  res.json(getDevicesForUser(req.user.userId));
+});
+
+// POST /admin/devices/:id — update (must own device)
+app.post("/admin/devices/:id", requireAuth, (req, res) => {
   const id = req.params.id;
   const devices = loadDevices();
   if (!devices[id]) return res.status(404).json({ ok: false, error: "not found" });
+  if (devices[id].owner !== req.user.userId) return res.status(403).json({ ok: false, error: "forbidden" });
   const { place, lang, label } = req.body;
   if (place) devices[id].place = safe(place);
   if (lang)  devices[id].lang  = safe(lang);
   if (label) devices[id].label = label.slice(0, 40);
-  // Invalidate cache so next wake picks up new settings
   invalidateCache(devices[id].place, devices[id].lang, devices[id].profile);
   saveDevices(devices);
   res.json({ ok: true, device: devices[id] });
 });
 
-// POST /admin/welcome/:id — set welcome screen
-app.post("/admin/welcome/:id", (req, res) => {
+// POST /admin/welcome/:id
+app.post("/admin/welcome/:id", requireAuth, (req, res) => {
   const id = req.params.id;
+  const devices = loadDevices();
+  if (!devices[id] || devices[id].owner !== req.user.userId) return res.status(403).json({ ok: false, error: "forbidden" });
   const welcome = loadWelcome();
   const { guestName, arrivalDate, wifiSsid, wifiPass } = req.body;
   welcome[id] = { guestName, arrivalDate, wifiSsid, wifiPass };
@@ -554,16 +754,19 @@ app.post("/admin/welcome/:id", (req, res) => {
   res.json({ ok: true });
 });
 
-// DELETE /admin/welcome/:id — clear welcome
-app.delete("/admin/welcome/:id", (req, res) => {
+// DELETE /admin/welcome/:id
+app.delete("/admin/welcome/:id", requireAuth, (req, res) => {
+  const id = req.params.id;
+  const devices = loadDevices();
+  if (!devices[id] || devices[id].owner !== req.user.userId) return res.status(403).json({ ok: false, error: "forbidden" });
   const welcome = loadWelcome();
-  delete welcome[req.params.id];
+  delete welcome[id];
   saveWelcome(welcome);
   res.json({ ok: true });
 });
 
-// ── Admin UI ──────────────────────────────────────────────────
-app.get("/admin", (req, res) => {
+// ── Admin UI (auth-protected) ────────────────────────────────
+app.get("/admin", requireAuth, (req, res) => {
   const PLACES_LIST = [
     ["sauze","Sauze d'Oulx"],["sestriere","Sestriere"],["sansicario","San Sicario"],
     ["cesana","Cesana"],["claviere","Claviere"],["monginevro","Monginevro"],
@@ -609,8 +812,12 @@ app.get("/admin", (req, res) => {
 </head>
 <body>
 <div class="header">
-  <h1>WeatherFrame</h1>
-  <p>Gestione display remota</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h1>WeatherFrame</h1>
+      <p>Ciao, ${req.user.name} · <a href="/auth/logout" style="color:#888;font-size:13px;">Esci</a></p>
+    </div>
+  </div>
 </div>
 
 <div class="section">
@@ -752,6 +959,202 @@ loadDevices();
 </script>
 </body>
 </html>`);
+});
+
+// ── Super Admin ──────────────────────────────────────────────
+
+app.get("/superadmin/login", (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeatherFrame — Super Admin</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,Arial,sans-serif;background:#111;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{background:#1a1a1a;border-radius:20px;padding:36px 28px;width:100%;max-width:360px;border:1px solid #333;}
+  h1{font-size:22px;font-weight:900;color:#fff;margin-bottom:4px;}
+  .sub{font-size:13px;color:#666;margin-bottom:28px;}
+  label{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#666;margin-bottom:4px;margin-top:18px;}
+  input{width:100%;padding:12px;font-size:16px;border:1px solid #333;border-radius:10px;background:#222;color:#fff;}
+  button{margin-top:24px;width:100%;padding:14px;font-size:16px;font-weight:700;background:#fff;color:#111;border:none;border-radius:10px;cursor:pointer;}
+  .err{margin-top:14px;padding:10px;background:#3a1010;color:#ff6b6b;border-radius:8px;font-size:13px;display:none;}
+</style></head><body>
+<div class="card">
+  <h1>⚡ Super Admin</h1>
+  <div class="sub">WeatherFrame internal</div>
+  <div class="err" id="err"></div>
+  <label>Password</label>
+  <input id="pass" type="password" placeholder="Super admin password">
+  <button onclick="login()">Accedi</button>
+</div>
+<script>
+async function login() {
+  const pass = document.getElementById('pass').value;
+  const r = await fetch('/superadmin/auth', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass})});
+  const d = await r.json();
+  if (d.ok) location.href = '/superadmin';
+  else { const e = document.getElementById('err'); e.textContent = d.error; e.style.display='block'; }
+}
+document.addEventListener('keydown', e => e.key==='Enter' && login());
+</script></body></html>`);
+});
+
+app.post("/superadmin/auth", (req, res) => {
+  const { pass } = req.body;
+  if (pass !== SUPER_ADMIN_PASSWORD) return res.json({ ok: false, error: "Password errata" });
+  const token = jwt.sign({ superadmin: true }, JWT_SECRET, { expiresIn: "1d" });
+  res.cookie("wf_super_token", token, { httpOnly: true, maxAge: 24*60*60*1000, sameSite: "lax" });
+  res.json({ ok: true });
+});
+
+app.get("/superadmin", requireSuperAdmin, (req, res) => {
+  const users = loadUsers();
+  const devices = loadDevices();
+  const userList = Object.values(users);
+  const deviceList = Object.values(devices);
+
+  res.send(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WeatherFrame — Super Admin</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,Arial,sans-serif;background:#111;color:#fff;padding:0 0 60px;}
+  .header{background:#1a1a1a;border-bottom:1px solid #333;padding:20px;}
+  .header h1{font-size:22px;font-weight:900;}
+  .header p{font-size:13px;color:#666;margin-top:4px;}
+  .section{padding:20px;}
+  h2{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#666;margin-bottom:14px;}
+  .card{background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:16px;margin-bottom:10px;}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .name{font-size:16px;font-weight:800;}
+  .meta{font-size:12px;color:#666;margin-top:3px;}
+  select{padding:8px;font-size:14px;border:1px solid #333;border-radius:8px;background:#222;color:#fff;flex:1;}
+  .btn{padding:10px 18px;font-size:14px;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+  .btn-assign{background:#fff;color:#111;}
+  .btn-del{background:#3a1010;color:#ff6b6b;}
+  .unassigned{background:#2a2000;border-color:#554400;}
+  .tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:#333;color:#aaa;}
+  .tag.assigned{background:#1a2a1a;color:#5dde8f;}
+</style></head>
+<body>
+<div class="header">
+  <h1>⚡ Super Admin</h1>
+  <p>${userList.length} clienti · ${deviceList.length} display · <a href="/superadmin/logout" style="color:#666;font-size:13px;">Esci</a></p>
+</div>
+
+<div class="section">
+  <h2>Display da assegnare</h2>
+  <div id="unassigned"></div>
+  <h2 style="margin-top:24px;">Clienti</h2>
+  <div id="userList"></div>
+</div>
+
+<script>
+const users = ${JSON.stringify(userList.map(u => ({id:u.id,name:u.name,email:u.email,createdAt:u.createdAt})))};
+const devices = ${JSON.stringify(deviceList)};
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('it-IT');
+}
+
+function render() {
+  const unassigned = devices.filter(d => !d.owner);
+  const uEl = document.getElementById('unassigned');
+  if (!unassigned.length) {
+    uEl.innerHTML = '<div style="color:#666;font-size:14px;padding:10px 0">Nessun display non assegnato</div>';
+  } else {
+    uEl.innerHTML = unassigned.map(d => \`
+    <div class="card unassigned">
+      <div class="row">
+        <div>
+          <div class="name">\${d.label || d.id}</div>
+          <div class="meta">ID: \${d.id} · \${d.profile || 'unknown'} · Registrato: \${formatDate(d.registeredAt)}</div>
+        </div>
+        <select id="assign-\${d.id}">
+          <option value="">— Assegna a cliente —</option>
+          \${users.map(u => '<option value="'+u.id+'">'+u.name+' ('+u.email+')'+'</option>').join('')}
+        </select>
+        <button class="btn btn-assign" onclick="assignDevice('\${d.id}')">Assegna</button>
+      </div>
+    </div>\`).join('');
+  }
+
+  const uList = document.getElementById('userList');
+  uList.innerHTML = users.map(u => {
+    const myDevices = devices.filter(d => d.owner === u.id);
+    return \`
+    <div class="card">
+      <div class="row" style="margin-bottom:10px;">
+        <div>
+          <div class="name">\${u.name}</div>
+          <div class="meta">\${u.email} · \${myDevices.length} display · Dal \${formatDate(u.createdAt)}</div>
+        </div>
+        <button class="btn btn-del" onclick="deleteUser('\${u.id}')">Elimina</button>
+      </div>
+      \${myDevices.map(d => \`
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #333;">
+          <span class="tag assigned">● online</span>
+          <span style="font-size:14px;font-weight:700;">\${d.label || d.id}</span>
+          <span style="font-size:12px;color:#666;">\${d.profile}</span>
+          <button class="btn btn-del" style="margin-left:auto;padding:6px 12px;font-size:12px;" onclick="unassignDevice('\${d.id}')">Rimuovi</button>
+        </div>\`).join('')}
+    </div>\`;
+  }).join('');
+}
+
+async function assignDevice(deviceId) {
+  const userId = document.getElementById('assign-'+deviceId).value;
+  if (!userId) return alert('Seleziona un cliente');
+  const r = await fetch('/superadmin/assign', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId,userId})});
+  const d = await r.json();
+  if (d.ok) location.reload();
+  else alert('Errore: '+d.error);
+}
+
+async function unassignDevice(deviceId) {
+  if (!confirm('Rimuovere assegnazione?')) return;
+  const r = await fetch('/superadmin/assign', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({deviceId,userId:null})});
+  if ((await r.json()).ok) location.reload();
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Eliminare questo cliente? I suoi display diventeranno non assegnati.')) return;
+  const r = await fetch('/superadmin/users/'+userId, {method:'DELETE'});
+  if ((await r.json()).ok) location.reload();
+}
+
+render();
+</script>
+</body></html>`);
+});
+
+// POST /superadmin/assign
+app.post("/superadmin/assign", requireSuperAdmin, (req, res) => {
+  const { deviceId, userId } = req.body;
+  const devices = loadDevices();
+  if (!devices[deviceId]) return res.status(404).json({ ok: false, error: "device not found" });
+  devices[deviceId].owner = userId || null;
+  saveDevices(devices);
+  console.log(`[SA] Device ${deviceId} assigned to ${userId}`);
+  res.json({ ok: true });
+});
+
+// DELETE /superadmin/users/:id
+app.delete("/superadmin/users/:id", requireSuperAdmin, (req, res) => {
+  const users = loadUsers();
+  if (!users[req.params.id]) return res.status(404).json({ ok: false, error: "user not found" });
+  // Unassign all devices
+  const devices = loadDevices();
+  Object.values(devices).forEach(d => { if (d.owner === req.params.id) d.owner = null; });
+  saveDevices(devices);
+  delete users[req.params.id];
+  saveUsers(users);
+  res.json({ ok: true });
+});
+
+app.get("/superadmin/logout", (req, res) => {
+  res.clearCookie("wf_super_token");
+  res.redirect("/superadmin/login");
 });
 
 app.listen(PORT, () => {
