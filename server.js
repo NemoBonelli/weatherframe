@@ -186,6 +186,20 @@ const DATA_DIR = path.join(__dirname, "data");
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
+const FIRMWARE_DIR = path.join(__dirname, "public", "firmware");
+fs.mkdirSync(FIRMWARE_DIR, { recursive: true });
+
+// firmware/version.json structure:
+// { "inkplate6": { "version": "1.0.2", "url": "https://weatherframe.onrender.com/public/firmware/inkplate6_1.0.2.bin" } }
+const FIRMWARE_VERSION_FILE = path.join(FIRMWARE_DIR, "version.json");
+function loadFirmwareVersions() {
+  try { return JSON.parse(fs.readFileSync(FIRMWARE_VERSION_FILE, "utf8")); }
+  catch { return {}; }
+}
+function saveFirmwareVersions(v) {
+  fs.writeFileSync(FIRMWARE_VERSION_FILE, JSON.stringify(v, null, 2));
+}
+
 // ── Display profiles ─────────────────────────────────────────
 const PROFILES = {
   inkplate6:   { w: 600, h: 800 },
@@ -961,6 +975,18 @@ loadDevices();
 </html>`);
 });
 
+// ── Firmware OTA endpoints ───────────────────────────────────
+
+// GET /firmware/version?profile=inkplate6
+// Called by ESP32 at boot to check for updates
+app.get("/firmware/version", (req, res) => {
+  const profile = safe(req.query.profile || "inkplate6");
+  const versions = loadFirmwareVersions();
+  const fw = versions[profile];
+  if (!fw) return res.json({ version: "0.0.0", url: "" });
+  res.json({ version: fw.version, url: fw.url });
+});
+
 // ── Super Admin ──────────────────────────────────────────────
 
 app.get("/superadmin/login", (req, res) => {
@@ -1000,6 +1026,7 @@ document.addEventListener('keydown', e => e.key==='Enter' && login());
 
 app.post("/superadmin/auth", (req, res) => {
   const { pass } = req.body;
+  console.log(`[SA] Auth attempt, env password length: ${SUPER_ADMIN_PASSWORD.length}`);
   if (pass !== SUPER_ADMIN_PASSWORD) return res.json({ ok: false, error: "Password errata" });
   const token = jwt.sign({ superadmin: true }, JWT_SECRET, { expiresIn: "1d" });
   res.cookie("wf_super_token", token, { httpOnly: true, maxAge: 24*60*60*1000, sameSite: "lax" });
@@ -1042,7 +1069,32 @@ app.get("/superadmin", requireSuperAdmin, (req, res) => {
 </div>
 
 <div class="section">
-  <h2>Display da assegnare</h2>
+  <h2>Firmware OTA</h2>
+  <div class="card" style="background:#1a1a1a;">
+    <div style="margin-bottom:12px;font-size:14px;color:#aaa;">
+      Versioni correnti: Inkplate6 = <strong id="fw-inkplate6">—</strong> · Waveshare = <strong id="fw-waveshare75">—</strong>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Profile</div>
+        <select id="fw-profile" style="background:#222;color:#fff;border:1px solid #333;padding:8px;border-radius:8px;">
+          <option value="inkplate6">Inkplate 6</option>
+          <option value="waveshare75">Waveshare 7.5"</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Versione</div>
+        <input id="fw-version" placeholder="es. 1.0.3" style="background:#222;color:#fff;border:1px solid #333;padding:8px;border-radius:8px;width:120px;">
+      </div>
+      <div>
+        <div style="font-size:11px;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">File .bin</div>
+        <input id="fw-file" type="file" accept=".bin" style="color:#aaa;font-size:13px;">
+      </div>
+      <button class="btn btn-assign" onclick="uploadFirmware()" style="margin-top:0;">Carica firmware</button>
+    </div>
+    <div id="fw-status" style="margin-top:10px;font-size:13px;color:#5dde8f;display:none;"></div>
+  </div>
+  <h2 style="margin-top:24px;">Display da assegnare</h2>
   <div id="unassigned"></div>
   <h2 style="margin-top:24px;">Clienti</h2>
   <div id="userList"></div>
@@ -1102,6 +1154,38 @@ function render() {
   }).join('');
 }
 
+async function loadFirmwareVersions() {
+  const r = await fetch('/firmware/version?profile=inkplate6');
+  const d = await r.json();
+  document.getElementById('fw-inkplate6').textContent = d.version || '—';
+  const r2 = await fetch('/firmware/version?profile=waveshare75');
+  const d2 = await r2.json();
+  document.getElementById('fw-waveshare75').textContent = d2.version || '—';
+}
+
+async function uploadFirmware() {
+  const file = document.getElementById('fw-file').files[0];
+  const version = document.getElementById('fw-version').value.trim();
+  const profile = document.getElementById('fw-profile').value;
+  if (!file || !version) return alert('Seleziona file e inserisci versione');
+  const status = document.getElementById('fw-status');
+  status.textContent = 'Caricamento...'; status.style.display='block';
+  const buf = await file.arrayBuffer();
+  const r = await fetch('/superadmin/firmware?profile='+profile+'&version='+version, {
+    method: 'POST',
+    headers: {'Content-Type':'application/octet-stream'},
+    body: buf
+  });
+  const d = await r.json();
+  if (d.ok) {
+    status.textContent = '✓ Firmware ' + d.version + ' caricato — i display si aggiorneranno al prossimo risveglio';
+    loadFirmwareVersions();
+  } else {
+    status.textContent = 'Errore: ' + (d.error || 'unknown');
+    status.style.color = '#ff6b6b';
+  }
+}
+
 async function assignDevice(deviceId) {
   const userId = document.getElementById('assign-'+deviceId).value;
   if (!userId) return alert('Seleziona un cliente');
@@ -1124,8 +1208,24 @@ async function deleteUser(userId) {
 }
 
 render();
+loadFirmwareVersions();
 </script>
 </body></html>`);
+});
+
+// POST /superadmin/firmware — upload new firmware version
+app.post("/superadmin/firmware", requireSuperAdmin, express.raw({ type: "application/octet-stream", limit: "2mb" }), (req, res) => {
+  const profile = safe(req.query.profile || "inkplate6");
+  const version = req.query.version || "1.0.0";
+  const filename = `${profile}_${version}.bin`;
+  const filepath = path.join(FIRMWARE_DIR, filename);
+  fs.writeFileSync(filepath, req.body);
+  const url = `${req.protocol}://${req.get("host")}/public/firmware/${filename}`;
+  const versions = loadFirmwareVersions();
+  versions[profile] = { version, url, uploadedAt: new Date().toISOString() };
+  saveFirmwareVersions(versions);
+  console.log(`[FW] Uploaded ${filename} — version ${version}`);
+  res.json({ ok: true, version, url });
 });
 
 // POST /superadmin/assign
