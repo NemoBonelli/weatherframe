@@ -2,494 +2,174 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta id="metaViewport" name="viewport" content="width=600, initial-scale=1" />
-  <title>WeatherFrame · E‑ink V3</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather Frame V3</title>
   <style>
     :root{
-      --w:600px; --h:800px;
-      --pad:14px; --gap:10px; --r:16px;
-      --ink:#111; --soft:#b9b9b9; --bg:#cfcfcf;
-      --line:2px;
+      --w:480px; --h:800px; --pad:14px; --gap:10px;
+      --ink:#111; --soft:#b6b6b6; --bg:#efefef; --r:14px;
     }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
-    .screen{width:var(--w);min-height:var(--h);background:#fff;margin:0 auto;padding:var(--pad);position:relative}
-    .render .controls{display:none}
-    .profile-waveshare75{--w:480px; --h:800px; --pad:14px; --gap:10px; --r:14px}
-    .profile-waveshare75 h1{font-size:44px}
-    .profile-waveshare75 .meta{font-size:13px}
-    .profile-waveshare75 .mainWx{font-size:26px}
-    .profile-waveshare75 .mainTemp{font-size:38px}
-    .profile-waveshare75 .hero{grid-template-columns:52px 1fr}
-    .profile-waveshare75 .icoBox{width:52px;height:52px}
-    .profile-waveshare75 .advice{font-size:15px}
-    .profile-waveshare75 .kicker{font-size:10px;letter-spacing:5px}
-    .profile-waveshare75 .statusTitle{font-size:22px}
-    .profile-waveshare75 .statusSub{font-size:14px}
-    .profile-waveshare75 .nowLine{font-size:17px}
-    .profile-waveshare75 .band{min-height:122px;padding:10px 8px}
-    .profile-waveshare75 .time{font-size:18px}
-    .profile-waveshare75 .bandWx{font-size:14px}
-    .profile-waveshare75 .bandDet{font-size:13px}
-    .profile-waveshare75 .stripRow{font-size:15px}
-    .profile-waveshare75 .footer{font-size:12px}
-
-    .hide{display:none!important}
-    h1{margin:0;font-size:50px;line-height:1;font-weight:950;letter-spacing:-1.1px}
-    .meta{margin-top:6px;font-size:15px;font-weight:800;opacity:.94}
-    .controls{display:flex;gap:10px;margin-top:10px}
-    select{appearance:none;-webkit-appearance:none;padding:9px 16px;border-radius:16px;border:var(--line) solid var(--soft);font-size:14px;font-weight:800;background:#fff}
-    .rule{height:3px;background:#111;opacity:.9;margin:10px 0 12px}
-    .panel{border:var(--line) solid var(--soft);border-radius:var(--r);background:#fff;padding:12px}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
-    .kicker{font-size:11px;letter-spacing:6px;text-transform:uppercase;font-weight:900;opacity:.6}
-    .hero{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;margin-top:8px}
-    .icoBox{width:58px;height:58px;border:var(--line) solid var(--soft);border-radius:16px;display:flex;align-items:center;justify-content:center}
-    .mainRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-    .mainWx{font-size:32px;font-weight:950;line-height:1.02}
-    .mainTemp{font-size:46px;font-weight:950;line-height:1}
-    .sub{margin-top:3px;font-size:16px;font-weight:850;line-height:1.15}
-    .advice{margin-top:10px;font-size:17px;font-weight:850;line-height:1.24}
-    .statusHeader{display:flex;justify-content:space-between;gap:10px;align-items:flex-end}
-    .statusTitle{font-size:24px;font-weight:950;line-height:1.05;margin-top:3px}
-    .statusSub{font-size:15px;font-weight:850;line-height:1.2;margin-top:4px}
-    .pill{padding:4px 12px;border:3px solid #111;border-radius:999px;font-size:15px;font-weight:950;text-transform:uppercase;white-space:nowrap}
-    .bandsHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-end}
-    .bandsTitle{font-size:14px;font-weight:950;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
-    .nowLine{font-size:19px;font-weight:950;white-space:nowrap}
-    .bands{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
-    .band{border:3px solid #111;border-radius:18px;padding:10px 10px;min-height:130px;text-align:center}
-    .time{font-size:20px;font-weight:950;line-height:1.05}
-    .bandWx{display:flex;justify-content:center;gap:6px;align-items:center;font-size:15px;font-weight:950;margin-top:8px}
-    .bandDet{font-size:14px;font-weight:850;line-height:1.28;margin-top:8px}
-    .stripTitle{margin-bottom:8px}
-    .stripRow{font-size:16px;font-weight:900;line-height:1.25;word-spacing:2px}
-    .footer{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:900;margin-top:10px}
-    .render .screen{padding-top:12px}
-
-    .icon{width:26px;height:26px;display:inline-block}
-    .icon.small{width:18px;height:18px}
-    .icon svg{width:100%;height:100%;display:block}
-    .stroke svg *{stroke:#111;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;fill:none}
-
-    /* welcome screen */
-    .welcome{display:none;width:var(--w);height:var(--h);background:#fff;margin:0 auto;padding:var(--pad);position:relative}
-    .welcome.active{display:block}
-    .wl-title{font-size:58px;font-weight:950;line-height:1;letter-spacing:-1px}
-    .wl-sub{font-size:24px;font-weight:800;margin-top:6px}
-    .wl-rule{height:3px;background:#111;margin:12px 0 16px}
-    .wl-box{border:var(--line) solid var(--soft);border-radius:16px;padding:14px}
-    .wl-kicker{font-size:11px;letter-spacing:4px;text-transform:uppercase;font-weight:900;opacity:.6;margin-bottom:8px}
-    .wl-footer{position:absolute;left:var(--pad);right:var(--pad);bottom:var(--pad);text-align:center;font-size:28px;font-weight:950}
-    .render .updatedPreviewOnly{display:none}
+    body{margin:0;background:#d7d7d7;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+    .frame{width:var(--w);min-height:var(--h);background:#fff;margin:0 auto;padding:var(--pad);box-sizing:border-box}
+    h1{margin:0;font-size:52px;line-height:0.95;font-weight:950;letter-spacing:-1.2px}
+    .meta{margin-top:8px;font-size:16px;font-weight:800}
+    .controls{display:flex;gap:10px;margin:12px 0 14px}
+    .pill{border:2px solid var(--soft);border-radius:999px;padding:10px 18px;font-size:16px;font-weight:850;background:#fff}
+    .rule{height:4px;background:#222;margin:8px 0 12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .panel{border:2px solid var(--soft);border-radius:16px;padding:14px;background:#fff}
+    .kicker{font-size:10px;letter-spacing:7px;text-transform:uppercase;color:#6c6c6c;font-weight:900;margin-bottom:10px}
+    .heroWrap{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center}
+    .icoBox{width:72px;height:72px;border:2px solid var(--soft);border-radius:16px;display:flex;align-items:center;justify-content:center}
+    .wxLine{font-size:30px;font-weight:950;line-height:1.02}
+    .tempLine{font-size:54px;font-weight:950;line-height:1}
+    .sub{font-size:18px;font-weight:900;line-height:1.1}
+    .advice{font-size:20px;font-weight:900;line-height:1.2}
+    .mountain{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .mountTitle{font-size:26px;font-weight:950;line-height:1}
+    .mountSub{font-size:16px;font-weight:850;margin-top:6px}
+    .badge{border:3px solid #111;border-radius:999px;padding:6px 14px;font-size:18px;font-weight:950}
+    .bandsHead{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:8px}
+    .bandsHead .now{font-size:18px;font-weight:950}
+    .bands{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .band{border:3px solid #111;border-radius:18px;padding:14px 12px;text-align:center;min-height:170px}
+    .time{font-size:28px;font-weight:950;line-height:1.05;margin-bottom:10px}
+    .wxMini{display:flex;gap:8px;justify-content:center;align-items:center;font-size:18px;font-weight:900;margin-bottom:10px}
+    .det{font-size:18px;font-weight:900;line-height:1.22}
+    .footerline{font-size:18px;font-weight:950;line-height:1.25}
+    .footmeta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:14px;font-weight:850}
+    .strip{margin-top:10px}
+    .hide{display:none}
+    svg{stroke:#111;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
   </style>
 </head>
 <body>
-  <div class="welcome" id="welcomeRoot">
-    <div class="wl-title">Benvenuti</div>
-    <div class="wl-sub" id="wlName">a Sauze d’Oulx</div>
-    <div class="wl-rule"></div>
-    <div class="wl-box" style="margin-bottom:12px">
-      <div class="wl-kicker">Wi‑Fi</div>
-      <div id="wlWifi" style="font-size:24px;font-weight:950;line-height:1.3">Rete e password disponibili</div>
-    </div>
-    <div class="wl-box">
-      <div class="wl-kicker">Meteo</div>
-      <div id="wlWx" style="font-size:22px;font-weight:900;line-height:1.35">Caricamento…</div>
-    </div>
-    <div class="wl-footer" id="wlFooter">Buona vacanza!</div>
-  </div>
+<div class="frame" id="app"></div>
+<script>
+const qs = new URLSearchParams(location.search);
+const forcedSeason = qs.get("season");
+const mock = {
+  place: "Sauze d’Oulx",
+  townAlt: 1509,
+  liftsAlt: 2300,
+  current: { desc:"Sereno", temp:4, min:-3, max:4, mm:0, perceived:2, icon:"sun" },
+  adviceWinter: "Sereno. In quota percepita -9°C. Vento 28 km/h.",
+  adviceSummer: "Buone condizioni per escursioni. Vento moderato.",
+  ski: { status:"partial", label:"Apertura parziale", lifts:"32/40", slopes:"71/120", snowFresh:4 },
+  liftsNow: { temp:-2, wind:28 },
+  bandsWinter: [
+    { time:"09:00–13:00", icon:"partly", desc:"Variabile", temp:-4, perceived:-11, wind:22 },
+    { time:"13:00–15:00", icon:"partly", desc:"Variabile", temp:-2, perceived:-9, wind:28 },
+    { time:"15:00–18:00", icon:"partly", desc:"Variabile", temp:-3, perceived:-10, wind:29 }
+  ],
+  bandsSummer: [
+    { time:"08:00–11:00", icon:"sun", desc:"Sereno", temp:16, perceived:16, wind:8 },
+    { time:"11:00–15:00", icon:"partly", desc:"Variabile", temp:21, perceived:21, wind:10 },
+    { time:"15:00–19:00", icon:"cloud", desc:"Più nuvoloso", temp:18, perceived:18, wind:12 }
+  ],
+  next3: [
+    { dow:"MER", min:-5, max:4 },
+    { dow:"GIO", min:-2, max:9 },
+    { dow:"VEN", min:-1, max:12 }
+  ],
+  updated:"16:13",
+  source:"preview mock"
+};
 
-  <div class="screen" id="root">
-    <h1 id="title">Sauze d’Oulx</h1>
-    <div class="meta" id="meta">Via Lattea · Paese 1509 m · Quota 2300 m · OGGI</div>
-
-    <div class="controls" id="controls">
-      <select id="placeSelect"></select>
-      <select id="langSelect">
-        <option value="it">IT</option>
-        <option value="en">EN</option>
-      </select>
-      <select id="modeSelect">
-        <option value="auto">AUTO</option>
-        <option value="oggi">OGGI</option>
-        <option value="domani">DOMANI</option>
-      </select>
+function seasonOf(){
+  if (forcedSeason) return forcedSeason;
+  const m = new Date().getMonth()+1;
+  return (m <= 3 || m >= 12) ? "winter" : "summer";
+}
+function icon(name, size=28){
+  const s=size;
+  if(name==="sun") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>`;
+  if(name==="cloud") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .2-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"/></svg>`;
+  if(name==="partly") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .2-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"/><path d="M8 8.5A4 4 0 0 1 15 6"/><path d="M12 2v2M4 10H2M5.2 5.2 3.8 3.8"/></svg>`;
+  return '';
+}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(d){
+  const season = seasonOf();
+  const isWinter = season === "winter";
+  const bands = isWinter ? d.bandsWinter : d.bandsSummer;
+  const statusTitle = isWinter ? "STATO MONTAGNA" : "STATO OUTDOOR";
+  const statusMain = isWinter ? d.ski.label : "Condizioni escursioni buone";
+  const statusSub = isWinter
+    ? `Impianti ${d.ski.lifts} • Piste ${d.ski.slopes}` + (d.ski.snowFresh>0 ? ` • Neve fresca ${d.ski.snowFresh} cm` : '')
+    : `Quota ${d.liftsAlt} m • vento ${d.liftsNow.wind} km/h`;
+  const badge = isWinter ? "PARZIALE" : "OK";
+  const advice = isWinter ? d.adviceWinter : d.adviceSummer;
+  const bandTitle = isWinter ? "FASCE SCI" : "FASCE ESCURSIONE";
+  document.getElementById('app').innerHTML = `
+    <h1>${escapeHtml(d.place)}</h1>
+    <div class="meta">Via Lattea • Paese ${d.townAlt} m • Quota ${d.liftsAlt} m • OGGI</div>
+    <div class="controls">
+      <div class="pill">${escapeHtml(d.place)}</div>
+      <div class="pill">IT</div>
+      <div class="pill">AUTO</div>
     </div>
-
     <div class="rule"></div>
 
     <div class="grid2">
       <div class="panel">
-        <div class="kicker" id="kVillage">PAESE</div>
-        <div class="hero">
-          <div class="icoBox stroke" id="mainIconBox"></div>
+        <div class="kicker">PAESE</div>
+        <div class="heroWrap">
+          <div class="icoBox">${icon(d.current.icon,38)}</div>
           <div>
-            <div class="mainRow">
-              <div class="mainWx" id="mainWx">Sereno</div>
-              <div class="mainTemp" id="mainTemp">0°C</div>
-            </div>
-            <div class="sub" id="mainSub">-3°C / 4°C · 0 mm · perc. -1°C</div>
+            <div class="wxLine">${escapeHtml(d.current.desc)}</div>
+            <div class="tempLine">${d.current.temp}°C</div>
+            <div class="sub">${d.current.min}°C / ${d.current.max}°C • ${d.current.mm} mm • perc. ${d.current.perceived}°C</div>
           </div>
         </div>
       </div>
-
       <div class="panel">
-        <div class="kicker" id="kAdvice">CONSIGLI PER OGGI</div>
-        <div class="advice" id="advice">Cielo sereno. Condizioni stabili.</div>
+        <div class="kicker">CONSIGLI PER OGGI</div>
+        <div class="advice">${escapeHtml(advice)}</div>
       </div>
     </div>
 
     <div class="rule"></div>
 
     <div class="panel" style="margin-bottom:10px">
-      <div class="statusHeader">
+      <div class="kicker">${statusTitle}</div>
+      <div class="mountain">
         <div>
-          <div class="kicker" id="kStatus">STATO MONTAGNA</div>
-          <div class="statusTitle" id="statusTitle">Condizioni sci buone</div>
-          <div class="statusSub" id="statusSub">Impianti 32/40 · Piste 71/120 · Neve 4 cm</div>
+          <div class="mountTitle">${escapeHtml(statusMain)}</div>
+          <div class="mountSub">${escapeHtml(statusSub)}</div>
         </div>
-        <div class="pill" id="statusPill">OPEN</div>
+        <div class="badge">${badge}</div>
       </div>
     </div>
 
     <div class="panel" style="margin-bottom:10px">
       <div class="bandsHead">
         <div>
-          <div class="kicker" id="kBandsScope">QUOTA IMPIANTI</div>
-          <div class="bandsTitle" id="kBands">FASCE SCI</div>
+          <div class="kicker">QUOTA IMPIANTI</div>
+          <div class="mountTitle" style="font-size:18px">${bandTitle}</div>
         </div>
-        <div class="nowLine" id="nowLine">Ora -2°C · vento 10 km/h</div>
+        <div class="now">Ora ${d.liftsNow.temp}°C • vento ${d.liftsNow.wind} km/h</div>
       </div>
-      <div class="bands" id="bands"></div>
+      <div class="bands">
+        ${bands.map(b=>`
+          <div class="band">
+            <div class="time">${b.time}</div>
+            <div class="wxMini">${icon(b.icon,24)} <span>${escapeHtml(b.desc)}</span></div>
+            <div class="det">${b.temp}°C • perc. ${b.perceived}°C</div>
+            <div class="det" style="margin-top:10px">vento ${b.wind} km/h</div>
+          </div>`).join('')}
+      </div>
     </div>
 
-    <div class="panel">
-      <div class="kicker stripTitle" id="kNext">PROSSIMI 3 GIORNI (PAESE)</div>
-      <div class="stripRow" id="daysStrip">MER -5°C / 4°C · GIO -2°C / 9°C · VEN -1°C / 12°C</div>
-      <div class="footer">
-        <div id="updated">Aggiornato: --:--</div>
-        <div id="source">Fonte: WeatherAPI</div>
-      </div>
+    <div class="panel strip">
+      <div class="kicker">PROSSIMI 3 GIORNI (PAESE)</div>
+      <div class="footerline">${d.next3.map(x=>`${x.dow} ${x.min}°C / ${x.max}°C`).join(' • ')}</div>
+      <div class="footmeta"><span>Aggiornato: ${escapeHtml(d.updated)}</span><span>Fonte: ${escapeHtml(d.source)}</span></div>
     </div>
-  </div>
-
-  <script>
-  const PLACES = [
-    { key:"bardonecchia", name:"Bardonecchia", town:1312, lifts:2400, region:"Bardonecchia" },
-    { key:"cesana", name:"Cesana", town:1354, lifts:2300, region:"Via Lattea" },
-    { key:"claviere", name:"Claviere", town:1766, lifts:2500, region:"Via Lattea" },
-    { key:"monginevro", name:"Montgenèvre", town:1860, lifts:2700, region:"Via Lattea" },
-    { key:"oulx", name:"Oulx", town:1100, lifts:2550, region:"Via Lattea" },
-    { key:"pragelato", name:"Pragelato", town:1518, lifts:2500, region:"Via Lattea" },
-    { key:"sanmarco", name:"San Marco", town:1212, lifts:2550, region:"Via Lattea" },
-    { key:"sansicario", name:"San Sicario", town:1700, lifts:2550, region:"Via Lattea" },
-    { key:"sauze", name:"Sauze d’Oulx", town:1509, lifts:2300, region:"Via Lattea" },
-    { key:"sestriere", name:"Sestriere", town:2035, lifts:2700, region:"Via Lattea" }
-  ];
-
-  const I18N = {
-    it: {
-      today: "OGGI", tomorrow: "DOMANI", auto: "AUTO",
-      village: "PAESE", adviceToday: "CONSIGLI PER OGGI", adviceTomorrow: "CONSIGLI PER DOMANI",
-      statusMountain: "STATO MONTAGNA", statusOutdoor: "STATO OUTDOOR",
-      liftAltitude: "QUOTA IMPIANTI", hikeAltitude: "QUOTA ESCURSIONI",
-      skiBands: "FASCE SCI", hikeBands: "FASCE ESCURSIONI",
-      next3: "PROSSIMI 3 GIORNI (PAESE)", source: "Fonte", updated: "Aggiornato",
-      now: "Ora", wind: "vento", perc: "perc.", lifts: "Impianti", slopes: "Piste", snow: "Neve",
-      skiGood: "Condizioni sci buone", skiPartial: "Apertura parziale", skiLimited: "Apertura limitata", skiClosed: "Impianti chiusi",
-      hikeGreat: "Condizioni escursioni ottime", hikeGood: "Condizioni escursioni buone", hikeWarm: "Meglio al mattino",
-      open: "OPEN", partial: "PARZIALE", limited: "LIMITED", closed: "CLOSED", ok: "OK",
-      adviceWinter: (main, percLift, wind)=> `${main}. In quota percepita ${fmtSigned(percLift)}°C. Vento ${wind} km/h.`,
-      adviceSummer: (main, tempLift, wind)=> `${main}. In quota ${fmtSigned(tempLift)}°C. Vento ${wind} km/h.`
-    },
-    en: {
-      today: "TODAY", tomorrow: "TOMORROW", auto: "AUTO",
-      village: "VILLAGE", adviceToday: "TIPS FOR TODAY", adviceTomorrow: "TIPS FOR TOMORROW",
-      statusMountain: "MOUNTAIN STATUS", statusOutdoor: "OUTDOOR STATUS",
-      liftAltitude: "LIFT ALTITUDE", hikeAltitude: "HIKING ALTITUDE",
-      skiBands: "SKI WINDOWS", hikeBands: "HIKING WINDOWS",
-      next3: "NEXT 3 DAYS (VILLAGE)", source: "Source", updated: "Updated",
-      now: "Now", wind: "wind", perc: "feels", lifts: "Lifts", slopes: "Slopes", snow: "Snow",
-      skiGood: "Good ski conditions", skiPartial: "Partial opening", skiLimited: "Limited opening", skiClosed: "Lifts closed",
-      hikeGreat: "Great hiking conditions", hikeGood: "Good hiking conditions", hikeWarm: "Best in the morning",
-      open: "OPEN", partial: "PARTIAL", limited: "LIMITED", closed: "CLOSED", ok: "OK",
-      adviceWinter: (main, percLift, wind)=> `${main}. Feels like ${fmtSigned(percLift)}°C at altitude. Wind ${wind} km/h.`,
-      adviceSummer: (main, tempLift, wind)=> `${main}. Around ${fmtSigned(tempLift)}°C at altitude. Wind ${wind} km/h.`
-    }
-  };
-
-  function $(id){ return document.getElementById(id); }
-  function round0(v){ return Math.round(Number(v || 0)); }
-  function fmtSigned(v){ return round0(v); }
-  function pad2(n){ return String(n).padStart(2, '0'); }
-  function q(name){ return new URLSearchParams(location.search).get(name); }
-  function safeText(v){ return String(v == null ? '' : v); }
-
-  function perceivedTemp(temp, wind){
-    const w = Math.max(Number(wind||0), 1);
-    return Math.round(13.12 + 0.6215*Number(temp||0) - 11.37*Math.pow(w,0.16) + 0.3965*Number(temp||0)*Math.pow(w,0.16));
-  }
-
-  function wxLabel(code, lang){
-    const map = {
-      0:["Sereno","Clear"], 1:["Quasi sereno","Mostly clear"], 2:["Variabile","Partly cloudy"], 3:["Nuvoloso","Cloudy"],
-      45:["Nebbia","Fog"], 48:["Nebbia","Fog"], 51:["Pioviggine","Drizzle"], 53:["Pioviggine","Drizzle"], 55:["Pioviggine","Drizzle"],
-      61:["Pioggia","Rain"], 63:["Pioggia","Rain"], 65:["Pioggia","Rain"], 71:["Neve","Snow"], 73:["Neve","Snow"], 75:["Neve","Snow"],
-      77:["Neve","Snow"], 80:["Pioggia","Rain"], 81:["Pioggia","Rain"], 82:["Pioggia","Rain"], 95:["Temporali","Storm"], 96:["Temporali","Storm"], 99:["Temporali","Storm"]
-    };
-    const row = map[code] || map[2];
-    return lang === 'en' ? row[1] : row[0];
-  }
-
-  function iconMarkup(code, cls='icon'){
-    const sun = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="1.5" x2="12" y2="4.2"></line><line x1="12" y1="19.8" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="4.2" y2="12"></line><line x1="19.8" y1="12" x2="22.5" y2="12"></line><line x1="4.2" y1="4.2" x2="6.2" y2="6.2"></line><line x1="17.8" y1="17.8" x2="19.8" y2="19.8"></line><line x1="4.2" y1="19.8" x2="6.2" y2="17.8"></line><line x1="17.8" y1="6.2" x2="19.8" y2="4.2"></line></svg></span>`;
-    const cloud = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h9a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.2 11.4 3.3 3.3 0 0 0 7 18Z"></path></svg></span>`;
-    const partly = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="8.5" r="3.1"></circle><line x1="8.5" y1="1.3" x2="8.5" y2="3.5"></line><line x1="8.5" y1="13.5" x2="8.5" y2="15.7"></line><line x1="1.3" y1="8.5" x2="3.5" y2="8.5"></line><line x1="13.5" y1="8.5" x2="15.7" y2="8.5"></line><path d="M8 18h8a3.7 3.7 0 0 0 .3-7.4 4.9 4.9 0 0 0-8.7 1.7A3 3 0 0 0 8 18Z"></path></svg></span>`;
-    const rain = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15h9a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.2 8.4 3.3 3.3 0 0 0 7 15Z"></path><line x1="9" y1="17.5" x2="8" y2="20.5"></line><line x1="13" y1="17.5" x2="12" y2="20.5"></line><line x1="17" y1="17.5" x2="16" y2="20.5"></line></svg></span>`;
-    const snow = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14h9a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.2 7.4 3.3 3.3 0 0 0 7 14Z"></path><line x1="11.5" y1="17" x2="11.5" y2="21"></line><line x1="9.5" y1="19" x2="13.5" y2="19"></line><line x1="10.1" y1="17.6" x2="12.9" y2="20.4"></line><line x1="12.9" y1="17.6" x2="10.1" y2="20.4"></line></svg></span>`;
-    const storm = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14h9a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.2 7.4 3.3 3.3 0 0 0 7 14Z"></path><path d="M12 15.5l-2 3h2l-1 4 4-5h-2l1-2z"></path></svg></span>`;
-    const fog = `<span class="${cls} stroke"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12h9a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.2 5.4 3.3 3.3 0 0 0 7 12Z"></path><line x1="4" y1="16" x2="20" y2="16"></line><line x1="6" y1="19" x2="18" y2="19"></line></svg></span>`;
-    if ([71,73,75,77,85,86].includes(code)) return snow;
-    if ([61,63,65,80,81,82,51,53,55].includes(code)) return rain;
-    if ([95,96,99].includes(code)) return storm;
-    if ([45,48].includes(code)) return fog;
-    if (code === 0 || code === 1) return sun;
-    if (code === 2) return partly;
-    return cloud;
-  }
-
-  function buildNext3(daily){
-    const DOW_IT = ['dom','lun','mar','mer','gio','ven','sab'];
-    const DOW_EN = ['sun','mon','tue','wed','thu','fri','sat'];
-    const out = [];
-    for (let i = 1; i <= 3; i++) {
-      const day = new Date(`${daily.time[i] || daily.time[0]}T12:00:00`);
-      out.push({
-        dow_it: DOW_IT[day.getDay()], dow_en: DOW_EN[day.getDay()],
-        tmin: round0((daily.temperature_2m_min || [])[i]),
-        tmax: round0((daily.temperature_2m_max || [])[i])
-      });
-    }
-    return out;
-  }
-
-  function avg(arr, idxs){
-    if (!arr || !idxs.length) return 0;
-    return idxs.reduce((s, i)=> s + Number(arr[i] || 0), 0) / idxs.length;
-  }
-
-  function buildSlots(hourly, season){
-    const windows = season === 'winter' ? [[9,13],[13,15],[15,18]] : [[8,11],[11,15],[15,19]];
-    return windows.map(([a,b])=>{
-      const idxs = (hourly.time || []).map((t,i)=>({i,h:new Date(t).getHours()})).filter(x=>x.h>=a && x.h<b).map(x=>x.i);
-      const ids = idxs.length ? idxs : [0];
-      const code = Number((hourly.weather_code || [])[ids[0]] || 2);
-      const temp = avg(hourly.temperature_2m || [], ids);
-      const wind = avg(hourly.wind_speed_10m || [], ids);
-      const perc = perceivedTemp(temp, wind);
-      return {
-        label: `${pad2(a)}:00–${pad2(b)}:00`,
-        code, temp: round0(temp), wind: round0(wind), perc: round0(perc)
-      };
-    });
-  }
-
-  function detectSeason(data){
-    const params = new URLSearchParams(window.location.search);
-    const forced = (params.get('season') || '').toLowerCase();
-    if (forced === 'winter' || forced === 'summer') return forced;
-    if (data && data.season) return data.season;
-    if (data && data.ski && Number(data.ski.lifts_open || 0) > 0) return 'winter';
-    const month = new Date().getMonth() + 1;
-    return (month <= 3 || month >= 12) ? 'winter' : 'summer';
-  }
-
-  function mockWeather(placeKey){
-    const base = {
-      village:{
-        current:{temperature_2m:4.0,weather_code:0,precipitation:0,wind_speed_10m:8},
-        hourly:{
-          time:['2026-03-31T09:00:00','2026-03-31T10:00:00','2026-03-31T11:00:00','2026-03-31T13:00:00','2026-03-31T14:00:00','2026-03-31T15:00:00','2026-03-31T16:00:00','2026-03-31T17:00:00'],
-          temperature_2m:[-1,0,1,3,4,4,3,2], weather_code:[2,2,0,0,0,2,2,2], precipitation:[0,0,0,0,0,0,0,0], wind_speed_10m:[7,8,9,10,11,10,9,8]
-        },
-        daily:{ time:['2026-03-31','2026-04-01','2026-04-02','2026-04-03'], weather_code:[0,2,0,3], temperature_2m_min:[-3,-5,-2,-1], temperature_2m_max:[4,4,9,12], precipitation_sum:[0,0,0,0] }
-      },
-      lifts:{
-        current:{temperature_2m:-2.2,weather_code:2,precipitation:0,wind_speed_10m:28},
-        hourly:{
-          time:['2026-03-31T09:00:00','2026-03-31T10:00:00','2026-03-31T11:00:00','2026-03-31T13:00:00','2026-03-31T14:00:00','2026-03-31T15:00:00','2026-03-31T16:00:00','2026-03-31T17:00:00'],
-          temperature_2m:[-4.3,-4,-3.5,-2,-2,-2.7,-2.8,-3], weather_code:[2,2,2,0,0,2,2,2], precipitation:[0,0,0,0,0,0,0,0], wind_speed_10m:[21,22,24,28,28,28,29,30]
-        },
-        daily:{ time:['2026-03-31','2026-04-01','2026-04-02','2026-04-03'], weather_code:[2,2,0,3], temperature_2m_min:[-8,-9,-5,-3], temperature_2m_max:[-2,-1,2,5], precipitation_sum:[0,0,0,1] }
-      },
-      season:'winter',
-      ski:{ status:'partial', lifts_open:32, lifts_total:40, slopes_open:71, slopes_total:120 },
-      snow:{ fresh:4, base:88 },
-      summer:{ hiking:'good', storm_risk:10 }
-    };
-    if (placeKey === 'sestriere') {
-      base.village.current.temperature_2m = 1.0;
-      base.lifts.current.temperature_2m = -4.0;
-      base.ski.lifts_open = 28;
-      base.ski.slopes_open = 64;
-    }
-    return base;
-  }
-
-  function placeInfo(key){
-    return PLACES.find(p=>p.key===key) || PLACES.find(p=>p.key==='sauze');
-  }
-
-  function populateSelects(placeKey, lang){
-    const sel = $('placeSelect');
-    sel.innerHTML = '';
-    PLACES.forEach(p=>{
-      const o = document.createElement('option');
-      o.value = p.key; o.textContent = p.name; if (p.key === placeKey) o.selected = true; sel.appendChild(o);
-    });
-    $('langSelect').value = ['it','en'].includes(lang) ? lang : 'it';
-  }
-
-  function updateHeader(place, lang, mode){
-    const t = I18N[lang] || I18N.it;
-    $('title').textContent = place.name;
-    $('meta').textContent = `${place.region} · ${lang==='en'?'Village':'Paese'} ${place.town} m · ${lang==='en'?'Altitude':'Quota'} ${place.lifts} m · ${mode==='domani' ? t.tomorrow : t.today}`;
-    $('kVillage').textContent = t.village;
-    $('kAdvice').textContent = mode === 'domani' ? t.adviceTomorrow : t.adviceToday;
-    $('kNext').textContent = t.next3;
-    $('updated').textContent = `${t.updated}: ${pad2(new Date().getHours())}:${pad2(new Date().getMinutes())}`;
-  }
-
-  function renderWeather(placeKey, lang, mode){
-    const t = I18N[lang] || I18N.it;
-    const place = placeInfo(placeKey);
-    updateHeader(place, lang, mode);
-
-    const data = window.__WF_WEATHER__ || mockWeather(placeKey);
-    const season = detectSeason(data);
-
-    const currentVillage = data.village.current;
-    const currentLifts = data.lifts.current;
-    const villagePerc = perceivedTemp(currentVillage.temperature_2m, currentVillage.wind_speed_10m);
-    const liftPerc = perceivedTemp(currentLifts.temperature_2m, currentLifts.wind_speed_10m);
-    const dailyVillage = data.village.daily;
-
-    $('mainIconBox').innerHTML = iconMarkup(currentVillage.weather_code);
-    $('mainWx').textContent = wxLabel(currentVillage.weather_code, lang);
-    $('mainTemp').textContent = `${fmtSigned(currentVillage.temperature_2m)}°C`;
-    $('mainSub').textContent = `${fmtSigned((dailyVillage.temperature_2m_min||[])[0])}°C / ${fmtSigned((dailyVillage.temperature_2m_max||[])[0])}°C · ${round0((dailyVillage.precipitation_sum||[])[0])} mm · ${t.perc} ${fmtSigned(villagePerc)}°C`;
-    $('advice').textContent = season === 'winter'
-      ? t.adviceWinter(wxLabel(currentVillage.weather_code, lang), liftPerc, round0(currentLifts.wind_speed_10m))
-      : t.adviceSummer(wxLabel(currentVillage.weather_code, lang), round0(currentLifts.temperature_2m), round0(currentLifts.wind_speed_10m));
-
-    const ski = data.ski || {};
-    const snow = data.snow || {};
-    const summer = data.summer || {};
-    $('kStatus').textContent = season === 'winter' ? t.statusMountain : t.statusOutdoor;
-    if (season === 'winter') {
-      const st = ski.status || (Number(ski.lifts_open||0) > 0 ? 'open' : 'partial');
-      $('statusTitle').textContent = st === 'open' ? t.skiGood : st === 'partial' ? t.skiPartial : st === 'limited' ? t.skiLimited : t.skiClosed;
-      $('statusSub').textContent = `${t.lifts} ${ski.lifts_open ?? 0}/${ski.lifts_total ?? 0} · ${t.slopes} ${ski.slopes_open ?? 0}/${ski.slopes_total ?? 0} · ${t.snow} ${snow.fresh ?? 0} cm`;
-      $('statusPill').textContent = st === 'open' ? t.open : st === 'partial' ? t.partial : st === 'limited' ? t.limited : t.closed;
-    } else {
-      const hiking = summer.hiking || 'good';
-      $('statusTitle').textContent = hiking === 'perfect' ? t.hikeGreat : hiking === 'hot' ? t.hikeWarm : t.hikeGood;
-      $('statusSub').textContent = `${fmtSigned(currentLifts.temperature_2m)}°C · ${t.wind} ${round0(currentLifts.wind_speed_10m)} km/h · temporali ${(summer.storm_risk ?? 10)}%`;
-      $('statusPill').textContent = t.ok;
-    }
-
-    $('kBandsScope').textContent = season === 'winter' ? t.liftAltitude : t.hikeAltitude;
-    $('kBands').textContent = season === 'winter' ? t.skiBands : t.hikeBands;
-    $('nowLine').textContent = `${t.now} ${fmtSigned(currentLifts.temperature_2m)}°C · ${t.wind} ${round0(currentLifts.wind_speed_10m)} km/h`;
-
-    const slots = buildSlots(data.lifts.hourly, season);
-    $('bands').innerHTML = slots.map(s => `
-      <div class="band">
-        <div class="time">${s.label}</div>
-        <div class="bandWx">${iconMarkup(s.code,'icon small')}<span>${wxLabel(s.code, lang)}</span></div>
-        <div class="bandDet">${fmtSigned(s.temp)}°C · ${t.perc} ${fmtSigned(s.perc)}°C</div>
-        <div class="bandDet">${t.wind} ${s.wind} km/h</div>
-      </div>
-    `).join('');
-
-    const next = buildNext3(data.village.daily);
-    $('daysStrip').textContent = next.map(d => `${lang==='en' ? d.dow_en.toUpperCase() : d.dow_it.toUpperCase()} ${fmtSigned(d.tmin)}°C / ${fmtSigned(d.tmax)}°C`).join(' · ');
-    $('source').textContent = `${t.source}: ${window.__WF_WEATHER__ ? 'WeatherAPI' : 'preview mock'}`;
-
-    window.__WF_READY__ = true;
-  }
-
-  function renderWelcome(params){
-    $('root').classList.add('hide');
-    $('welcomeRoot').classList.add('active');
-    const guestName = params.get('guestName') || '';
-    const wifiSsid = params.get('wifiSsid') || '';
-    const wifiPass = params.get('wifiPass') || '';
-    $('wlName').textContent = guestName ? `Benvenuti, ${guestName}` : 'a Sauze d’Oulx';
-    $('wlWifi').textContent = wifiSsid ? `${wifiSsid}${wifiPass ? ` · ${wifiPass}` : ''}` : 'Rete e password disponibili';
-    const data = window.__WF_WEATHER__ || mockWeather('sauze');
-    const main = wxLabel(data.village.current.weather_code, 'it');
-    const temp = fmtSigned(data.village.current.temperature_2m);
-    $('wlWx').textContent = `${main} · ${temp}°C oggi in paese.`;
-    $('wlFooter').textContent = 'Buona vacanza!';
-    window.__WF_READY__ = true;
-  }
-
-  (function init(){
-    const params = new URLSearchParams(location.search);
-    const placeKey = (params.get('place') || 'sauze').toLowerCase();
-    const lang = (params.get('lang') || 'it').toLowerCase();
-    const mode = (params.get('mode') || 'auto').toLowerCase();
-    const renderFlag = params.get('render') === '1';
-    const profile = (params.get('profile') || 'inkplate6').toLowerCase();
-
-    if (profile === 'waveshare75') {
-      $('root').classList.add('profile-waveshare75');
-      $('welcomeRoot').classList.add('profile-waveshare75');
-      const mv = document.getElementById('metaViewport');
-      if (mv) mv.setAttribute('content', 'width=480, initial-scale=1');
-    }
-    if (renderFlag) $('root').classList.add('render');
-
-    populateSelects(placeKey, lang);
-    $('modeSelect').value = ['auto','oggi','domani'].includes(mode) ? mode : 'auto';
-
-    if (params.get('welcome') === '1') {
-      renderWelcome(params);
-      return;
-    }
-
-    $('placeSelect').addEventListener('change', ()=> {
-      const q = new URLSearchParams(location.search);
-      q.set('place', $('placeSelect').value);
-      q.set('lang', $('langSelect').value);
-      q.set('mode', $('modeSelect').value);
-      if (profile) q.set('profile', profile);
-      if (renderFlag) q.set('render', '1');
-      location.search = q.toString();
-    });
-    $('langSelect').addEventListener('change', ()=> {
-      const q = new URLSearchParams(location.search);
-      q.set('place', $('placeSelect').value);
-      q.set('lang', $('langSelect').value);
-      q.set('mode', $('modeSelect').value);
-      if (profile) q.set('profile', profile);
-      if (renderFlag) q.set('render', '1');
-      location.search = q.toString();
-    });
-    $('modeSelect').addEventListener('change', ()=> {
-      const q = new URLSearchParams(location.search);
-      q.set('place', $('placeSelect').value);
-      q.set('lang', $('langSelect').value);
-      q.set('mode', $('modeSelect').value);
-      if (profile) q.set('profile', profile);
-      if (renderFlag) q.set('render', '1');
-      location.search = q.toString();
-    });
-
-    renderWeather(placeKey, lang, mode);
-  })();
-  </script>
+  `;
+  window.__WF_READY__ = true;
+}
+render(mock);
+</script>
 </body>
 </html>
