@@ -1,61 +1,104 @@
 <!doctype html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Weather Frame V3</title>
-  <style>
-    :root{
-      --w:480px; --h:800px; --pad:14px; --gap:10px;
-      --ink:#111; --soft:#b6b6b6; --bg:#efefef; --r:14px;
-    }
-    body{margin:0;background:#d7d7d7;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
-    .frame{width:var(--w);min-height:var(--h);background:#fff;margin:0 auto;padding:var(--pad);box-sizing:border-box}
-    h1{margin:0;font-size:52px;line-height:0.95;font-weight:950;letter-spacing:-1.2px}
-    .meta{margin-top:8px;font-size:16px;font-weight:800}
-    .controls{display:flex;gap:10px;margin:12px 0 14px}
-    .pill{border:2px solid var(--soft);border-radius:999px;padding:10px 18px;font-size:16px;font-weight:850;background:#fff}
-    .rule{height:4px;background:#222;margin:8px 0 12px}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .panel{border:2px solid var(--soft);border-radius:16px;padding:14px;background:#fff}
-    .kicker{font-size:10px;letter-spacing:7px;text-transform:uppercase;color:#6c6c6c;font-weight:900;margin-bottom:10px}
-    .heroWrap{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center}
-    .icoBox{width:72px;height:72px;border:2px solid var(--soft);border-radius:16px;display:flex;align-items:center;justify-content:center}
-    .wxLine{font-size:30px;font-weight:950;line-height:1.02}
-    .tempLine{font-size:54px;font-weight:950;line-height:1}
-    .sub{font-size:18px;font-weight:900;line-height:1.1}
-    .advice{font-size:20px;font-weight:900;line-height:1.2}
-    .mountain{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-    .mountTitle{font-size:26px;font-weight:950;line-height:1}
-    .mountSub{font-size:16px;font-weight:850;margin-top:6px}
-    .badge{border:3px solid #111;border-radius:999px;padding:6px 14px;font-size:18px;font-weight:950}
-    .bandsHead{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:8px}
-    .bandsHead .now{font-size:18px;font-weight:950}
-    .bands{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-    .band{border:3px solid #111;border-radius:18px;padding:14px 12px;text-align:center;min-height:170px}
-    .time{font-size:28px;font-weight:950;line-height:1.05;margin-bottom:10px}
-    .wxMini{display:flex;gap:8px;justify-content:center;align-items:center;font-size:18px;font-weight:900;margin-bottom:10px}
-    .det{font-size:18px;font-weight:900;line-height:1.22}
-    .footerline{font-size:18px;font-weight:950;line-height:1.25}
-    .footmeta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:14px;font-weight:850}
-    .strip{margin-top:10px}
-    .hide{display:none}
-    svg{stroke:#111;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Weather Frame Display Safe</title>
+<style>
+  :root{
+    --w:480px; --h:800px; --pad:12px; --gap:10px;
+    --ink:#000; --paper:#fff; --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#fff;color:#000;font-family:Arial, Helvetica, sans-serif}
+  body{font-smoothing:none;-webkit-font-smoothing:none;text-rendering:geometricPrecision}
+  .frame{
+    width:var(--w); min-height:var(--h); background:var(--paper);
+    margin:0 auto; padding:var(--pad);
+  }
+  h1{
+    margin:0; font-size:54px; line-height:.95; font-weight:900; letter-spacing:-1.5px;
+  }
+  .meta{
+    margin-top:8px; font-size:16px; line-height:1.2; font-weight:900;
+  }
+  .controls{display:flex;gap:10px;margin:12px 0 14px}
+  .pill{
+    border:4px solid #000; border-radius:999px; padding:8px 18px;
+    font-size:16px; font-weight:900; background:#fff;
+  }
+  .rule{height:4px;background:#000;margin:8px 0 12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .panel{
+    border:4px solid #000; border-radius:18px; padding:14px; background:#fff;
+  }
+  .kicker{
+    font-size:10px; line-height:1; letter-spacing:6px; text-transform:uppercase;
+    font-weight:900; margin-bottom:10px;
+  }
+  .heroWrap{
+    display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:center;
+  }
+  .icoBox{
+    width:72px; height:72px; border:4px solid #000; border-radius:18px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .wxLine{font-size:30px; line-height:1.02; font-weight:900; margin-bottom:6px}
+  .tempLine{font-size:58px; line-height:.95; font-weight:900; margin-bottom:6px}
+  .sub{font-size:17px; line-height:1.15; font-weight:900}
+  .advice{font-size:19px; line-height:1.2; font-weight:900}
+  .mountain{
+    display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
+  }
+  .mountTitle{font-size:28px; line-height:1; font-weight:900}
+  .mountSub{font-size:18px; line-height:1.2; font-weight:900; margin-top:8px}
+  .badge{
+    border:4px solid #000; border-radius:999px; padding:8px 16px; font-size:18px; font-weight:900;
+    white-space:nowrap;
+  }
+  .bandsHead{
+    display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end; margin-bottom:10px;
+  }
+  .bandsNow{font-size:18px; line-height:1.15; font-weight:900}
+  .bandsTitle{font-size:19px; line-height:1; font-weight:900}
+  .bands{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;
+  }
+  .band{
+    border:4px solid #000; border-radius:18px; padding:12px 10px; text-align:center; min-height:168px; background:#fff;
+  }
+  .time{font-size:27px; line-height:1.02; font-weight:900; margin-bottom:10px}
+  .wxMini{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    font-size:17px; line-height:1.1; font-weight:900; margin-bottom:10px;
+  }
+  .det{font-size:17px; line-height:1.18; font-weight:900}
+  .stripLine{font-size:19px; line-height:1.25; font-weight:900}
+  .footmeta{
+    display:flex; justify-content:space-between; gap:8px; margin-top:10px;
+    font-size:14px; line-height:1.2; font-weight:900;
+  }
+  svg{
+    stroke:#000; fill:none; stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round; shape-rendering:crispEdges;
+  }
+</style>
 </head>
 <body>
 <div class="frame" id="app"></div>
+
 <script>
-const qs = new URLSearchParams(location.search);
-const forcedSeason = qs.get("season");
+const params = new URLSearchParams(location.search);
+const forcedSeason = params.get("season");
+
 const mock = {
   place: "Sauze d’Oulx",
   townAlt: 1509,
   liftsAlt: 2300,
   current: { desc:"Sereno", temp:4, min:-3, max:4, mm:0, perceived:2, icon:"sun" },
   adviceWinter: "Sereno. In quota percepita -9°C. Vento 28 km/h.",
-  adviceSummer: "Buone condizioni per escursioni. Vento moderato.",
-  ski: { status:"partial", label:"Apertura parziale", lifts:"32/40", slopes:"71/120", snowFresh:4 },
+  adviceSummer: "Buone condizioni per escursioni. Vento 12 km/h.",
+  ski: { status:"partial", label:"Apertura parziale", badge:"PARZIALE", lifts:"32/40", slopes:"71/120", snowFresh:4 },
+  outdoor: { label:"Escursioni buone", badge:"OK", text:"Quota 2300 m • vento 12 km/h" },
   liftsNow: { temp:-2, wind:28 },
   bandsWinter: [
     { time:"09:00–13:00", icon:"partly", desc:"Variabile", temp:-4, perceived:-11, wind:22 },
@@ -65,7 +108,7 @@ const mock = {
   bandsSummer: [
     { time:"08:00–11:00", icon:"sun", desc:"Sereno", temp:16, perceived:16, wind:8 },
     { time:"11:00–15:00", icon:"partly", desc:"Variabile", temp:21, perceived:21, wind:10 },
-    { time:"15:00–19:00", icon:"cloud", desc:"Più nuvoloso", temp:18, perceived:18, wind:12 }
+    { time:"15:00–19:00", icon:"cloud", desc:"Nuvoloso", temp:18, perceived:18, wind:12 }
   ],
   next3: [
     { dow:"MER", min:-5, max:4 },
@@ -73,59 +116,88 @@ const mock = {
     { dow:"VEN", min:-1, max:12 }
   ],
   updated:"16:13",
-  source:"preview mock"
+  source:"preview display-safe"
 };
 
-function seasonOf(){
-  if (forcedSeason) return forcedSeason;
-  const m = new Date().getMonth()+1;
+function getSeason(){
+  if (forcedSeason === "summer" || forcedSeason === "winter") return forcedSeason;
+  const m = new Date().getMonth() + 1;
   return (m <= 3 || m >= 12) ? "winter" : "summer";
 }
+
 function icon(name, size=28){
-  const s=size;
-  if(name==="sun") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>`;
-  if(name==="cloud") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .2-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"/></svg>`;
-  if(name==="partly") return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .2-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"/><path d="M8 8.5A4 4 0 0 1 15 6"/><path d="M12 2v2M4 10H2M5.2 5.2 3.8 3.8"/></svg>`;
-  return '';
+  const s = size;
+  if(name==="sun"){
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"></path>
+    </svg>`;
+  }
+  if(name==="cloud"){
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 18h10a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"></path>
+    </svg>`;
+  }
+  if(name==="partly"){
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 18h10a4 4 0 0 0 .3-8A5.5 5.5 0 0 0 6.5 8.5 4.5 4.5 0 0 0 7 18Z"></path>
+      <path d="M8 8.5A4 4 0 0 1 15 6"></path>
+      <path d="M12 2v2M4 10H2M5.2 5.2 3.8 3.8"></path>
+    </svg>`;
+  }
+  return "";
 }
-function escapeHtml(s){return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function render(d){
-  const season = seasonOf();
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function render(data){
+  const season = getSeason();
   const isWinter = season === "winter";
-  const bands = isWinter ? d.bandsWinter : d.bandsSummer;
+  const bands = isWinter ? data.bandsWinter : data.bandsSummer;
+
   const statusTitle = isWinter ? "STATO MONTAGNA" : "STATO OUTDOOR";
-  const statusMain = isWinter ? d.ski.label : "Condizioni escursioni buone";
+  const statusMain = isWinter ? data.ski.label : data.outdoor.label;
+  const statusBadge = isWinter ? data.ski.badge : data.outdoor.badge;
   const statusSub = isWinter
-    ? `Impianti ${d.ski.lifts} • Piste ${d.ski.slopes}` + (d.ski.snowFresh>0 ? ` • Neve fresca ${d.ski.snowFresh} cm` : '')
-    : `Quota ${d.liftsAlt} m • vento ${d.liftsNow.wind} km/h`;
-  const badge = isWinter ? "PARZIALE" : "OK";
-  const advice = isWinter ? d.adviceWinter : d.adviceSummer;
-  const bandTitle = isWinter ? "FASCE SCI" : "FASCE ESCURSIONE";
-  document.getElementById('app').innerHTML = `
-    <h1>${escapeHtml(d.place)}</h1>
-    <div class="meta">Via Lattea • Paese ${d.townAlt} m • Quota ${d.liftsAlt} m • OGGI</div>
+    ? `Impianti ${data.ski.lifts} • Piste ${data.ski.slopes}` + (data.ski.snowFresh > 0 ? ` • Neve fresca ${data.ski.snowFresh} cm` : "")
+    : data.outdoor.text;
+
+  const bandsLabelTop = isWinter ? "QUOTA IMPIANTI" : "QUOTA";
+  const bandsTitle = isWinter ? "FASCE SCI" : "FASCE ESCURSIONE";
+  const nowTemp = isWinter ? data.liftsNow.temp : data.bandsSummer[0].temp;
+  const nowWind = isWinter ? data.liftsNow.wind : data.bandsSummer[1].wind;
+  const advice = isWinter ? data.adviceWinter : data.adviceSummer;
+
+  document.getElementById("app").innerHTML = `
+    <h1>${esc(data.place)}</h1>
+    <div class="meta">Via Lattea • Paese ${data.townAlt} m • Quota ${data.liftsAlt} m • OGGI</div>
+
     <div class="controls">
-      <div class="pill">${escapeHtml(d.place)}</div>
+      <div class="pill">${esc(data.place)}</div>
       <div class="pill">IT</div>
       <div class="pill">AUTO</div>
     </div>
+
     <div class="rule"></div>
 
     <div class="grid2">
       <div class="panel">
         <div class="kicker">PAESE</div>
         <div class="heroWrap">
-          <div class="icoBox">${icon(d.current.icon,38)}</div>
+          <div class="icoBox">${icon(data.current.icon, 40)}</div>
           <div>
-            <div class="wxLine">${escapeHtml(d.current.desc)}</div>
-            <div class="tempLine">${d.current.temp}°C</div>
-            <div class="sub">${d.current.min}°C / ${d.current.max}°C • ${d.current.mm} mm • perc. ${d.current.perceived}°C</div>
+            <div class="wxLine">${esc(data.current.desc)}</div>
+            <div class="tempLine">${data.current.temp}°C</div>
+            <div class="sub">${data.current.min}°C / ${data.current.max}°C • ${data.current.mm} mm • perc. ${data.current.perceived}°C</div>
           </div>
         </div>
       </div>
+
       <div class="panel">
         <div class="kicker">CONSIGLI PER OGGI</div>
-        <div class="advice">${escapeHtml(advice)}</div>
+        <div class="advice">${esc(advice)}</div>
       </div>
     </div>
 
@@ -135,40 +207,47 @@ function render(d){
       <div class="kicker">${statusTitle}</div>
       <div class="mountain">
         <div>
-          <div class="mountTitle">${escapeHtml(statusMain)}</div>
-          <div class="mountSub">${escapeHtml(statusSub)}</div>
+          <div class="mountTitle">${esc(statusMain)}</div>
+          <div class="mountSub">${esc(statusSub)}</div>
         </div>
-        <div class="badge">${badge}</div>
+        <div class="badge">${esc(statusBadge)}</div>
       </div>
     </div>
 
     <div class="panel" style="margin-bottom:10px">
       <div class="bandsHead">
         <div>
-          <div class="kicker">QUOTA IMPIANTI</div>
-          <div class="mountTitle" style="font-size:18px">${bandTitle}</div>
+          <div class="kicker">${bandsLabelTop}</div>
+          <div class="bandsTitle">${bandsTitle}</div>
         </div>
-        <div class="now">Ora ${d.liftsNow.temp}°C • vento ${d.liftsNow.wind} km/h</div>
+        <div class="bandsNow">Ora ${nowTemp}°C • vento ${nowWind} km/h</div>
       </div>
+
       <div class="bands">
-        ${bands.map(b=>`
+        ${bands.map(b => `
           <div class="band">
-            <div class="time">${b.time}</div>
-            <div class="wxMini">${icon(b.icon,24)} <span>${escapeHtml(b.desc)}</span></div>
+            <div class="time">${esc(b.time)}</div>
+            <div class="wxMini">${icon(b.icon, 24)} <span>${esc(b.desc)}</span></div>
             <div class="det">${b.temp}°C • perc. ${b.perceived}°C</div>
             <div class="det" style="margin-top:10px">vento ${b.wind} km/h</div>
-          </div>`).join('')}
+          </div>
+        `).join("")}
       </div>
     </div>
 
-    <div class="panel strip">
+    <div class="panel">
       <div class="kicker">PROSSIMI 3 GIORNI (PAESE)</div>
-      <div class="footerline">${d.next3.map(x=>`${x.dow} ${x.min}°C / ${x.max}°C`).join(' • ')}</div>
-      <div class="footmeta"><span>Aggiornato: ${escapeHtml(d.updated)}</span><span>Fonte: ${escapeHtml(d.source)}</span></div>
+      <div class="stripLine">${data.next3.map(d => `${d.dow} ${d.min}°C / ${d.max}°C`).join(" • ")}</div>
+      <div class="footmeta">
+        <span>Aggiornato: ${esc(data.updated)}</span>
+        <span>Fonte: ${esc(data.source)}</span>
+      </div>
     </div>
   `;
+
   window.__WF_READY__ = true;
 }
+
 render(mock);
 </script>
 </body>
