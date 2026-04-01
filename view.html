@@ -1034,55 +1034,6 @@ function setKickers(lang, mode){
 
 // trendLineHTML removed — sezione trend sostituita da stato montagna
 
-function skiStatusLabel(status, lang) {
-  const labels = {
-    open:    { it:"Impianti aperti",      en:"Lifts open",        fr:"Remontées ouvertes" },
-    partial: { it:"Apertura parziale",    en:"Partial opening",   fr:"Ouverture partielle" },
-    limited: { it:"Apertura limitata",    en:"Limited opening",   fr:"Ouverture limitée" },
-    closed:  { it:"Impianti chiusi",      en:"Lifts closed",      fr:"Remontées fermées" },
-    unknown: { it:"Dati impianti n.d.",   en:"Lift data n/a",     fr:"Données n.d." }
-  };
-  return (labels[status] || labels.unknown)[lang] || labels.unknown.it;
-}
-
-function renderSkiStatus(ski, lNowT, lNowW, lang, t) {
-  const status = ski?.status || "unknown";
-  $("skiStatusMain").textContent = skiStatusLabel(status, lang);
-
-  if (ski && ski.lifts_open != null) {
-    const liftsStr = `🎿 ${ski.lifts_open}/${ski.lifts_total}`;
-    const slopesStr = ski.slopes_open != null ? `  ·  ⛷️ ${ski.slopes_open}/${ski.slopes_total}` : "";
-    const snowStr = ski.snow_cm != null ? `  ·  ❄️ ${ski.snow_cm} cm` : "";
-    $("skiStatusRow").textContent = liftsStr + slopesStr + snowStr;
-  } else {
-    // Fallback: modello meteo
-    const lNowW2 = lNowW || 0;
-    let inferredStatus = "unknown";
-    const month = new Date().getMonth() + 1;
-    if (month < 12 && month > 4) {
-      inferredStatus = "closed";
-    } else if (lNowW2 > 50) {
-      inferredStatus = "closed";
-    } else if (lNowW2 > 30) {
-      inferredStatus = "limited";
-    } else {
-      inferredStatus = "open";
-    }
-    $("skiStatusMain").textContent = skiStatusLabel(inferredStatus, lang);
-    $("skiStatusRow").textContent = `${t.now} ${lNowT ? lNowT.toFixed(1)+"°" : "--"} · ${t.wind} ${Math.round(lNowW2)} km/h`;
-  }
-
-  // Badge
-  const badgeMap = {
-    open:    { it:"APERTO",   en:"OPEN",    fr:"OUVERT" },
-    partial: { it:"PARZIALE", en:"PARTIAL", fr:"PARTIEL" },
-    limited: { it:"LIMITATO", en:"LIMITED", fr:"LIMITÉ" },
-    closed:  { it:"CHIUSO",   en:"CLOSED",  fr:"FERMÉ" },
-    unknown: { it:"N.D.",     en:"N/A",     fr:"N.D." }
-  };
-  const badge = (badgeMap[status] || badgeMap.unknown)[lang] || "N.D.";
-  $("skiStatusBadge").textContent = badge;
-}
 
 function renderSkiStatus(ski, windKph, tempC, lang) {
   const labels = {
@@ -1199,7 +1150,7 @@ async function refresh(){
     const ski = (window.__WF_WEATHER__ && window.__WF_WEATHER__.ski)
       ? window.__WF_WEATHER__.ski
       : null;
-    renderSkiStatus(ski, lNowT, lNowW, lang, t);
+    renderSkiStatus(ski, lNowW, lNowT, lang);
 
     $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
 
