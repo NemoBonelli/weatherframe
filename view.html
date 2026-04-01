@@ -175,18 +175,20 @@
       line-height:1;
       letter-spacing:-1px;
       font-weight:900;
+      color:#000;
     }
     .meta{
       margin-top:6px;
       font-size:15px;
       line-height:1.2;
-      opacity:.92;
-      font-weight:600;
+      opacity:1;
+      font-weight:700;
+      color:#000;
     }
     .rule{
       height:2px;
-      background:var(--ink);
-      opacity:.85;
+      background:#000;
+      opacity:1;
       margin:10px 0 12px 0;
     }
 
@@ -211,16 +213,17 @@
 
     /* COMMON */
     .panel{
-      border:1px solid var(--soft);
+      border:1.5px solid #aaa;
       border-radius:var(--r);
       background:#fff;
     }
     .kicker{
       font-size:11px;
-      letter-spacing:6px;
+      letter-spacing:4px;
       text-transform:uppercase;
-      opacity:.62;
-      font-weight:800;
+      opacity:.75;
+      font-weight:900;
+      color:#000;
     }
 
     /* GRID TOP */
@@ -263,12 +266,14 @@
       line-height:1;
       letter-spacing:-1px;
       white-space:nowrap;
+      color:#000;
     }
     .sub{
       margin-top:8px;
       font-size:14px;
-      font-weight:700;
-      opacity:.9;
+      font-weight:800;
+      opacity:1;
+      color:#000;
     }
 
     .adviceTitle{
@@ -284,6 +289,7 @@
       font-weight:800;
       line-height:1.3;
       white-space:pre-line;
+      color:#000;
     }
     .adviceLines .line{
       display:block;
@@ -308,12 +314,14 @@
       font-size:22px;
       font-weight:900;
       line-height:1.1;
+      color:#000;
     }
     .skiStatusRow{
       font-size:15px;
-      font-weight:700;
-      opacity:.85;
+      font-weight:800;
+      opacity:1;
       margin-top:4px;
+      color:#000;
     }
     .skiStatusBadge{
       font-size:13px;
@@ -352,7 +360,7 @@
       gap:10px;
     }
     .band{
-      border:1px solid var(--soft);
+      border:1.5px solid #aaa;
       border-radius:14px;
       padding:10px 8px;
       text-align:center;
@@ -363,10 +371,11 @@
       gap:4px;
     }
     .time{
-      font-size:20px;
+      font-size:19px;
       font-weight:950;
-      letter-spacing:-.2px;
+      letter-spacing:-.5px;
       white-space:nowrap;
+      color:#000;
     }
     .wx{
       font-size:16px;
@@ -400,11 +409,11 @@
       margin-top:6px;
     }
     .day{
-      border:1px solid var(--soft);
+      border:1.5px solid #aaa;
       border-radius:12px;
       padding:8px 6px;
       text-align:center;
-      background:var(--mist);
+      background:#e8e8e8;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -439,8 +448,9 @@
       gap:12px;
       margin-top:6px;
       font-size:12px;
-      font-weight:750;
-      opacity:.78;
+      font-weight:900;
+      opacity:1;
+      color:#000;
     }
 
     /* SVG ICONS */
@@ -1037,9 +1047,9 @@ function setKickers(lang, mode){
 
 function renderSkiStatus(ski, windKph, tempC, lang) {
   const labels = {
-    it: { open:"APERTO", partial:"PARZIALE", limited:"LIMITATO", closed:"CHIUSO", unknown:"N.D." },
-    en: { open:"OPEN",   partial:"PARTIAL",  limited:"LIMITED",  closed:"CLOSED", unknown:"N/A" },
-    fr: { open:"OUVERT", partial:"PARTIEL",  limited:"LIMITÉ",   closed:"FERMÉ",  unknown:"N/D" }
+    it: { open:"APERTO", partial:"PARZIALE", limited:"VENTO FORTE", closed:"CHIUSO", unknown:"N.D." },
+    en: { open:"OPEN",   partial:"PARTIAL",  limited:"STRONG WIND",  closed:"CLOSED", unknown:"N/A" },
+    fr: { open:"OUVERT", partial:"PARTIEL",  limited:"VENT FORT",   closed:"FERMÉ",  unknown:"N/D" }
   };
   const ll = labels[lang] || labels.it;
 
