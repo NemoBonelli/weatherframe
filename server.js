@@ -138,14 +138,12 @@ function convertWeatherAPI(raw) {
 
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
-  // WeatherAPI non supporta elevation — fetch per paese e quota separatamente
-  // Per ora usa le stesse coordinate con 1s di delay
   const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 1000));
-  // Per la quota usiamo le stesse coords — WeatherAPI non ha parametro elevation
-  // La differenza temp è simulata con -0.6°C ogni 100m di dislivello
+  await new Promise(r => setTimeout(r, 500));
   const lF = adjustForElevation(vF, p.lifts - p.town);
-  return { village: vF, lifts: lF };
+  // Ski status — non bloccante, non blocca il render se fallisce
+  const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
+  return { village: vF, lifts: lF, ski };
 }
 
 function adjustForElevation(data, elevDiff) {
@@ -168,6 +166,86 @@ function adjustForElevation(data, elevDiff) {
   };
 }
 
+
+// ── SKI STATUS — Skiinfo scraping + meteo fallback ───────────
+const SKI_CACHE = {};
+const SKI_TTL = 15 * 60 * 1000; // 15 min
+
+async function fetchSkiinfoStatus(placeKey) {
+  const urls = {
+    sauze:        "https://www.skiinfo.it/piemonte/sauze-doulx/bollettino-neve.html",
+    sestriere:    "https://www.skiinfo.it/piemonte/sestriere/bollettino-neve.html",
+    sansicario:   "https://www.skiinfo.it/piemonte/sansicario/bollettino-neve.html",
+    bardonecchia: "https://www.skiinfo.it/piemonte/bardonecchia/bollettino-neve.html",
+    claviere:     "https://www.skiinfo.it/piemonte/claviere/bollettino-neve.html",
+    cesana:       "https://www.skiinfo.it/piemonte/cesana-sansicario/bollettino-neve.html",
+  };
+  const url = urls[placeKey] || urls.sauze;
+
+  const resp = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 WeatherFrame/1.0" },
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!resp.ok) throw new Error(`Skiinfo HTTP ${resp.status}`);
+  const html = await resp.text();
+
+  // Extract lifts open/total
+  const liftsM  = html.match(/(\d+)\s*\/\s*(\d+)\s*impianti/i)
+                || html.match(/impianti\D{0,30}(\d+)\D{0,10}\/\D{0,10}(\d+)/i);
+  const slopesM = html.match(/(\d+)\s*\/\s*(\d+)\s*piste/i)
+                || html.match(/piste\D{0,30}(\d+)\D{0,10}\/\D{0,10}(\d+)/i);
+  const snowM   = html.match(/(\d+)\s*cm/i);
+
+  const liftsOpen   = liftsM  ? parseInt(liftsM[1])  : null;
+  const liftsTotal  = liftsM  ? parseInt(liftsM[2])  : null;
+  const slopesOpen  = slopesM ? parseInt(slopesM[1]) : null;
+  const slopesTotal = slopesM ? parseInt(slopesM[2]) : null;
+  const snowCm      = snowM   ? parseInt(snowM[1])   : null;
+
+  let status = "unknown";
+  if (liftsOpen != null && liftsTotal != null && liftsTotal > 0) {
+    const pct = liftsOpen / liftsTotal;
+    if (pct === 0) status = "closed";
+    else if (pct < 0.35) status = "limited";
+    else if (pct < 0.75) status = "partial";
+    else status = "open";
+  }
+
+  return { status, lifts_open: liftsOpen, lifts_total: liftsTotal,
+           slopes_open: slopesOpen, slopes_total: slopesTotal,
+           snow_cm: snowCm, source: "skiinfo" };
+}
+
+function skiStatusFromWeather(liftWeather) {
+  if (!liftWeather) return { status: "unknown", source: "model" };
+  const wind  = liftWeather.current?.wind_speed_10m ?? 0;
+  const month = new Date().getMonth() + 1;
+  let status = "unknown";
+  if (month >= 5 && month <= 11) status = "closed";
+  else if (wind > 60) status = "closed";
+  else if (wind > 35) status = "limited";
+  else status = "open";
+  return { status, source: "model" };
+}
+
+async function getSkiStatus(placeKey, liftWeather) {
+  const cached = SKI_CACHE[placeKey];
+  if (cached && Date.now() - cached.ts < SKI_TTL) {
+    console.log(`[SKI] Cache hit for ${placeKey}`);
+    return cached.data;
+  }
+  let data;
+  try {
+    console.log(`[SKI] Fetching Skiinfo for ${placeKey}...`);
+    data = await fetchSkiinfoStatus(placeKey);
+    console.log(`[SKI] ${placeKey}: ${data.status} (${data.lifts_open}/${data.lifts_total})`);
+  } catch(e) {
+    console.warn(`[SKI] Skiinfo failed: ${e.message} — using model`);
+    data = skiStatusFromWeather(liftWeather);
+  }
+  SKI_CACHE[placeKey] = { data, ts: Date.now() };
+  return data;
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;

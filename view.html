@@ -78,6 +78,10 @@
     .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
     .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
     .profile-waveshare75 .ski             { padding: 10px 14px 12px; }
+    .profile-waveshare75 .skiStatus       { padding: 8px 12px; margin-bottom: 8px; }
+    .profile-waveshare75 .skiStatusMain   { font-size: 18px; font-weight: 900; }
+    .profile-waveshare75 .skiStatusRow    { font-size: 13px; font-weight: 700; }
+    .profile-waveshare75 .skiStatusBadge  { font-size: 11px; padding: 4px 10px; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
     .profile-waveshare75 .skiHead         { margin-bottom: 6px; }
     .profile-waveshare75 .forecast        { padding: 6px 12px 10px; }
@@ -89,53 +93,53 @@
     .welcome-wrap { display:none; width:var(--w); height:var(--h); background:#fff; margin:0 auto; padding:var(--pad); overflow:hidden; box-sizing:border-box; }
     .welcome-wrap.active { display:block; }
 
-    .wl-title { font-size:64px; font-weight:900; line-height:1; letter-spacing:-2px; margin-bottom:6px; }
-    .wl-name  { font-size:38px; font-weight:800; margin-bottom:6px; }
-    .wl-sub   { font-size:17px; font-weight:600; opacity:.7; margin-bottom:16px; }
-    .wl-rule  { height:3px; background:#111; margin-bottom:18px; }
+    .wl-title { font-size:72px; font-weight:900; line-height:1; letter-spacing:-2px; margin-bottom:8px; }
+    .wl-name  { font-size:48px; font-weight:800; margin-bottom:6px; }
+    .wl-sub   { font-size:20px; font-weight:600; opacity:.7; margin-bottom:18px; }
+    .wl-rule  { height:3px; background:#111; margin-bottom:20px; }
 
     .wl-wifi {
       border:2px solid #111;
       border-radius:14px;
-      padding:16px 18px;
-      margin-bottom:16px;
+      padding:18px 20px;
+      margin-bottom:18px;
       display:flex;
       gap:16px;
       align-items:center;
     }
     .wl-wifi-info { flex:1; min-width:0; }
-    .wl-wifi-lbl  { font-size:10px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:6px; }
-    .wl-wifi-ssid { font-size:26px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .wl-wifi-pass { font-size:18px; font-weight:700; opacity:.75; margin-top:4px; }
-    .wl-wifi-qr   { flex-shrink:0; width:130px; height:130px; }
-    .wl-wifi-qr svg, .wl-wifi-qr img, .wl-wifi-qr canvas { width:130px !important; height:130px !important; }
+    .wl-wifi-lbl  { font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:8px; }
+    .wl-wifi-ssid { font-size:30px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .wl-wifi-pass { font-size:22px; font-weight:700; opacity:.8; margin-top:6px; }
+    .wl-wifi-qr   { flex-shrink:0; width:140px; height:140px; }
+    .wl-wifi-qr svg, .wl-wifi-qr img, .wl-wifi-qr canvas { width:140px !important; height:140px !important; }
 
-    .wl-rule2 { height:2px; background:#ccc; margin-bottom:16px; }
+    .wl-rule2 { height:2px; background:#ccc; margin-bottom:18px; }
 
-    .wl-wx-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:10px; }
+    .wl-wx-label { font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:900; opacity:.5; margin-bottom:12px; }
     .wl-days {
       display:grid;
       grid-template-columns:1fr 1fr 1fr;
-      gap:8px;
-      margin-bottom:14px;
+      gap:10px;
+      margin-bottom:16px;
     }
     .wl-day {
       border:2px solid #111;
       border-radius:12px;
-      padding:12px 8px;
+      padding:14px 8px;
       text-align:center;
     }
-    .wl-day-name  { font-size:18px; font-weight:900; text-transform:lowercase; margin-bottom:6px; }
+    .wl-day-name  { font-size:20px; font-weight:900; text-transform:lowercase; margin-bottom:6px; }
     .wl-day-ico   { display:flex; justify-content:center; margin-bottom:6px; }
-    .wl-day-temp  { font-size:20px; font-weight:900; }
-    .wl-day-mm    { font-size:14px; font-weight:700; opacity:.7; margin-top:4px; }
+    .wl-day-temp  { font-size:22px; font-weight:900; }
+    .wl-day-mm    { font-size:15px; font-weight:700; opacity:.7; margin-top:4px; }
 
     .wl-narrative {
-      font-size:16px;
+      font-size:18px;
       font-weight:500;
       line-height:1.5;
       opacity:.85;
-      margin-bottom:16px;
+      margin-bottom:18px;
     }
 
     .wl-footer {
@@ -143,7 +147,7 @@
       bottom:var(--pad);
       left:var(--pad);
       right:var(--pad);
-      font-size:28px;
+      font-size:34px;
       font-weight:900;
       text-align:center;
     }
@@ -167,9 +171,9 @@
     /* HEADER */
     h1{
       margin:0;
-      font-size:50px;
+      font-size:58px;
       line-height:1;
-      letter-spacing:-0.6px;
+      letter-spacing:-1px;
       font-weight:900;
     }
     .meta{
@@ -226,15 +230,15 @@
       gap:var(--gap);
       margin-bottom:var(--gap);
     }
-    .paese{ padding:12px; min-height:126px; }
-    .consigli{ padding:12px; min-height:126px; }
+    .paese{ padding:12px 12px 10px; }
+    .consigli{ padding:12px; }
 
     .hero{
       display:grid;
-      grid-template-columns:40px 1fr;
-      gap:8px;
+      grid-template-columns:52px 1fr;
+      gap:10px;
       align-items:center;
-      margin-top:6px;
+      margin-top:8px;
     }
     .icoBox{
       width:52px; height:52px;
@@ -245,12 +249,7 @@
       justify-content:center;
       background:#fff;
     }
-    .mainRow{
-      display:flex;
-      align-items:baseline;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .mainRow{ display:flex; align-items:baseline; gap:8px; }
     .mainWx{
       font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
       font-weight:950;
@@ -259,17 +258,17 @@
       white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
     }
     .mainTemp{
-      font-size:40px;
+      font-size:52px;
       font-weight:950;
-      line-height:1.05;
-      letter-spacing:-0.2px;
+      line-height:1;
+      letter-spacing:-1px;
       white-space:nowrap;
     }
     .sub{
-      margin-top:6px;
-      font-size:16px;
+      margin-top:8px;
+      font-size:14px;
       font-weight:700;
-      opacity:.95;
+      opacity:.9;
     }
 
     .adviceTitle{
@@ -281,9 +280,9 @@
       margin-bottom:8px;
     }
     .adviceLines{
-      font-size:18px;
+      font-size:16px;
       font-weight:800;
-      line-height:1.22;
+      line-height:1.3;
       white-space:pre-line;
     }
     .adviceLines .line{
@@ -293,28 +292,39 @@
       font-weight:700;
     }
 
-    /* TRENDS */
-    .trends{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:var(--gap);
+    /* STATO MONTAGNA */
+    .skiStatus{
+      padding:10px 12px;
       margin-bottom:var(--gap);
     }
-    .trend{
-      padding:10px 12px;
-      min-height:76px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-    }
-    .trendLine{
-      margin-top:8px;
+    .skiStatusBody{
       display:flex;
       align-items:center;
-      gap:8px;
-      font-size:18px;
-      font-weight:850;
-      line-height:1.15;
+      justify-content:space-between;
+      margin-top:6px;
+      gap:10px;
+    }
+    .skiStatusMain{
+      font-size:22px;
+      font-weight:900;
+      line-height:1.1;
+    }
+    .skiStatusRow{
+      font-size:15px;
+      font-weight:700;
+      opacity:.85;
+      margin-top:4px;
+    }
+    .skiStatusBadge{
+      font-size:13px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      border:2px solid var(--ink);
+      border-radius:20px;
+      padding:6px 14px;
+      white-space:nowrap;
+      flex-shrink:0;
     }
 
     /* SKI */
@@ -344,25 +354,25 @@
     .band{
       border:1px solid var(--soft);
       border-radius:14px;
-      padding:10px 10px;
+      padding:10px 8px;
       text-align:center;
       background:#fff;
-      min-height:140px;
       display:flex;
       flex-direction:column;
       justify-content:flex-start;
+      gap:4px;
     }
     .time{
-      font-size:18px;
+      font-size:20px;
       font-weight:950;
-      letter-spacing:.2px;
+      letter-spacing:-.2px;
+      white-space:nowrap;
     }
     .wx{
-      margin-top:6px;
       font-size:16px;
-      font-weight:950;
+      font-weight:900;
       display:flex;
-      gap:8px;
+      gap:6px;
       align-items:center;
       justify-content:center;
       line-height:1;
@@ -381,54 +391,53 @@
       opacity:.95;
     }
 
-    /* FORECAST */
-    .forecast{ padding:10px; }
+    /* FORECAST — compact single row */
+    .forecast{ padding:8px 10px 10px; }
     .days{
       display:grid;
       grid-template-columns:1fr 1fr 1fr;
-      gap:8px;
-      margin-top:8px;
+      gap:6px;
+      margin-top:6px;
     }
     .day{
       border:1px solid var(--soft);
-      border-radius:14px;
-      padding:10px 8px;
+      border-radius:12px;
+      padding:8px 6px;
       text-align:center;
       background:var(--mist);
-      min-height:112px;
       display:flex;
       flex-direction:column;
-      justify-content:flex-start;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
     }
     .dow{
-      font-size:18px;
+      font-size:16px;
       font-weight:950;
       text-transform:lowercase;
       line-height:1;
-      margin-bottom:6px;
     }
     .dayIco{
       display:flex;
       justify-content:center;
-      margin-bottom:6px;
     }
     .temp{
-      font-size:20px;
+      font-size:17px;
       font-weight:950;
       letter-spacing:-0.2px;
+      white-space:nowrap;
     }
     .mm{
-      margin-top:6px;
-      font-size:13px;
-      font-weight:850;
-      opacity:.95;
+      font-size:12px;
+      font-weight:800;
+      opacity:.85;
     }
     .footer{
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:12px;
-      margin-top:8px;
+      margin-top:6px;
       font-size:12px;
       font-weight:750;
       opacity:.78;
@@ -441,63 +450,12 @@
     /* per render: nascondi i controlli se ?render=1 */
     .render .controls{ display:none; margin:0; }
   </style>
-  <!-- QR code generator inline — no external requests needed -->
+  <!-- QR code — loaded from CDN in browser, injected by server in render mode -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-  // Minimal QR code SVG generator (pure JS, no dependencies)
-  // Generates a WiFi QR code as SVG for the welcome screen
-  function generateWifiQR(ssid, pass, size) {
-    // Build WiFi string
-    const wifiStr = `WIFI:T:WPA;S:${ssid};P:${pass};;`;
-    // Use a simple pattern-based approach for small QR codes
-    // For Puppeteer render we create a styled box with the WiFi string encoded
-    const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-    svg.setAttribute("width", size);
-    svg.setAttribute("height", size);
-    svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
-
-    // White background
-    const bg = document.createElementNS("http://www.w3.org/2000/svg","rect");
-    bg.setAttribute("width",size); bg.setAttribute("height",size); bg.setAttribute("fill","white");
-    svg.appendChild(bg);
-
-    // Use canvas + qrcode approach via data encoding
-    // Since we can't use external libs, draw a visual "scan me" placeholder
-    // with the actual WiFi data visible
-    const border = document.createElementNS("http://www.w3.org/2000/svg","rect");
-    border.setAttribute("x","4"); border.setAttribute("y","4");
-    border.setAttribute("width",size-8); border.setAttribute("height",size-8);
-    border.setAttribute("fill","none"); border.setAttribute("stroke","#000"); border.setAttribute("stroke-width","4");
-    svg.appendChild(border);
-
-    // Corner squares (QR style)
-    [[6,6],[size-22,6],[6,size-22]].forEach(([x,y]) => {
-      const outer = document.createElementNS("http://www.w3.org/2000/svg","rect");
-      outer.setAttribute("x",x); outer.setAttribute("y",y);
-      outer.setAttribute("width","16"); outer.setAttribute("height","16");
-      outer.setAttribute("fill","#000");
-      svg.appendChild(outer);
-      const inner = document.createElementNS("http://www.w3.org/2000/svg","rect");
-      inner.setAttribute("x",x+3); inner.setAttribute("y",y+3);
-      inner.setAttribute("width","10"); inner.setAttribute("height","10");
-      inner.setAttribute("fill","white");
-      svg.appendChild(inner);
-      const dot = document.createElementNS("http://www.w3.org/2000/svg","rect");
-      dot.setAttribute("x",x+5); dot.setAttribute("y",y+5);
-      dot.setAttribute("width","6"); dot.setAttribute("height","6");
-      dot.setAttribute("fill","#000");
-      svg.appendChild(dot);
-    });
-
-    // WiFi symbol in center
-    const t = document.createElementNS("http://www.w3.org/2000/svg","text");
-    t.setAttribute("x","50%"); t.setAttribute("y","50%");
-    t.setAttribute("text-anchor","middle"); t.setAttribute("dominant-baseline","middle");
-    t.setAttribute("font-size","11"); t.setAttribute("font-family","monospace");
-    t.setAttribute("font-weight","bold");
-    t.textContent = "WiFi";
-    svg.appendChild(t);
-
-    return svg;
+  // Fallback if QRCode library not available (Puppeteer blocks external scripts)
+  if (typeof QRCode === "undefined") {
+    window.QRCode = null; // will use SVG fallback
   }
   </script>
 </head>
@@ -532,7 +490,8 @@
 
   <div class="inkplate" id="root">
 
-    <h1 id="title">Sauze d’Oulx</h1>
+    <!-- HEADER -->
+    <h1 id="title">Sauze d'Oulx</h1>
     <div class="meta" id="meta">Via Lattea · Paese 1509 m · Quota 2300 m · OGGI</div>
 
     <div class="controls" id="controls">
@@ -551,69 +510,57 @@
 
     <div class="rule"></div>
 
+    <!-- S1: METEO PAESE + CONSIGLI -->
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-
         <div class="hero">
-          <div class="icoBox" aria-label="Icona meteo paese" id="mainIconBox">
-            <!-- placeholder -->
+          <div class="icoBox" id="mainIconBox">
             <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
               <circle class="icoStroke" cx="24" cy="24" r="8"/>
             </svg>
           </div>
-
           <div>
-            <div class="mainRow">
-              <div class="mainWx" id="mainWx">Variabile</div>
-              <div class="mainTemp" id="mainTemp">4.6°</div>
-            </div>
-            <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm</div>
+            <div class="mainWx" id="mainWx">Variabile</div>
+            <div class="mainTemp" id="mainTemp">4°C</div>
           </div>
         </div>
+        <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
-
       <div class="panel consigli">
         <div class="adviceTitle" id="kConsigli">CONSIGLI PER OGGI</div>
         <div class="adviceLines" id="advice">Caricamento…</div>
       </div>
     </div>
 
-    <div class="rule" style="margin:8px 0 10px 0;"></div>
-
-    <div class="trends">
-      <div class="panel trend">
-        <div class="kicker" id="kTrendVillage">ANDAMENTO PAESE OGGI</div>
-        <div class="trendLine" id="trendVillage">
-          <!-- icon + text -->
+    <!-- S2: STATO MONTAGNA -->
+    <div class="panel skiStatus" id="skiStatusPanel">
+      <div class="kicker" id="kSkiStatus">STATO MONTAGNA</div>
+      <div class="skiStatusBody">
+        <div>
+          <div class="skiStatusMain" id="skiStatusMain">Dati impianti n.d.</div>
+          <div class="skiStatusRow" id="skiStatusRow"></div>
         </div>
-      </div>
-
-      <div class="panel trend">
-        <div class="kicker" id="kTrendLift">QUOTA IMPIANTI</div>
-        <div class="trendLine" id="trendLift">
-          <!-- icon + text -->
-        </div>
+        <div class="skiStatusBadge" id="skiStatusBadge"></div>
       </div>
     </div>
 
+    <!-- S3: FASCE SCI -->
     <div class="panel ski">
       <div class="skiHead">
         <div>
-          <div class="kicker" id="kSki">QUOTA IMPIANTI OGGI</div>
-          <div class="kicker" style="letter-spacing:3px; margin-top:6px;">FASCE SCI</div>
+          <div class="kicker" id="kSki">QUOTA IMPIANTI</div>
+          <div class="kicker" style="letter-spacing:3px; margin-top:4px;">FASCE SCI</div>
         </div>
         <div class="skiNow" id="skiNow">Ora --.-° · Vento --</div>
       </div>
-
       <div class="bands" id="bands"></div>
     </div>
 
+    <!-- S4: 3 GIORNI -->
     <div class="panel forecast">
       <div class="kicker" id="kNext">PROSSIMI 3 GIORNI (PAESE)</div>
-
       <div class="days" id="days"></div>
-
       <div class="footer">
         <div id="updated">Aggiornato: --:--</div>
         <div id="source">Fonte: WeatherAPI</div>
@@ -656,12 +603,14 @@ const I18N = {
     liftTomorrow:"QUOTA IMPIANTI",
     next3:"PROSSIMI 3 GIORNI (PAESE)",
     updated:"Aggiornato",
+    mountain:"STATO MONTAGNA",
     source:"Fonte: WeatherAPI",
     now:"Ora",
     min:"Min",
     max:"Max",
     wind:"Vento",
-    mm:"mm"
+    mm:"mm",
+    skiStatus:"STATO MONTAGNA"
   },
   en: {
     region: (p)=> p.region === "Bardonecchia" ? "Bardonecchia" : "Via Lattea",
@@ -678,12 +627,14 @@ const I18N = {
     liftTomorrow:"LIFT ALTITUDE",
     next3:"NEXT 3 DAYS (VILLAGE)",
     updated:"Updated",
+    mountain:"MOUNTAIN STATUS",
     source:"Source: WeatherAPI",
     now:"Now",
     min:"Min",
     max:"Max",
     wind:"Wind",
-    mm:"mm"
+    mm:"mm",
+    skiStatus:"MOUNTAIN STATUS"
   },
   fr: {
     region: (p)=> p.region === "Bardonecchia" ? "Bardonecchia" : "Via Lattea",
@@ -700,12 +651,14 @@ const I18N = {
     liftTomorrow:"ALTITUDE",
     next3:"3 PROCHAINS JOURS (VILLAGE)",
     updated:"Mis à jour",
+    mountain:"ÉTAT DES PISTES",
     source:"Source: WeatherAPI",
     now:"Actuel",
     min:"Min",
     max:"Max",
     wind:"Vent",
-    mm:"mm"
+    mm:"mm",
+    skiStatus:"ÉTAT MONTAGNE"
   }
 };
 
@@ -1073,18 +1026,113 @@ function setKickers(lang, mode){
   const t = I18N[lang];
   $("kPaese").textContent = t.village;
   $("kConsigli").textContent = (mode==="domani") ? t.adviceTomorrow : t.adviceToday;
-  $("kTrendVillage").textContent = (mode==="domani") ? t.trendVillageTomorrow : t.trendVillageToday;
-  $("kTrendLift").textContent = (mode==="domani") ? t.trendLiftTomorrow : t.trendLiftToday;
+  $("kSkiStatus").textContent = t.mountain || "STATO MONTAGNA";
   $("kSki").textContent = (mode==="domani") ? t.liftTomorrow : t.liftToday;
   $("kNext").textContent = t.next3;
   $("source").textContent = t.source;
 }
 
-function trendLineHTML(code, label, tmin, tmax, mm, lang, t){
-  return `
-    <div style="flex:0 0 auto;">${wxIconSVG(code).replace('width="32"', 'width="24"').replace('height="32"', 'height="24"')}</div>
-    <div>${label} · ${round0(tmin)}° / ${round0(tmax)}°C · ${round0(mm)} mm</div>
-  `;
+// trendLineHTML removed — sezione trend sostituita da stato montagna
+
+function skiStatusLabel(status, lang) {
+  const labels = {
+    open:    { it:"Impianti aperti",      en:"Lifts open",        fr:"Remontées ouvertes" },
+    partial: { it:"Apertura parziale",    en:"Partial opening",   fr:"Ouverture partielle" },
+    limited: { it:"Apertura limitata",    en:"Limited opening",   fr:"Ouverture limitée" },
+    closed:  { it:"Impianti chiusi",      en:"Lifts closed",      fr:"Remontées fermées" },
+    unknown: { it:"Dati impianti n.d.",   en:"Lift data n/a",     fr:"Données n.d." }
+  };
+  return (labels[status] || labels.unknown)[lang] || labels.unknown.it;
+}
+
+function renderSkiStatus(ski, lNowT, lNowW, lang, t) {
+  const status = ski?.status || "unknown";
+  $("skiStatusMain").textContent = skiStatusLabel(status, lang);
+
+  if (ski && ski.lifts_open != null) {
+    const liftsStr = `🎿 ${ski.lifts_open}/${ski.lifts_total}`;
+    const slopesStr = ski.slopes_open != null ? `  ·  ⛷️ ${ski.slopes_open}/${ski.slopes_total}` : "";
+    const snowStr = ski.snow_cm != null ? `  ·  ❄️ ${ski.snow_cm} cm` : "";
+    $("skiStatusRow").textContent = liftsStr + slopesStr + snowStr;
+  } else {
+    // Fallback: modello meteo
+    const lNowW2 = lNowW || 0;
+    let inferredStatus = "unknown";
+    const month = new Date().getMonth() + 1;
+    if (month < 12 && month > 4) {
+      inferredStatus = "closed";
+    } else if (lNowW2 > 50) {
+      inferredStatus = "closed";
+    } else if (lNowW2 > 30) {
+      inferredStatus = "limited";
+    } else {
+      inferredStatus = "open";
+    }
+    $("skiStatusMain").textContent = skiStatusLabel(inferredStatus, lang);
+    $("skiStatusRow").textContent = `${t.now} ${lNowT ? lNowT.toFixed(1)+"°" : "--"} · ${t.wind} ${Math.round(lNowW2)} km/h`;
+  }
+
+  // Badge
+  const badgeMap = {
+    open:    { it:"APERTO",   en:"OPEN",    fr:"OUVERT" },
+    partial: { it:"PARZIALE", en:"PARTIAL", fr:"PARTIEL" },
+    limited: { it:"LIMITATO", en:"LIMITED", fr:"LIMITÉ" },
+    closed:  { it:"CHIUSO",   en:"CLOSED",  fr:"FERMÉ" },
+    unknown: { it:"N.D.",     en:"N/A",     fr:"N.D." }
+  };
+  const badge = (badgeMap[status] || badgeMap.unknown)[lang] || "N.D.";
+  $("skiStatusBadge").textContent = badge;
+}
+
+function renderSkiStatus(ski, windKph, tempC, lang) {
+  const labels = {
+    it: { open:"APERTO", partial:"PARZIALE", limited:"LIMITATO", closed:"CHIUSO", unknown:"N.D." },
+    en: { open:"OPEN",   partial:"PARTIAL",  limited:"LIMITED",  closed:"CLOSED", unknown:"N/A" },
+    fr: { open:"OUVERT", partial:"PARTIEL",  limited:"LIMITÉ",   closed:"FERMÉ",  unknown:"N/D" }
+  };
+  const ll = labels[lang] || labels.it;
+
+  let mainText, rowText, badgeText;
+
+  if (ski && ski.status && ski.status !== "unknown") {
+    // Dati reali da Skiinfo
+    const statusMap = { open: ll.open, partial: ll.partial, limited: ll.limited, closed: ll.closed };
+    const mainMap = {
+      it: { open:"Apertura completa", partial:"Apertura parziale", limited:"Apertura limitata", closed:"Impianti chiusi" },
+      en: { open:"Full opening",      partial:"Partial opening",   limited:"Limited opening",   closed:"Lifts closed" },
+      fr: { open:"Ouverture totale",  partial:"Ouverture partielle",limited:"Ouverture limitée",closed:"Remontées fermées" }
+    };
+    mainText = (mainMap[lang] || mainMap.it)[ski.status] || ski.status;
+    const parts = [];
+    if (ski.lifts_open != null && ski.lifts_total != null) parts.push(`Impianti ${ski.lifts_open}/${ski.lifts_total}`);
+    if (ski.slopes_open != null && ski.slopes_total != null) parts.push(`Piste ${ski.slopes_open}/${ski.slopes_total}`);
+    if (ski.snow_cm != null) parts.push(`Neve ${ski.snow_cm} cm`);
+    rowText = parts.join(" · ");
+    badgeText = statusMap[ski.status] || ll.unknown;
+  } else {
+    // Fallback: stima da meteo
+    let status = "open";
+    if (windKph > 60) status = "closed";
+    else if (windKph > 40 || tempC > 8) status = "limited";
+    else if (windKph > 25) status = "partial";
+    const mainMapFb = {
+      it: { open:"Condizioni sci buone", partial:"Vento moderato in quota", limited:"Vento forte — sci difficile", closed:"Impianti probabilmente chiusi" },
+      en: { open:"Good skiing conditions", partial:"Moderate wind at altitude", limited:"Strong wind — difficult skiing", closed:"Lifts likely closed" },
+      fr: { open:"Bonnes conditions de ski", partial:"Vent modéré en altitude", limited:"Vent fort — ski difficile", closed:"Remontées probablement fermées" }
+    };
+    mainText = (mainMapFb[lang] || mainMapFb.it)[status];
+    rowText = lang === "fr" ? `Vent ${round0(windKph)} km/h · ${tempC.toFixed(1)}°C en altitude`
+            : lang === "en" ? `Wind ${round0(windKph)} km/h · ${tempC.toFixed(1)}°C at altitude`
+            : `Vento ${round0(windKph)} km/h · ${tempC.toFixed(1)}°C in quota`;
+    badgeText = { it:{ open:"APERTO", partial:"PARZIALE", limited:"LIMITATO", closed:"CHIUSO" },
+                  en:{ open:"OPEN", partial:"PARTIAL", limited:"LIMITED", closed:"CLOSED" },
+                  fr:{ open:"OUVERT", partial:"PARTIEL", limited:"LIMITÉ", closed:"FERMÉ" }
+                }[lang][status];
+  }
+
+  $("skiStatusMain").textContent = mainText;
+  $("skiStatusRow").textContent = rowText;
+  $("skiStatusBadge").textContent = badgeText;
 }
 
 async function refresh(){
@@ -1131,18 +1179,23 @@ async function refresh(){
     $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
     $("mainWx").textContent = wxToLabel(vNowCode, lang);
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
-    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm`;
+    // Perceived temp from wind chill approximation
+    const perceivedT = (vNowT < 10 && lNowW > 5)
+      ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
+      : Math.round(vNowT);
+    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°`;
 
-    // TRENDS
+    // STATO MONTAGNA — usa dati iniettati dal server se disponibili
     const vDayCode = vF.daily.weather_code[dayIdx];
     const lDayCode = lF.daily.weather_code[dayIdx];
-
     const lMin = lF.daily.temperature_2m_min[dayIdx];
     const lMax = lF.daily.temperature_2m_max[dayIdx];
     const lDayMm = lF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("trendVillage").innerHTML = trendLineHTML(vDayCode, wxToLabel(vDayCode,lang), vMin, vMax, vDayMm, lang, t);
-    $("trendLift").innerHTML = trendLineHTML(lDayCode, wxToLabel(lDayCode,lang), lMin, lMax, lDayMm, lang, t);
+    const ski = (window.__WF_WEATHER__ && window.__WF_WEATHER__.ski)
+      ? window.__WF_WEATHER__.ski
+      : null;
+    renderSkiStatus(ski, lNowT, lNowW, lang, t);
 
     // SKI NOW
     const lNowT = lF.current.temperature_2m;
@@ -1252,10 +1305,24 @@ async function refreshWelcome(params) {
       $("wlWifiQr").appendChild(qrImg);
       await new Promise(r => { qrImg.onload = r; qrImg.onerror = r; setTimeout(r, 3000); });
     } else {
-      // Render mode: generate QR SVG inline (no external APIs)
+      // Render mode: use server-injected QR data or QRCode library
       $("wlWifiQr").innerHTML = "";
-      const qrSvg = generateWifiQR(wifiSsid, wifiPass, 130);
-      $("wlWifiQr").appendChild(qrSvg);
+      const qrString = window.__WF_QR__ || wifiStr;
+      if (typeof QRCode !== "undefined" && QRCode) {
+        // QRCode library available
+        new QRCode($("wlWifiQr"), {
+          text: qrString,
+          width: 140, height: 140,
+          colorDark: "#000000", colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        // Fallback SVG placeholder
+        const div = document.createElement("div");
+        div.style.cssText = "width:140px;height:140px;border:3px solid #000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;";
+        div.innerHTML = `<div style="font-size:9px;font-weight:900;letter-spacing:2px;opacity:.5">WIFI QR</div><div style="font-size:11px;font-weight:800;text-align:center;padding:0 6px;">${wifiSsid}</div>`;
+        $("wlWifiQr").appendChild(div);
+      }
     }
   }
 
@@ -1263,12 +1330,19 @@ async function refreshWelcome(params) {
   const wxLbl = lang==="en" ? "NEXT 3 DAYS" : lang==="fr" ? "3 PROCHAINS JOURS" : "PROSSIMI 3 GIORNI";
   $("wlWxLabel").textContent = wxLbl;
 
-  // Fetch weather for narrative + 3-day grid
-  // Use injected data if available (Puppeteer mode), otherwise fetch
+  // Fetch weather — use injected data if in Puppeteer render mode
   try {
     const place = PLACES.find(p=>p.key===placeKey) || PLACES.find(p=>p.key==="sauze");
-    const vF = await fetchForecast(place.lat, place.lon, place.town, "village");
-    const lF = await fetchForecast(place.lat, place.lon, place.lifts, "lifts");
+    // In render mode window.__WF_WEATHER__ is injected by server
+    // In browser mode fetch normally
+    let vF, lF;
+    if (window.__WF_WEATHER__ && window.__WF_WEATHER__.village) {
+      vF = window.__WF_WEATHER__.village;
+      lF = window.__WF_WEATHER__.lifts;
+    } else {
+      vF = await fetchForecast(place.lat, place.lon, place.town, "village");
+      lF = await fetchForecast(place.lat, place.lon, place.lifts, "lifts");
+    }
 
     const DOW_IT = ["dom","lun","mar","mer","gio","ven","sab"];
     const DOW_EN = ["sun","mon","tue","wed","thu","fri","sat"];
