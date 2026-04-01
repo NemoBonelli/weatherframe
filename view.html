@@ -60,7 +60,7 @@
     .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 400; line-height: 1.5; color: #000; opacity: 1; }
     .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 500; color: #000; opacity: 1; }
     .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; }
-    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 700; }
+    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
     .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
     .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; }
     .profile-waveshare75 .det             { font-size: 13px; font-weight: 800; opacity: 1; }
@@ -75,7 +75,7 @@
     .profile-waveshare75 .paese           { min-height: 116px; padding: 10px 10px 10px 12px; }
     .profile-waveshare75 .consigli        { min-height: 116px; padding: 10px 12px; }
     .profile-waveshare75 .trend           { padding: 9px 12px; min-height: 76px; }
-    .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
+    .profile-waveshare75 .kicker          { letter-spacing: 1px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
     .profile-waveshare75 .panel           { border: 2px solid #000 !important; }
     .profile-waveshare75 .ski             { padding: 10px 14px 12px; }
     .profile-waveshare75 .skiStatus       { padding: 8px 12px; margin-bottom: 8px; }
@@ -812,131 +812,166 @@ function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayM
   const month = now.getMonth() + 1;
   const isWinter = (month >= 11 || month <= 4);
   const thunder    = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
-  const snowLift   = [71,73,75,77,85,86].includes(lDayCode);
+  const snowLift   = [71,73,75,77,85,86].includes(lDayCode) || !!lSnowLike;
   const snowVillage= [71,73,75,77,85,86].includes(vDayCode);
   const rainVillage= [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(vDayCode) || vDayMm>=2;
   const rainLift   = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(lDayCode) || (lDayMm||0)>=2;
   const sunny      = vDayCode <= 1;
   const partlyCloudy = [2,3].includes(vDayCode);
   const foggy      = [45,48].includes(vDayCode) || [45,48].includes(lDayCode);
-  const windyLift  = lNowWind >= 40;
+  const windyLift  = lNowWind >= 35;
   const veryWindy  = lNowWind >= 60;
   const freshSnow  = snowLift && lNowTemp <= -2;
-  const veryWarm   = lNowTemp >= 5;
+  const bitterCold = lNowTemp <= -12;
+  const softSnow   = lNowTemp >= 4;
+  const tomorrow   = mode === "domani";
   const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
+  const lead = (it, en, fr) => tomorrow
+    ? T(`Domani ${it}`, `Tomorrow ${en}`, `Demain ${fr}`)
+    : T(it, en, fr);
 
-  if(thunder) return T(
-    "Temporale previsto in quota — finestra migliore nelle ore più stabili, con condizioni in possibile rapido cambiamento",
-    "Thunderstorms forecast at altitude — best window during the more stable hours, with conditions able to change quickly",
-    "Orages prévus en altitude — meilleure fenêtre durant les heures les plus stables, avec des conditions pouvant évoluer rapidement"
-  );
-  if(foggy){
-    if(isWinter) return T(
-      "Nebbia o visibilità ridotta in quota — giornata più leggibile sulle piste basse e nei tratti più riparati",
-      "Fog or low visibility at altitude — the day is generally easier on lower slopes and more sheltered areas",
-      "Brouillard ou faible visibilité en altitude — journée généralement plus lisible sur les pistes basses et zones abritées"
-    );
-    return T(
-      "Visibilità ridotta in quota — condizioni in miglioramento attese nel corso della giornata",
-      "Reduced visibility at altitude — conditions expected to improve during the day",
-      "Visibilité réduite en altitude — amélioration attendue en cours de journée"
+  if (thunder) {
+    return lead(
+      "condizioni in rapido cambiamento in quota: meglio una giornata flessibile.",
+      "conditions can change quickly at altitude: best to keep the day flexible.",
+      "les conditions peuvent changer vite en altitude : mieux vaut garder une journée flexible."
     );
   }
-  if(veryWindy) return T(
-    `Vento molto forte in quota (${Math.round(lNowWind)} km/h) — verificare apertura impianti sul sito Via Lattea`,
-    `Very strong winds at altitude (${Math.round(lNowWind)} km/h) — check lift status on Via Lattea website`,
-    `Vent très fort en altitude (${Math.round(lNowWind)} km/h) — vérifier l'ouverture des remontées sur Via Lattea`
-  );
-  if(isWinter){
-    if(freshSnow && sunny) return T(
-      "Neve fresca in quota e cielo sereno — mattina molto invitante, con le condizioni più belle nelle prime ore",
-      "Fresh snow at altitude and clear skies — a very inviting morning, with the best conditions in the early hours",
-      "Neige fraîche en altitude et ciel dégagé — matinée très engageante, avec les plus belles conditions dès les premières heures"
+
+  if (veryWindy) {
+    return lead(
+      `vento molto forte in quota (${Math.round(lNowWind)} km/h): meglio verificare prima l'apertura degli impianti e puntare sulle zone più riparate.`,
+      `very strong winds at altitude (${Math.round(lNowWind)} km/h): best to check lift openings first and focus on more sheltered areas.`,
+      `vent très fort en altitude (${Math.round(lNowWind)} km/h) : mieux vaut vérifier l'ouverture des remontées et privilégier les zones abritées.`
     );
-    if(freshSnow) return T(
-      "Neve fresca in quota — giornata interessante soprattutto al mattino, con visibilità variabile nel corso delle ore",
-      "Fresh snow at altitude — especially appealing through the morning, with visibility varying during the day",
-      "Neige fraîche en altitude — journée surtout intéressante le matin, avec une visibilité variable au fil des heures"
-    );
-    if(snowVillage && lNowTemp<=0) return T(
-      "Neve in caduta — strade innevate possibili, attrezzatura invernale consigliata per i veicoli",
-      "Snowfall — roads may be snowy, winter tyres recommended for vehicles",
-      "Chutes de neige — routes enneigées possibles, équipement hiver conseillé pour les véhicules"
-    );
-    if(snowLift && !snowVillage) return T(
-      "Neve in quota — cielo più coperto in alto, verificare le condizioni agli impianti",
-      "Snow at altitude — overcast higher up, check conditions at the lifts",
-      "Neige en altitude — ciel couvert en hauteur, vérifier les conditions aux remontées"
-    );
-    if(lNowTemp <= -12 && sunny) return T(
-      `Temperatura molto bassa in quota (${lNowTemp.toFixed(1)}°) — giornata soleggiata con freddo intenso`,
-      `Very cold at altitude (${lNowTemp.toFixed(1)}°) — sunny day but with intense cold`,
-      `Très froid en altitude (${lNowTemp.toFixed(1)}°) — journée ensoleillée mais froid intense`
-    );
-    if(veryWarm && sunny) return T(
-      `Temperatura in quota (${lNowTemp.toFixed(1)}°) — neve che si ammorbidisce nelle ore centrali`,
-      `Temperature at altitude (${lNowTemp.toFixed(1)}°) — snow softening during midday hours`,
-      `Température en altitude (${lNowTemp.toFixed(1)}°) — neige ramollissant en milieu de journée`
-    );
-    if(rainVillage && !snowVillage && !snowLift) return T(
-      "Pioggia al paese — salendo di quota il quadro può diventare più invernale, con condizioni variabili",
-      "Rain in the village — climbing higher may bring a more wintry feel, with variable conditions",
-      "Pluie au village — en prenant de l'altitude l'ambiance peut devenir plus hivernale, avec des conditions variables"
-    );
-    if(rainLift) return T(
-      "Precipitazioni in quota — neve bagnata o pioggia gelata possibile, condizioni da valutare",
-      "Precipitation at altitude — wet snow or freezing rain possible, conditions to assess",
-      "Précipitations en altitude — neige mouillée ou pluie verglaçante possible, conditions à évaluer"
-    );
-    if(windyLift) return T(
-      `Vento moderato in quota (${Math.round(lNowWind)} km/h) — possibili limitazioni su alcuni impianti`,
-      `Moderate wind at altitude (${Math.round(lNowWind)} km/h) — possible restrictions on some lifts`,
-      `Vent modéré en altitude (${Math.round(lNowWind)} km/h) — restrictions possibles sur certaines remontées`
-    );
-    if(sunny) return T(
-      "Cielo sereno in quota — giornata luminosa e leggibile, con buona visibilità per gran parte del tempo",
-      "Clear skies at altitude — bright and readable day, with good visibility for most of the time",
-      "Ciel dégagé en altitude — journée lumineuse et lisible, avec une bonne visibilité la plupart du temps"
-    );
-    if(partlyCloudy) return T(
-      "Cielo parzialmente nuvoloso — giornata regolare e piuttosto stabile, senza precipitazioni significative previste",
-      "Partly cloudy skies — a regular and fairly stable day, with no significant precipitation expected",
-      "Ciel partiellement nuageux — journée régulière et assez stable, sans précipitations significatives prévues"
-    );
-    return T("Condizioni nella norma per la stagione","Normal conditions for the season","Conditions normales pour la saison");
   }
-  // Estate
-  if(rainVillage && rainLift) return T(
-    "Precipitazioni previste — sentieri e trail con fondo probabilmente più umido o scivoloso",
-    "Precipitation expected — trails and paths will likely feel wetter or more slippery",
-    "Précipitations prévues — sentiers et pistes avec un terrain probablement plus humide ou glissant"
+
+  if (foggy) {
+    return lead(
+      "la visibilità resta ridotta in quota: la giornata rende meglio sulle piste basse o nelle fasce in cui il cielo si apre.",
+      "visibility stays limited at altitude: the day works better on lower slopes or in the time windows when the sky opens up.",
+      "la visibilité reste réduite en altitude : la journée fonctionne mieux sur les pistes basses ou pendant les créneaux où le ciel s'ouvre."
+    );
+  }
+
+  if (isWinter) {
+    if (freshSnow && sunny) {
+      return lead(
+        "ha il profilo della giornata migliore: neve fresca in quota, buona luce e resa molto bella al mattino. Nel pomeriggio la neve tenderà ad assestarsi.",
+        "has the profile of a best-day scenario: fresh snow at altitude, good light and excellent snow feel in the morning. In the afternoon the surface will start to settle.",
+        "a le profil d'une très belle journée : neige fraîche en altitude, bonne lumière et excellente sensation le matin. L'après-midi, la neige commencera à se tasser."
+      );
+    }
+    if (freshSnow) {
+      return lead(
+        "porta con sé neve fresca in quota: la finestra più interessante è la prima parte della giornata, con visibilità da verificare sul posto.",
+        "brings fresh snow at altitude: the most interesting window is the first part of the day, with visibility to be checked on site.",
+        "apporte de la neige fraîche en altitude : le créneau le plus intéressant est la première partie de journée, avec une visibilité à vérifier sur place."
+      );
+    }
+    if (snowVillage) {
+      return lead(
+        "può dare un'atmosfera molto invernale anche in paese: strade e accessi potrebbero essere più lenti, mentre in quota il paesaggio sarà al massimo.",
+        "can bring a fully alpine feel even in the village: roads and access may be slower, while higher up the landscape will look at its best.",
+        "peut offrir une vraie ambiance alpine jusque dans le village : les accès peuvent être plus lents, tandis qu'en altitude le paysage sera au maximum."
+      );
+    }
+    if (rainVillage && snowLift) {
+      return lead(
+        "parte bagnata in paese ma molto più invernale salendo: conviene leggere la giornata come doppio scenario, morbida in basso e più interessante in quota.",
+        "starts wet in the village but far more wintry higher up: best to read the day as a two-level scenario, softer down low and more interesting at altitude.",
+        "commence humide au village mais bien plus hivernale en montant : il faut lire la journée comme un double scénario, plus doux en bas et plus intéressant en altitude."
+      );
+    }
+    if (rainLift) {
+      return lead(
+        "resta delicata in quota: neve pesante o precipitazione mista possono rendere la qualità meno uniforme nell'arco della giornata.",
+        "stays delicate at altitude: heavy snow or mixed precipitation can make quality less consistent through the day.",
+        "reste délicate en altitude : neige lourde ou précipitations mixtes peuvent rendre la qualité moins homogène dans la journée."
+      );
+    }
+    if (bitterCold && sunny) {
+      return lead(
+        `sarà molto bella ma decisamente fredda (${lNowTemp.toFixed(1)}° in quota): aria secca, luce pulita e sensazione intensa per gran parte della giornata.`,
+        `should be beautiful but seriously cold (${lNowTemp.toFixed(1)}° at altitude): dry air, crisp light and an intense feel for most of the day.`,
+        `devrait être très belle mais franchement froide (${lNowTemp.toFixed(1)}° en altitude) : air sec, lumière nette et sensation intense pendant une grande partie de la journée.`
+      );
+    }
+    if (softSnow && sunny) {
+      return lead(
+        `si apre bene ma con temperatura già alta in quota (${lNowTemp.toFixed(1)}°): mattina ancora piacevole, poi neve più morbida nelle ore centrali.`,
+        `opens up nicely but with already mild temperature at altitude (${lNowTemp.toFixed(1)}°): pleasant in the morning, then softer snow around midday.`,
+        `s'ouvre bien mais avec une température déjà douce en altitude (${lNowTemp.toFixed(1)}°) : agréable le matin, puis neige plus souple en milieu de journée.`
+      );
+    }
+    if (windyLift) {
+      return lead(
+        `ha vento presente in quota (${Math.round(lNowWind)} km/h): giornata comunque leggibile, ma con possibili differenze sensibili tra zone esposte e riparate.`,
+        `has noticeable wind at altitude (${Math.round(lNowWind)} km/h): still a readable day, but with meaningful differences between exposed and sheltered zones.`,
+        `présente du vent en altitude (${Math.round(lNowWind)} km/h) : journée encore lisible, mais avec de vraies différences entre zones exposées et abritées.`
+      );
+    }
+    if (sunny) {
+      return lead(
+        "ha il profilo della giornata classica da montagna: cielo pulito, buona visibilità e condizioni ordinate per quasi tutto il giorno.",
+        "has the profile of a classic mountain day: clear sky, good visibility and tidy conditions for most of the day.",
+        "a le profil d'une journée classique de montagne : ciel dégagé, bonne visibilité et conditions régulières pendant presque toute la journée."
+      );
+    }
+    if (partlyCloudy) {
+      return lead(
+        "resta equilibrata e abbastanza facile da leggere: luce più morbida, meteo stabile e poche sorprese nel corso della giornata.",
+        "stays balanced and fairly easy to read: softer light, stable weather and few surprises through the day.",
+        "reste équilibrée et assez facile à lire : lumière plus douce, météo stable et peu de surprises pendant la journée."
+      );
+    }
+    return lead(
+      "ha condizioni in linea con la stagione, senza segnali particolarmente critici ma con qualità da leggere sul momento.",
+      "has conditions in line with the season, with no major warning signs but quality to be read in real time.",
+      "présente des conditions conformes à la saison, sans signal vraiment critique mais avec une qualité à lire sur le moment."
+    );
+  }
+
+  if (rainVillage && rainLift) {
+    return lead(
+      "si muove su uno scenario più umido: sentieri e trail possono restare bagnati più a lungo, soprattutto nelle zone in ombra.",
+      "moves into a wetter scenario: paths and trails may stay damp for longer, especially in shaded areas.",
+      "évolue vers un scénario plus humide : sentiers et pistes peuvent rester mouillés plus longtemps, surtout à l'ombre."
+    );
+  }
+  if (sunny && lNowTemp >= 20) {
+    return lead(
+      `ha un taglio pienamente estivo in quota (${lNowTemp.toFixed(1)}°): ottima luce ma irraggiamento forte nelle ore centrali.`,
+      `has a fully summer feel at altitude (${lNowTemp.toFixed(1)}°): excellent light but strong sun exposure around midday.`,
+      `a une vraie tonalité estivale en altitude (${lNowTemp.toFixed(1)}°) : très belle lumière mais ensoleillement fort à la mi-journée.`
+    );
+  }
+  if (sunny && lNowTemp >= 8 && lNowTemp <= 18) {
+    return lead(
+      "ha il profilo migliore per attività all'aperto: aria fresca, buona visibilità e quota molto godibile per gran parte della giornata.",
+      "has the best profile for outdoor activities: cool air, good visibility and very enjoyable altitude conditions for most of the day.",
+      "a le meilleur profil pour les activités de plein air : air frais, bonne visibilité et altitude très agréable pendant une grande partie de la journée."
+    );
+  }
+  if (windyLift) {
+    return lead(
+      `resta vivace in quota per il vento (${Math.round(lNowWind)} km/h): meglio immaginare una giornata più esposta sui crinali e più piacevole nei tratti riparati.`,
+      `stays lively at altitude because of the wind (${Math.round(lNowWind)} km/h): best to imagine a more exposed day on ridges and a more pleasant one on sheltered sections.`,
+      `reste animée en altitude à cause du vent (${Math.round(lNowWind)} km/h) : mieux vaut imaginer une journée plus exposée sur les crêtes et plus agréable dans les secteurs abrités.`
+    );
+  }
+  if (sunny) {
+    return lead(
+      "ha una lettura semplice e molto gradevole: cielo aperto, orizzonte pulito e sensazione di montagna ampia.",
+      "has a simple and very pleasant feel: open sky, clear horizon and a broad mountain atmosphere.",
+      "offre une lecture simple et très agréable : ciel ouvert, horizon net et vraie sensation d'espace en montagne."
+    );
+  }
+  return lead(
+    "resta stabile e facile da gestire, con condizioni regolari nell'arco della giornata.",
+    "stays stable and easy to handle, with regular conditions through the day.",
+    "reste stable et facile à vivre, avec des conditions régulières au fil de la journée."
   );
-  if(lNowTemp >= 20 && sunny) return T(
-    `Temperatura elevata in quota (${lNowTemp.toFixed(1)}°) — irraggiamento solare intenso in alta quota`,
-    `High temperature at altitude (${lNowTemp.toFixed(1)}°) — intense solar radiation at high altitude`,
-    `Température élevée en altitude (${lNowTemp.toFixed(1)}°) — rayonnement solaire intense en haute altitude`
-  );
-  if(sunny && lNowTemp >= 8 && lNowTemp <= 18) return T(
-    "Cielo sereno con temperature fresche in quota — condizioni generalmente buone per attività all'aperto",
-    "Clear skies with cool temperatures at altitude — generally good conditions for outdoor activities",
-    "Ciel dégagé avec températures fraîches en altitude — bonnes conditions pour les activités de plein air"
-  );
-  if(sunny) return T(
-    "Giornata soleggiata — atmosfera molto aperta, con UV elevati in quota nelle ore centrali",
-    "Sunny day — very open atmosphere, with high UV at altitude during midday hours",
-    "Journée ensoleillée — ambiance très ouverte, avec des UV élevés en altitude en milieu de journée"
-  );
-  if(windyLift) return T(
-    `Vento in quota (${Math.round(lNowWind)} km/h) — condizioni esposte sui crinali`,
-    `Wind at altitude (${Math.round(lNowWind)} km/h) — exposed conditions on ridges`,
-    `Vent en altitude (${Math.round(lNowWind)} km/h) — conditions exposées sur les crêtes`
-  );
-  if(partlyCloudy) return T(
-    "Cielo variabile — condizioni stabili senza precipitazioni significative previste",
-    "Variable sky — stable conditions with no significant precipitation forecast",
-    "Ciel variable — conditions stables sans précipitations significatives prévues"
-  );
-  return T("Condizioni nella norma per la stagione estiva","Normal conditions for the summer season","Conditions normales pour la saison estivale");
 }
 
 
