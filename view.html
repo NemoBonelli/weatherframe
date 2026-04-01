@@ -1180,6 +1180,10 @@ async function refresh(){
     $("mainWx").textContent = wxToLabel(vNowCode, lang);
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
     // Perceived temp from wind chill approximation
+    // SKI NOW — definiti qui perché usati anche sopra
+    const lNowT = lF.current.temperature_2m;
+    const lNowW = lF.current.wind_speed_10m ?? 0;
+
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
       : Math.round(vNowT);
@@ -1197,9 +1201,6 @@ async function refresh(){
       : null;
     renderSkiStatus(ski, lNowT, lNowW, lang, t);
 
-    // SKI NOW
-    const lNowT = lF.current.temperature_2m;
-    const lNowW = lF.current.wind_speed_10m ?? 0;
     $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
 
     // BANDS
@@ -1253,7 +1254,8 @@ async function refresh(){
     window.__WF_READY__ = true;
 
   }catch(err){
-    console.error(err);
+    console.error("WF_ERROR: " + (err && err.message ? err.message : String(err)));
+    if (err && err.stack) console.error("STACK: " + err.stack.split('\n')[0]);
     window.__WF_READY__ = true;
     $("advice").textContent = (lang==="en")
       ? "Error loading weather.\nCheck connection."
