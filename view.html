@@ -1128,10 +1128,10 @@ async function refresh(){
   const season = pickSeason();
   const dayIdx = pickDayIndex(mode);
 
-  // Switch winter/summer UI
+  // Entrambe le stagioni mostrano le stesse sezioni, solo con contenuto diverso
+  $("skiStatusPanel").style.display = "";
+  $("skiPanel").style.display = "";
   const isWinter = (season === "winter");
-  $("skiStatusPanel").style.display = isWinter ? "" : "none";
-  $("skiPanel").style.display = isWinter ? "" : "none";
 
   // Header
   $("title").textContent = place.name;

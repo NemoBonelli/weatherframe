@@ -443,14 +443,27 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
       window.__WF_QR__ = qr; // WiFi QR string for welcome screen
     }, weatherJson, qrData);
 
-    await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
+    // Render a 2x per testo più nitido, poi downsample a 1x
+    await page.setViewport({ width: w * 2, height: h * 2, deviceScaleFactor: 2 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
     await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
     await new Promise(r => setTimeout(r, 800));
-    return await page.screenshot({ type: format, ...(format === "jpeg" ? { quality: 90 } : {}) });
+
+    if (format === "jpeg") {
+      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
+      await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
+      await new Promise(r => setTimeout(r, 500));
+      return await page.screenshot({ type: "jpeg", quality: 92 });
+    } else {
+      // Per PNG/RAW (Waveshare) usa 2x con downsample
+      const raw2x = await page.screenshot({ type: "png" });
+      return downsample2x(raw2x, w, h);
+    }
   } finally {
     await browser.close();
   }
