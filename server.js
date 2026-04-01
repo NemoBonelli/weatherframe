@@ -877,7 +877,7 @@ app.delete("/admin/welcome/:id", requireAuth, (req, res) => {
 app.get("/admin", requireAuth, (req, res) => {
   const PLACES_LIST = [
     ["sauze","Sauze d'Oulx"],["sestriere","Sestriere"],["sansicario","San Sicario"],
-    ["cesana","Cesana"],["claviere","Claviere"],["monginevro","Monginevro"],
+    ["cesana","Cesana"],["claviere","Claviere"],["monginevro","Montgenèvre"],
     ["bardonecchia","Bardonecchia"],["oulx","Oulx"]
   ];
   const placeOptions = PLACES_LIST.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
