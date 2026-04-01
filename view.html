@@ -516,6 +516,10 @@
         <option value="oggi">OGGI</option>
         <option value="domani">DOMANI</option>
       </select>
+      <select id="seasonSelect" title="stagione">
+        <option value="winter">⛷️ Inverno</option>
+        <option value="summer">🌿 Estate</option>
+      </select>
     </div>
 
     <div class="rule"></div>
@@ -543,7 +547,7 @@
       </div>
     </div>
 
-    <!-- S2: STATO MONTAGNA -->
+    <!-- S2: STATO MONTAGNA (inverno) / ATTIVITÀ ESTIVE (estate) -->
     <div class="panel skiStatus" id="skiStatusPanel">
       <div class="kicker" id="kSkiStatus">STATO MONTAGNA</div>
       <div class="skiStatusBody">
@@ -555,12 +559,12 @@
       </div>
     </div>
 
-    <!-- S3: FASCE SCI -->
-    <div class="panel ski">
+    <!-- S3: FASCE SCI (inverno) / FASCE GIORNATA (estate) -->
+    <div class="panel ski" id="skiPanel">
       <div class="skiHead">
         <div>
           <div class="kicker" id="kSki">QUOTA IMPIANTI</div>
-          <div class="kicker" style="letter-spacing:3px; margin-top:4px;">FASCE SCI</div>
+          <div class="kicker" id="kSkiSub" style="letter-spacing:3px; margin-top:4px;">FASCE SCI</div>
         </div>
         <div class="skiNow" id="skiNow">Ora --.-° · Vento --</div>
       </div>
@@ -689,6 +693,18 @@ function pickMode(modeParam){
 }
 function pickDayIndex(mode){
   return (mode==="domani") ? 1 : 0;
+}
+
+function pickSeason() {
+  const params = new URLSearchParams(location.search);
+  // Parametro URL esplicito (es. ?season=summer) ha priorità
+  if (params.get("season")) return params.get("season");
+  // Selector manuale nella preview browser
+  const sel = document.getElementById("seasonSelect");
+  if (sel && sel.value && sel.value !== "auto") return sel.value;
+  // Auto da mese
+  const m = new Date().getMonth() + 1;
+  return (m >= 6 && m <= 9) ? "summer" : "winter";
 }
 
 function fmtDow(d, lang){
@@ -1109,7 +1125,13 @@ async function refresh(){
   const t = I18N[lang] || I18N.it;
 
   const mode = pickMode(modeParam);
+  const season = pickSeason();
   const dayIdx = pickDayIndex(mode);
+
+  // Switch winter/summer UI
+  const isWinter = (season === "winter");
+  $("skiStatusPanel").style.display = isWinter ? "" : "none";
+  $("skiPanel").style.display = isWinter ? "" : "none";
 
   // Header
   $("title").textContent = place.name;
@@ -1150,7 +1172,7 @@ async function refresh(){
       : Math.round(vNowT);
     $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°`;
 
-    // STATO MONTAGNA — usa dati iniettati dal server se disponibili
+    // STATO MONTAGNA / ESTATE
     const vDayCode = vF.daily.weather_code[dayIdx];
     const lDayCode = lF.daily.weather_code[dayIdx];
     const lMin = lF.daily.temperature_2m_min[dayIdx];
@@ -1160,24 +1182,83 @@ async function refresh(){
     const ski = (window.__WF_WEATHER__ && window.__WF_WEATHER__.ski)
       ? window.__WF_WEATHER__.ski
       : null;
-    renderSkiStatus(ski, lNowW, lNowT, lang);
 
-    $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
+    if (isWinter) {
+      renderSkiStatus(ski, lNowW, lNowT, lang);
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
 
-    // BANDS
-    const slots = buildSlots(lF.hourly, lang, dayISO);
-    const bands = $("bands");
-    bands.innerHTML = "";
-    for(const s of slots){
-      const div = document.createElement("div");
-      div.className = "band";
-      div.innerHTML = `
-        <div class="time">${s.time}</div>
-        <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')} ${s.label}</div>
-        <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
-        <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
-      `;
-      bands.appendChild(div);
+      // BANDS
+      const slots = buildSlots(lF.hourly, lang, dayISO);
+      const bands = $("bands");
+      bands.innerHTML = "";
+      for(const s of slots){
+        const div = document.createElement("div");
+        div.className = "band";
+        div.innerHTML = `
+          <div class="time">${s.time}</div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')} ${s.label}</div>
+          <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
+        `;
+        bands.appendChild(div);
+      }
+
+      // Kickers ski
+      $("kSki").textContent = (lang==="en") ? "LIFT ALTITUDE" : (lang==="fr") ? "ALTITUDE" : "QUOTA IMPIANTI";
+      $("kSkiSub").textContent = (lang==="en") ? "SKI SLOTS" : (lang==="fr") ? "PLAGES DE SKI" : "FASCE SCI";
+
+    } else {
+      // ESTATE — stato montagna = condizioni outdoor
+      const summerMain = {
+        it: lNowW > 40 ? "Vento forte — escursioni difficili"
+          : lNowT > 22 ? "Caldo in quota — protezione solare"
+          : lNowT < 5  ? "Fresco in quota — abbigliamento a strati"
+          : "Buone condizioni per escursioni",
+        en: lNowW > 40 ? "Strong wind — difficult hiking"
+          : lNowT > 22 ? "Hot at altitude — sun protection needed"
+          : lNowT < 5  ? "Cool at altitude — bring layers"
+          : "Good conditions for hiking & MTB",
+        fr: lNowW > 40 ? "Vent fort — randonnées difficiles"
+          : lNowT > 22 ? "Chaud en altitude — protection solaire"
+          : lNowT < 5  ? "Frais en altitude — vêtements en couches"
+          : "Bonnes conditions pour la randonnée"
+      };
+      $("skiStatusMain").textContent = (summerMain[lang] || summerMain.it);
+
+      // Row: quota escursioni con temp e vento
+      const summerRow = (lang==="en")
+        ? `Altitude ${lNowT.toFixed(1)}°C · Wind ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        : (lang==="fr")
+        ? `Altitude ${lNowT.toFixed(1)}°C · Vent ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        : `Quota ${lNowT.toFixed(1)}°C · Vento ${round0(lNowW)} km/h · Paese ${vNowT.toFixed(1)}°C`;
+      $("skiStatusRow").textContent = summerRow;
+
+      const summerBadge = lNowW > 40 ? {it:"VENTOSO",en:"WINDY",fr:"VENTEUX"}
+        : lNowT > 22 ? {it:"CALDO",en:"HOT",fr:"CHAUD"}
+        : lNowT < 5  ? {it:"FRESCO",en:"COOL",fr:"FRAIS"}
+        : {it:"IDEALE",en:"IDEAL",fr:"IDÉAL"};
+      $("skiStatusBadge").textContent = (summerBadge[lang] || summerBadge.it);
+      $("kSkiStatus").textContent = (lang==="en") ? "OUTDOOR CONDITIONS" : (lang==="fr") ? "CONDITIONS OUTDOOR" : "CONDIZIONI OUTDOOR";
+
+      // BANDS estate — quota escursioni (dati lifts) per fascia mattina/pomeriggio/sera
+      const slotsS = buildSlots(lF.hourly, lang, dayISO);
+      const bands = $("bands");
+      bands.innerHTML = "";
+      for(const s of slotsS){
+        const div = document.createElement("div");
+        div.className = "band";
+        div.innerHTML = `
+          <div class="time">${s.time}</div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')} ${s.label}</div>
+          <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
+        `;
+        bands.appendChild(div);
+      }
+      // Kickers estate
+      $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDO" : "QUOTA ESCURSIONI";
+      $("kSkiSub").textContent = (lang==="en") ? "CONDITIONS BY TIME" : (lang==="fr") ? "TRANCHES HORAIRES" : "FASCE ORARIE";
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
     }
 
     // ADVICE
@@ -1426,6 +1507,9 @@ async function refreshWelcome(params) {
     const m = $("modeSelect").value;
     location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
   });
+  // Season switch — non ricarica la pagina, aggiorna direttamente
+  const seasonSel = $("seasonSelect");
+  if (seasonSel) seasonSel.addEventListener("change", () => refresh());
 
   refresh();
 })();

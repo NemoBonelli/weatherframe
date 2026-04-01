@@ -404,7 +404,10 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     }
   }
 
-  let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&render=1&t=${Date.now()}`;
+  // Stagione: per display fisici sempre winter (auto da mese), solo preview browser può cambiare
+  const month = new Date().getMonth() + 1;
+  const season = (month >= 6 && month <= 9) ? "summer" : "winter";
+  let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
   }
