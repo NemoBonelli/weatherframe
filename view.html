@@ -61,48 +61,51 @@
       box-sizing: border-box;
     }
     /* Header */
-    .profile-waveshare75 h1               { font-size: 50px; line-height: 1; letter-spacing: -1.5px; }
-    .profile-waveshare75 .meta            { font-size: 13px; font-weight: 800; margin-top: 3px; }
+    .profile-waveshare75 h1               { font-size: 52px; line-height: 1; letter-spacing: -1.5px; }
+    .profile-waveshare75 .meta            { font-size: 14px; font-weight: 800; margin-top: 3px; }
     .profile-waveshare75 .rule            { height: 2px; background: #000; margin: 7px 0 8px 0; flex-shrink: 0; }
-    /* S1: paese + consigli 2 colonne, altezza uguale */
-    .profile-waveshare75 .grid2           { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
-    .profile-waveshare75 .paese           { padding: 10px 10px 8px; }
-    .profile-waveshare75 .consigli        { padding: 10px 10px 8px; display: flex; flex-direction: column; justify-content: center; }
-    .profile-waveshare75 .icoBox          { width: 36px; height: 36px; border: 2px solid #888 !important; }
-    .profile-waveshare75 .hero            { grid-template-columns: 36px 1fr; gap: 8px; margin-top: 5px; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; white-space: nowrap; line-height: 1.1; }
-    .profile-waveshare75 .mainTemp        { font-size: 42px; font-weight: 950; line-height: 1; letter-spacing: -1px; }
-    .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 4px; line-height: 1.3; }
-    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; opacity: 0.6; }
-    .profile-waveshare75 .adviceLines     { font-size: 16px; font-weight: 800; line-height: 1.35; color: #000; }
-    .profile-waveshare75 .adviceLines .line { font-size: 16px; font-weight: 800; color: #000; }
-    /* S2: stato montagna */
-    .profile-waveshare75 .skiStatus       { padding: 8px 10px; margin-bottom: 8px; flex-shrink: 0; }
-    .profile-waveshare75 .skiStatusMain   { font-size: 21px; font-weight: 900; line-height: 1.1; }
-    .profile-waveshare75 .skiStatusRow    { font-size: 14px; font-weight: 700; margin-top: 3px; }
-    .profile-waveshare75 .skiStatusBadge  { font-size: 12px; padding: 5px 12px; border-width: 2px; }
-    /* S3: fasce sci — flex:1 per prendere spazio disponibile */
-    .profile-waveshare75 .ski             { padding: 9px 10px 10px; margin-bottom: 8px; flex: 1; display: flex; flex-direction: column; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 7px; flex-shrink: 0; }
-    .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
+    /* Kicker — nascosti nel profilo waveshare, sostituiti da righe */
+    .profile-waveshare75 .kicker          { display: none; }
+    /* S1: paese + consigli 2 colonne */
+    .profile-waveshare75 .grid2           { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 0; flex-shrink: 0; border: 2px solid #888; border-radius: 12px; overflow: hidden; }
+    .profile-waveshare75 .paese           { padding: 10px 11px 10px; border-right: 1px solid #bbb; }
+    .profile-waveshare75 .consigli        { padding: 10px 11px 10px; display: flex; flex-direction: column; justify-content: center; }
+    .profile-waveshare75 .icoBox          { width: 38px; height: 38px; border: 2px solid #888 !important; }
+    .profile-waveshare75 .hero            { grid-template-columns: 38px 1fr; gap: 8px; margin-top: 4px; }
+    .profile-waveshare75 .mainWx          { font-size: 22px; font-weight: 900; white-space: nowrap; line-height: 1.1; }
+    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; }
+    .profile-waveshare75 .sub             { font-size: 13px; font-weight: 800; margin-top: 5px; line-height: 1.3; }
+    .profile-waveshare75 .adviceTitle     { display: none; }
+    .profile-waveshare75 .adviceLines     { font-size: 17px; font-weight: 800; line-height: 1.4; color: #000; }
+    .profile-waveshare75 .adviceLines .line { font-size: 17px; font-weight: 800; color: #000; }
+    /* Riga separatrice sopra stato montagna */
+    .profile-waveshare75 .skiStatus       { padding: 9px 11px 9px; flex-shrink: 0; border-top: 2px solid #888; margin-top: 8px; }
+    .profile-waveshare75 .skiStatusMain   { font-size: 22px; font-weight: 900; line-height: 1.1; }
+    .profile-waveshare75 .skiStatusRow    { font-size: 15px; font-weight: 700; margin-top: 4px; }
+    .profile-waveshare75 .skiStatusBadge  { font-size: 13px; padding: 5px 12px; border-width: 2px; }
+    /* Riga separatrice sopra e sotto quota impianti */
+    .profile-waveshare75 .ski             { padding: 9px 11px 10px; flex: 1; display: flex; flex-direction: column; border-top: 2px solid #888; border-bottom: 2px solid #888; margin-top: 8px; margin-bottom: 8px; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 8px; flex-shrink: 0; }
+    .profile-waveshare75 .skiNow          { font-size: 16px; font-weight: 900; }
     .profile-waveshare75 .bands           { gap: 7px; flex: 1; }
     .profile-waveshare75 .band            { padding: 9px 7px; border: 2px solid #000 !important; border-radius: 11px !important; flex: 1; }
-    .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
+    .profile-waveshare75 .time            { font-size: 17px; font-weight: 900; letter-spacing: -0.3px; }
     .profile-waveshare75 .wx              { font-size: 15px; font-weight: 900; margin-top: 4px; }
     .profile-waveshare75 .det             { font-size: 14px; font-weight: 800; margin-top: 6px; line-height: 1.4; }
     .profile-waveshare75 .risk            { display: none; }
     .profile-waveshare75 .riskCommon      { font-size: 13px; font-weight: 900; color: #000; margin-top: 7px; text-align: center; flex-shrink: 0; }
-    /* S4: 3 giorni */
-    .profile-waveshare75 .forecast        { padding: 7px 10px 8px; flex-shrink: 0; }
-    .profile-waveshare75 .days            { margin-top: 6px; gap: 7px; }
-    .profile-waveshare75 .day             { padding: 10px 6px; border: 2px solid #000 !important; border-radius: 11px !important; gap: 4px; }
-    .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
+    /* S4: 3 giorni — senza bordo esterno, solo celle */
+    .profile-waveshare75 .forecast        { padding: 0 0 0; flex-shrink: 0; }
+    .profile-waveshare75 .days            { margin-top: 0; gap: 7px; }
+    .profile-waveshare75 .day             { padding: 10px 6px; border: 2px solid #888 !important; border-radius: 11px !important; gap: 4px; }
+    .profile-waveshare75 .dow             { font-size: 19px; font-weight: 900; }
+    .profile-waveshare75 .temp            { font-size: 21px; font-weight: 950; letter-spacing: -0.3px; }
     .profile-waveshare75 .mm              { font-size: 13px; font-weight: 800; }
-    /* Kicker e footer */
-    .profile-waveshare75 .kicker          { font-size: 10px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #000; }
-    .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
-    .profile-waveshare75 .footer          { font-size: 12px; font-weight: 900; color: #000; margin-top: 5px; }
+    .profile-waveshare75 .panel           { border: 2px solid #888 !important; border-radius: 12px !important; }
+    .profile-waveshare75 .footer          { font-size: 12px; font-weight: 900; color: #000; margin-top: 6px; }
+    /* Nasconde panel border su ski/skiStatus — gestito con border-top/bottom */
+    .profile-waveshare75 .ski.panel,
+    .profile-waveshare75 .skiStatus.panel { border-left: none !important; border-right: none !important; border-radius: 0 !important; background: transparent; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
