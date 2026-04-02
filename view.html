@@ -48,45 +48,54 @@
 
     /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
     .profile-waveshare75 {
-      --w: 480px; --h: 800px; --pad: 14px; --gap: 11px; --r: 12px;
+      --w: 480px; --h: 800px; --pad: 12px; --gap: 8px; --r: 11px;
       --ink: #000;
     }
-    .profile-waveshare75 h1               { font-size: 44px; }
-    .profile-waveshare75 .meta            { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 5px; }
-    .profile-waveshare75 .rule            { height: 3px; opacity: 1; background: #000; margin: 10px 0 14px 0; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; white-space: nowrap; }
-    .profile-waveshare75 .mainTemp        { font-size: 34px; }
-    .profile-waveshare75 .sub             { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 3px; }
-    .profile-waveshare75 .adviceLines     { font-size: 14px; font-weight: 600; line-height: 1.32; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 600; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; }
-    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
-    .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
-    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; }
-    .profile-waveshare75 .det             { font-size: 13px; font-weight: 800; opacity: 1; }
-    .profile-waveshare75 .risk            { font-size: 12px; font-weight: 900; opacity: 1; }
-    .profile-waveshare75 .band            { min-height: 110px; padding: 8px; border: 2px solid #000 !important; border-radius: 12px !important; }
-    .profile-waveshare75 .dow             { font-size: 16px; font-weight: 900; }
-    .profile-waveshare75 .temp            { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .mm              { font-size: 13px; font-weight: 800; opacity: 1; }
-    .profile-waveshare75 .day             { min-height: 94px; padding: 8px 6px; border: 2px solid #000 !important; border-radius: 12px !important; }
-    .profile-waveshare75 .icoBox          { width: 38px; height: 38px; border: 2px solid #888 !important; }
-    .profile-waveshare75 .hero            { grid-template-columns: 38px 1fr; gap: 8px; }
-    .profile-waveshare75 .paese           { min-height: 112px; padding: 10px 10px 10px 12px; }
-    .profile-waveshare75 .consigli        { min-height: 112px; padding: 9px 12px; }
-    .profile-waveshare75 .trend           { padding: 9px 12px; min-height: 76px; }
+    /* Flex column: riempie esattamente 800px senza spazio vuoto sotto */
+    .profile-waveshare75.inkplate {
+      display: flex;
+      flex-direction: column;
+      height: 800px;
+      padding: 12px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .profile-waveshare75 h1               { font-size: 40px; line-height: 1; }
+    .profile-waveshare75 .meta            { font-size: 12px; font-weight: 800; opacity: 1; margin-top: 3px; }
+    .profile-waveshare75 .rule            { height: 2px; opacity: 1; background: #000; margin: 7px 0 9px 0; flex-shrink: 0; }
+    .profile-waveshare75 .mainWx          { font-size: 19px; white-space: nowrap; }
+    .profile-waveshare75 .mainTemp        { font-size: 33px; }
+    .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; opacity: 1; margin-top: 3px; }
+    .profile-waveshare75 .adviceLines     { font-size: 13px; font-weight: 600; line-height: 1.35; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceLines .line { font-size: 13px; font-weight: 600; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; margin-bottom: 5px; }
+    .profile-waveshare75 .time            { font-size: 14px; font-weight: 900; }
+    .profile-waveshare75 .wx              { font-size: 13px; font-weight: 900; }
+    .profile-waveshare75 .det             { font-size: 12px; font-weight: 800; opacity: 1; margin-top: 4px; line-height: 1.3; }
+    .profile-waveshare75 .risk            { font-size: 11px; font-weight: 900; opacity: 1; padding-top: 4px; }
+    .profile-waveshare75 .band            { min-height: 0; padding: 7px 5px; border: 2px solid #000 !important; border-radius: 10px !important; }
+    .profile-waveshare75 .bands           { gap: 6px; }
+    .profile-waveshare75 .dow             { font-size: 14px; font-weight: 900; }
+    .profile-waveshare75 .temp            { font-size: 16px; font-weight: 900; }
+    .profile-waveshare75 .mm              { font-size: 11px; font-weight: 800; opacity: 1; }
+    .profile-waveshare75 .day             { min-height: 0; padding: 7px 5px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 2px; }
+    .profile-waveshare75 .days            { margin-top: 5px; gap: 5px; }
+    .profile-waveshare75 .icoBox          { width: 36px; height: 36px; border: 2px solid #888 !important; }
+    .profile-waveshare75 .hero            { grid-template-columns: 36px 1fr; gap: 7px; margin-top: 5px; }
+    .profile-waveshare75 .grid2           { margin-bottom: 8px; flex-shrink: 0; }
+    .profile-waveshare75 .paese           { min-height: 0; padding: 8px 9px; }
+    .profile-waveshare75 .consigli        { min-height: 0; padding: 8px 9px; }
     .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
     .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
-    .profile-waveshare75 .ski             { padding: 10px 14px 10px; }
-    .profile-waveshare75 .skiStatus       { padding: 8px 12px; margin-bottom: 8px; }
-    .profile-waveshare75 .skiStatusMain   { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .skiStatusRow    { font-size: 13px; font-weight: 700; }
-    .profile-waveshare75 .skiStatusBadge  { font-size: 11px; padding: 4px 10px; }
-    .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 6px; }
-    .profile-waveshare75 .forecast        { padding: 5px 12px 8px; }
-    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 900; opacity: 1; color: #000; margin-top: 2px; }
-    .profile-waveshare75 .days            { margin-top: 6px; }
+    .profile-waveshare75 .ski             { padding: 8px 10px 9px; margin-bottom: 8px; flex-shrink: 0; }
+    .profile-waveshare75 .skiStatus       { padding: 7px 10px; margin-bottom: 8px; flex-shrink: 0; }
+    .profile-waveshare75 .skiStatusMain   { font-size: 17px; font-weight: 900; }
+    .profile-waveshare75 .skiStatusRow    { font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .profile-waveshare75 .skiStatusBadge  { font-size: 11px; padding: 4px 9px; }
+    .profile-waveshare75 .skiNow          { font-size: 13px; font-weight: 900; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 5px; }
+    .profile-waveshare75 .forecast        { padding: 6px 10px 8px; flex-shrink: 0; }
+    .profile-waveshare75 .footer          { font-size: 11px; font-weight: 900; opacity: 1; color: #000; margin-top: 5px; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
@@ -825,127 +834,118 @@ function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayM
   const veryWarm   = lNowTemp >= 5;
   const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
 
-  if (thunder) return T(
-    "Instabilità in quota — meglio una giornata più flessibile.",
-    "Storm risk at altitude — better to keep plans flexible.",
-    "Instabilité en altitude — mieux vaut garder un programme souple."
+  if(thunder) return T(
+    "Temporale previsto in quota — condizioni in rapido cambiamento",
+    "Thunderstorms forecast at altitude — conditions can change quickly",
+    "Orages prévus en altitude — conditions en évolution rapide"
   );
-  if (foggy) {
-    return isWinter ? T(
-      "Visibilità ridotta in quota — meglio zone più basse e giornata prudente.",
-      "Low visibility at altitude — better lower areas and a more cautious day.",
-      "Visibilité réduite en altitude — mieux vaut rester plus bas."
-    ) : T(
-      "Quota chiusa e visibilità ridotta — giornata più da paese e passeggiate brevi.",
-      "Poor visibility higher up — better for the village and shorter walks.",
-      "Visibilité réduite en altitude — plutôt une journée de village et de balades courtes."
-    );
-  }
-  if (veryWindy) return T(
-    `Vento molto forte in quota (${Math.round(lNowWind)} km/h) — meglio verificare gli impianti prima di salire.`,
-    `Very strong wind at altitude (${Math.round(lNowWind)} km/h) — best to check lifts before heading up.`,
-    `Vent très fort en altitude (${Math.round(lNowWind)} km/h) — mieux vaut vérifier les remontées avant de monter.`
-  );
-
-  if (isWinter) {
-    if (freshSnow && sunny) return T(
-      "Neve fresca e cielo aperto — mattina molto invitante, con condizioni al meglio presto.",
-      "Fresh snow and clear skies — very appealing morning, with the best conditions early.",
-      "Neige fraîche et ciel dégagé — très belle matinée, avec les meilleures conditions tôt."
-    );
-    if (freshSnow) return T(
-      "Neve fresca in quota — mattina interessante, con visibilità più variabile nel corso della giornata.",
-      "Fresh snow at altitude — promising morning, with more variable visibility later on.",
-      "Neige fraîche en altitude — matinée prometteuse, avec une visibilité plus variable ensuite."
-    );
-    if (snowVillage && lNowTemp<=0) return T(
-      "Neve fino al paese — atmosfera pienamente invernale e possibili strade più lente.",
-      "Snow down to the village — fully wintry feel and possibly slower roads.",
-      "Neige jusqu'au village — ambiance pleinement hivernale et routes possiblement plus lentes."
-    );
-    if (snowLift && !snowVillage) return T(
-      "Nevica in quota — parte alta più chiusa, con condizioni da valutare sul posto.",
-      "Snow at altitude — upper slopes more closed in, with conditions to assess on site.",
-      "Neige en altitude — partie haute plus fermée, avec des conditions à évaluer sur place."
-    );
-    if (lNowTemp <= -12 && sunny) return T(
-      `Freddo intenso in quota (${lNowTemp.toFixed(1)}°) — giornata limpida ma decisamente invernale.`,
-      `Intense cold at altitude (${lNowTemp.toFixed(1)}°) — clear but truly wintry conditions.`,
-      `Froid intense en altitude (${lNowTemp.toFixed(1)}°) — journée claire mais bien hivernale.`
-    );
-    if (veryWarm && sunny) return T(
-      `Temperature più miti in quota (${lNowTemp.toFixed(1)}°) — neve più morbida nelle ore centrali.`,
-      `Milder temperatures at altitude (${lNowTemp.toFixed(1)}°) — softer snow around midday.`,
-      `Températures plus douces en altitude (${lNowTemp.toFixed(1)}°) — neige plus souple à la mi-journée.`
-    );
-    if (rainVillage && !snowVillage && !snowLift) return T(
-      "Paese umido ma quota più fredda — giornata variabile, con scenario diverso salendo.",
-      "Wet village but colder higher up — mixed day, with a different feel as you climb.",
-      "Village humide mais plus froid en altitude — journée variable, avec un autre décor en montant."
-    );
-    if (rainLift) return T(
-      "Precipitazioni in quota — giornata da leggere passo dopo passo.",
-      "Precipitation at altitude — a day to read step by step.",
-      "Précipitations en altitude — une journée à lire au fil des heures."
-    );
-    if (windyLift) return T(
-      `Vento in quota (${Math.round(lNowWind)} km/h) — parte alta più esposta nel pomeriggio.`,
-      `Wind at altitude (${Math.round(lNowWind)} km/h) — upper slopes more exposed later on.`,
-      `Vent en altitude (${Math.round(lNowWind)} km/h) — partie haute plus exposée dans l'après-midi.`
-    );
-    if (sunny) return T(
-      "Giornata limpida e fredda — neve più compatta e ottima visibilità.",
-      "Clear and cold day — firmer snow and excellent visibility.",
-      "Journée claire et froide — neige plus compacte et excellente visibilité."
-    );
-    if (partlyCloudy) return T(
-      "Mattina stabile e fredda — neve più compatta. Nel pomeriggio cielo più chiuso ma senza peggioramenti.",
-      "Stable, colder morning — firmer snow. More cloud later, but no real deterioration.",
-      "Matinée stable et froide — neige plus compacte. Ciel plus fermé ensuite, sans vraie dégradation."
+  if(foggy){
+    if(isWinter) return T(
+      "Nebbia o scarsa visibilità in quota — piste basse più accessibili",
+      "Fog or low visibility at altitude — lower slopes more accessible",
+      "Brouillard ou faible visibilité en altitude — pistes basses plus accessibles"
     );
     return T(
-      "Condizioni invernali regolari — giornata leggibile e abbastanza stabile.",
-      "Typical winter conditions — a readable and fairly stable day.",
-      "Conditions hivernales régulières — journée lisible et assez stable."
+      "Visibilità ridotta in quota — condizioni in miglioramento attese nel corso della giornata",
+      "Reduced visibility at altitude — conditions expected to improve during the day",
+      "Visibilité réduite en altitude — amélioration attendue en cours de journée"
     );
   }
-
+  if(veryWindy) return T(
+    `Vento molto forte in quota (${Math.round(lNowWind)} km/h) — verificare apertura impianti sul sito Via Lattea`,
+    `Very strong winds at altitude (${Math.round(lNowWind)} km/h) — check lift status on Via Lattea website`,
+    `Vent très fort en altitude (${Math.round(lNowWind)} km/h) — vérifier l'ouverture des remontées sur Via Lattea`
+  );
+  if(isWinter){
+    if(freshSnow && sunny) return T(
+      "Neve fresca in quota con cielo sereno — condizioni generalmente ottime al mattino",
+      "Fresh snow at altitude with clear skies — generally excellent conditions in the morning",
+      "Neige fraîche en altitude avec ciel dégagé — conditions généralement excellentes le matin"
+    );
+    if(freshSnow) return T(
+      "Neve fresca in quota — condizioni generalmente buone, visibilità variabile",
+      "Fresh snow at altitude — generally good conditions, variable visibility",
+      "Neige fraîche en altitude — bonnes conditions généralement, visibilité variable"
+    );
+    if(snowVillage && lNowTemp<=0) return T(
+      "Neve in caduta — strade innevate possibili, attrezzatura invernale consigliata per i veicoli",
+      "Snowfall — roads may be snowy, winter tyres recommended for vehicles",
+      "Chutes de neige — routes enneigées possibles, équipement hiver conseillé pour les véhicules"
+    );
+    if(snowLift && !snowVillage) return T(
+      "Neve in quota — cielo più coperto in alto, verificare le condizioni agli impianti",
+      "Snow at altitude — overcast higher up, check conditions at the lifts",
+      "Neige en altitude — ciel couvert en hauteur, vérifier les conditions aux remontées"
+    );
+    if(lNowTemp <= -12 && sunny) return T(
+      `Temperatura molto bassa in quota (${lNowTemp.toFixed(1)}°) — giornata soleggiata con freddo intenso`,
+      `Very cold at altitude (${lNowTemp.toFixed(1)}°) — sunny day but with intense cold`,
+      `Très froid en altitude (${lNowTemp.toFixed(1)}°) — journée ensoleillée mais froid intense`
+    );
+    if(veryWarm && sunny) return T(
+      `Temperatura in quota (${lNowTemp.toFixed(1)}°) — neve che si ammorbidisce nelle ore centrali`,
+      `Temperature at altitude (${lNowTemp.toFixed(1)}°) — snow softening during midday hours`,
+      `Température en altitude (${lNowTemp.toFixed(1)}°) — neige ramollissant en milieu de journée`
+    );
+    if(rainVillage && !snowVillage && !snowLift) return T(
+      "Pioggia al paese — neve possibile salendo di quota, condizioni variabili",
+      "Rain in the village — snow possible at higher altitudes, variable conditions",
+      "Pluie au village — neige possible en prenant de l'altitude, conditions variables"
+    );
+    if(rainLift) return T(
+      "Precipitazioni in quota — neve bagnata o pioggia gelata possibile, condizioni da valutare",
+      "Precipitation at altitude — wet snow or freezing rain possible, conditions to assess",
+      "Précipitations en altitude — neige mouillée ou pluie verglaçante possible, conditions à évaluer"
+    );
+    if(windyLift) return T(
+      `Vento moderato in quota (${Math.round(lNowWind)} km/h) — possibili limitazioni su alcuni impianti`,
+      `Moderate wind at altitude (${Math.round(lNowWind)} km/h) — possible restrictions on some lifts`,
+      `Vent modéré en altitude (${Math.round(lNowWind)} km/h) — restrictions possibles sur certaines remontées`
+    );
+    if(sunny) return T(
+      "Cielo sereno in quota — giornata soleggiata con buona visibilità",
+      "Clear skies at altitude — sunny day with good visibility",
+      "Ciel dégagé en altitude — journée ensoleillée avec bonne visibilité"
+    );
+    if(partlyCloudy) return T(
+      "Cielo parzialmente nuvoloso — condizioni stabili senza precipitazioni previste",
+      "Partly cloudy skies — stable conditions with no precipitation forecast",
+      "Ciel partiellement nuageux — conditions stables sans précipitations prévues"
+    );
+    return T("Condizioni nella norma per la stagione","Normal conditions for the season","Conditions normales pour la saison");
+  }
   // Estate
-  if (rainVillage && rainLift) return T(
-    "Instabilità diffusa — meglio uscite brevi e rientro anticipato.",
-    "Widespread instability — better shorter outings and an earlier return.",
-    "Instabilité généralisée — mieux vaut des sorties plus courtes et un retour plus tôt."
+  if(rainVillage && rainLift) return T(
+    "Precipitazioni previste — sentieri e trail potrebbero essere bagnati",
+    "Precipitation expected — trails and paths may be wet",
+    "Précipitations prévues — sentiers et pistes pourraient être mouillés"
   );
-  if (lNowTemp >= 20 && sunny) return T(
-    `Giornata calda in quota (${lNowTemp.toFixed(1)}°) — meglio muoversi presto e alleggerire il pomeriggio.`,
-    `Warm day at altitude (${lNowTemp.toFixed(1)}°) — best to get moving early and ease off later.`,
-    `Journée chaude en altitude (${lNowTemp.toFixed(1)}°) — mieux vaut partir tôt et alléger l'après-midi.`
+  if(lNowTemp >= 20 && sunny) return T(
+    `Temperatura elevata in quota (${lNowTemp.toFixed(1)}°) — irraggiamento solare intenso in alta quota`,
+    `High temperature at altitude (${lNowTemp.toFixed(1)}°) — intense solar radiation at high altitude`,
+    `Température élevée en altitude (${lNowTemp.toFixed(1)}°) — rayonnement solaire intense en haute altitude`
   );
-  if (sunny && lNowTemp >= 8 && lNowTemp <= 18) return T(
-    "Mattina fresca e limpida — molto buona per camminare o stare fuori a lungo.",
-    "Fresh, clear morning — very good for walking or spending time outdoors.",
-    "Matinée fraîche et claire — très agréable pour marcher ou rester dehors longtemps."
+  if(sunny && lNowTemp >= 8 && lNowTemp <= 18) return T(
+    "Cielo sereno con temperature fresche in quota — condizioni generalmente buone per attività all'aperto",
+    "Clear skies with cool temperatures at altitude — generally good conditions for outdoor activities",
+    "Ciel dégagé avec températures fraîches en altitude — bonnes conditions pour les activités de plein air"
   );
-  if (sunny) return T(
-    "Giornata soleggiata e aperta — meglio sfruttare le ore più fresche per stare fuori.",
-    "Sunny, open day — best to use the cooler hours for outdoor time.",
-    "Journée ensoleillée et dégagée — mieux vaut profiter des heures plus fraîches dehors."
+  if(sunny) return T(
+    "Giornata soleggiata — UV elevati in quota nelle ore centrali",
+    "Sunny day — high UV at altitude during midday hours",
+    "Journée ensoleillée — UV élevés en altitude en milieu de journée"
   );
-  if (windyLift) return T(
-    `Vento in quota (${Math.round(lNowWind)} km/h) — crinali e zone esposte meno confortevoli.`,
-    `Wind at altitude (${Math.round(lNowWind)} km/h) — ridges and exposed areas less comfortable.`,
-    `Vent en altitude (${Math.round(lNowWind)} km/h) — crêtes et zones exposées moins confortables.`
+  if(windyLift) return T(
+    `Vento in quota (${Math.round(lNowWind)} km/h) — condizioni esposte sui crinali`,
+    `Wind at altitude (${Math.round(lNowWind)} km/h) — exposed conditions on ridges`,
+    `Vent en altitude (${Math.round(lNowWind)} km/h) — conditions exposées sur les crêtes`
   );
-  if (partlyCloudy) return T(
-    "Giornata variabile ma tranquilla — buona per passeggiate, paese e attività leggere.",
-    "Variable but calm day — good for walks, the village and lighter outdoor plans.",
-    "Journée variable mais calme — bien pour les balades, le village et des activités légères."
+  if(partlyCloudy) return T(
+    "Cielo variabile — condizioni stabili senza precipitazioni significative previste",
+    "Variable sky — stable conditions with no significant precipitation forecast",
+    "Ciel variable — conditions stables sans précipitations significatives prévues"
   );
-  return T(
-    "Condizioni estive regolari — giornata semplice da vivere all'aperto.",
-    "Typical summer conditions — an easy day to enjoy outdoors.",
-    "Conditions estivales régulières — une journée simple à vivre dehors."
-  );
+  return T("Condizioni nella norma per la stagione estiva","Normal conditions for the summer season","Conditions normales pour la saison estivale");
 }
 
 

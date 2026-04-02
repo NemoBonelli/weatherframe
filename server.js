@@ -453,14 +453,23 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
-      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
+      // Per JPEG (Inkplate) renderizza a 1x direttamente — screenshot elemento preciso
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
       await new Promise(r => setTimeout(r, 500));
+      const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
+      if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Per PNG/RAW (Waveshare) usa 2x con downsample
+      // Per PNG/RAW (Waveshare) screenshot dell'elemento preciso — niente banda grigia
+      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
+      const el = await page.$(selector);
+      if (el) {
+        const raw2x = await el.screenshot({ type: "png" });
+        return downsample2x(raw2x, w, h);
+      }
+      // Fallback alla pagina intera se l'elemento non si trova
       const raw2x = await page.screenshot({ type: "png" });
       return downsample2x(raw2x, w, h);
     }
@@ -877,7 +886,7 @@ app.delete("/admin/welcome/:id", requireAuth, (req, res) => {
 app.get("/admin", requireAuth, (req, res) => {
   const PLACES_LIST = [
     ["sauze","Sauze d'Oulx"],["sestriere","Sestriere"],["sansicario","San Sicario"],
-    ["cesana","Cesana"],["claviere","Claviere"],["monginevro","Montgenèvre"],
+    ["cesana","Cesana"],["claviere","Claviere"],["monginevro","Monginevro"],
     ["bardonecchia","Bardonecchia"],["oulx","Oulx"]
   ];
   const placeOptions = PLACES_LIST.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
