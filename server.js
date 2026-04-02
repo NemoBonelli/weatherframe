@@ -33,7 +33,7 @@ function downsample2x(pngBuffer, targetW, targetH) {
 
 // ── Open-Meteo fetch (server-side, with cache) ───────────────
 const WEATHER_CACHE = {};
-const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
+const WEATHER_TTL   = 25 * 60 * 1000; // 25 min — WeatherAPI aggiorna ogni 15-30 min
 const WEATHERAPI_KEY = "5b14deeb26e5493f9ee211416262003";
 
 const PLACES = {
@@ -453,23 +453,14 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
-      // Per JPEG (Inkplate) renderizza a 1x direttamente — screenshot elemento preciso
+      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
       await new Promise(r => setTimeout(r, 500));
-      const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
-      if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Per PNG/RAW (Waveshare) screenshot dell'elemento preciso — niente banda grigia
-      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
-      const el = await page.$(selector);
-      if (el) {
-        const raw2x = await el.screenshot({ type: "png" });
-        return downsample2x(raw2x, w, h);
-      }
-      // Fallback alla pagina intera se l'elemento non si trova
+      // Per PNG/RAW (Waveshare) usa 2x con downsample
       const raw2x = await page.screenshot({ type: "png" });
       return downsample2x(raw2x, w, h);
     }

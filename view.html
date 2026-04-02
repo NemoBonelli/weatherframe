@@ -1165,9 +1165,32 @@ async function refresh(){
 
     const dayISO = vF.daily.time[dayIdx];
 
-    // MAIN (Paese) — ora + min/max/day mm
-    const vNowT = vF.current.temperature_2m;
-    const vNowCode = vF.current.weather_code;
+    // Temperatura "ora" — usa dato orario per l'ora corrente invece di current
+    // più accurato con cache da 25 min: il dato previsionale orario è stabile
+    function getHourlyNow(forecast) {
+      const nowISO = now.toISOString().slice(0, 13); // "2025-01-15T14"
+      const idx = forecast.hourly.time.findIndex(t => t.startsWith(nowISO));
+      if (idx >= 0) return {
+        temp: forecast.hourly.temperature_2m[idx],
+        code: forecast.hourly.weather_code[idx],
+        wind: forecast.hourly.wind_speed_10m?.[idx] ?? forecast.current.wind_speed_10m ?? 0
+      };
+      // fallback a current se ora non trovata
+      return {
+        temp: forecast.current.temperature_2m,
+        code: forecast.current.weather_code,
+        wind: forecast.current.wind_speed_10m ?? 0
+      };
+    }
+
+    const vNow = getHourlyNow(vF);
+    const lNow = getHourlyNow(lF);
+    const vNowT    = vNow.temp;
+    const vNowCode = vNow.code;
+    const lNowT    = lNow.temp;
+    const lNowW    = lNow.wind;
+
+    // MAIN (Paese)
     const vMin = vF.daily.temperature_2m_min[dayIdx];
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
@@ -1175,11 +1198,6 @@ async function refresh(){
     $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
     $("mainWx").textContent = wxToLabel(vNowCode, lang);
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
-    // Perceived temp from wind chill approximation
-    // SKI NOW — definiti qui perché usati anche sopra
-    const lNowT = lF.current.temperature_2m;
-    const lNowW = lF.current.wind_speed_10m ?? 0;
-
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
       : Math.round(vNowT);
