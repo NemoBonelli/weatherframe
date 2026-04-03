@@ -144,11 +144,13 @@ async function fetchOpenMeteoDaily(lat, lon) {
   const key = `${lat},${lon}`;
   const cached = DAILY_CACHE[key];
   if (cached && Date.now() - cached.ts < DAILY_TTL) return cached.data;
-  // Delay per evitare rate limiting su IP condiviso
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 500));
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
   console.log(`[OM] Fetching daily for ${lat},${lon}`);
-  const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  const r = await fetch(url, {
+    signal: AbortSignal.timeout(15000),
+    headers: { "User-Agent": "WeatherFrame/1.0 (weatherframe.onrender.com)" }
+  });
   if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
   const raw = await r.json();
   const data = {

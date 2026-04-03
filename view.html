@@ -198,7 +198,6 @@
     }
     /* ─────────────────────────────────────────────────────────────────── */
     *{ box-sizing:border-box; }
-    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
     body{
       margin:0;
       background:#cfcfcf;
@@ -1281,7 +1280,7 @@ async function refresh(){
         div.innerHTML = `
           <div class="time">${s.time}</div>
           <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
-          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRisk ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
         bands.appendChild(div);
@@ -1345,7 +1344,7 @@ async function refresh(){
         div.innerHTML = `
           <div class="time">${s.time}</div>
           <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
-          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
         bandsS.appendChild(div);
