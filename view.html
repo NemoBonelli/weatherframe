@@ -36,6 +36,32 @@
   </script>
 
   <style>
+    /* Inter font — servito da localhost, sempre disponibile in Puppeteer */
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400;
+      src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 700;
+      src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 800;
+      src: url('/fonts/inter-latin-800-normal.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 900;
+      src: url('/fonts/inter-latin-900-normal.woff2') format('woff2');
+    }
+  </style>
     :root{
       --w:600px; --h:800px;
       --pad:14px;
@@ -198,10 +224,15 @@
     }
     /* ─────────────────────────────────────────────────────────────────── */
     *{ box-sizing:border-box; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
     body{
       margin:0;
       background:#cfcfcf;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: 'Inter', "Helvetica Neue", Helvetica, Arial, sans-serif;
       color:var(--ink);
     }
     .inkplate{

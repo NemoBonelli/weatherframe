@@ -10,26 +10,22 @@ const cookieParser = require("cookie-parser");
 const JWT_SECRET = process.env.JWT_SECRET || "wf-dev-secret-change-in-production";
 const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "superadmin2025";
 
-// Downscale Nx PNG to target size using box filter
-// Funziona con qualsiasi scale factor (2x, 3x ecc)
+// Downscale 2x PNG to target size using box filter (average 2×2 pixels)
+// This gives much sharper text than rendering at 1x
 function downsample2x(pngBuffer, targetW, targetH) {
   const src = PNG.sync.read(pngBuffer);
   const dst = new PNG({ width: targetW, height: targetH });
-  const n = Math.round(src.width / targetW); // scala effettiva
   for (let y = 0; y < targetH; y++) {
     for (let x = 0; x < targetW; x++) {
       let r=0, g=0, b=0, a=0;
-      for (let dy=0; dy<n; dy++) for (let dx=0; dx<n; dx++) {
-        const sx = Math.min(x*n+dx, src.width-1);
-        const sy = Math.min(y*n+dy, src.height-1);
-        const si = (sy*src.width + sx) * 4;
+      for (let dy=0; dy<2; dy++) for (let dx=0; dx<2; dx++) {
+        const si = ((y*2+dy)*src.width + (x*2+dx)) * 4;
         r += src.data[si]; g += src.data[si+1];
         b += src.data[si+2]; a += src.data[si+3];
       }
-      const c = n*n;
       const di = (y*targetW + x) * 4;
-      dst.data[di]=r/c; dst.data[di+1]=g/c;
-      dst.data[di+2]=b/c; dst.data[di+3]=a/c;
+      dst.data[di]=r/4; dst.data[di+1]=g/4;
+      dst.data[di+2]=b/4; dst.data[di+3]=a/4;
     }
   }
   return PNG.sync.write(dst);
@@ -140,33 +136,6 @@ function convertWeatherAPI(raw) {
   };
 }
 
-async function fetchWeatherForPlace(placeKey) {
-  const p = PLACES[placeKey] || PLACES.sauze;
-  const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 300));
-  const lF = adjustForElevation(vF, p.lifts - p.town);
-
-  // Open-Meteo daily — 7 giorni, TTL 3 ore
-  // Sostituisce il daily di WeatherAPI (solo 3 giorni)
-  try {
-    const omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
-    vF.daily = omDaily;
-    lF.daily = {
-      time:               omDaily.time,
-      weather_code:       omDaily.weather_code,
-      temperature_2m_min: omDaily.temperature_2m_min.map(t => t - (p.lifts - p.town)/100*0.6),
-      temperature_2m_max: omDaily.temperature_2m_max.map(t => t - (p.lifts - p.town)/100*0.6),
-      precipitation_sum:  omDaily.precipitation_sum
-    };
-    console.log(`[OM] Daily injected for ${placeKey}: ${omDaily.time.length} days`);
-  } catch(e) {
-    console.warn(`[OM] Daily failed for ${placeKey}: ${e.message} — using WeatherAPI daily (3 days)`);
-  }
-
-  const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
-  return { village: vF, lifts: lF, ski };
-}
-
 // ── Open-Meteo daily (7 giorni, cache 3 ore) ─────────────────
 const DAILY_CACHE = {};
 const DAILY_TTL = 3 * 60 * 60 * 1000;
@@ -174,12 +143,9 @@ const DAILY_TTL = 3 * 60 * 60 * 1000;
 async function fetchOpenMeteoDaily(lat, lon) {
   const key = `${lat},${lon}`;
   const cached = DAILY_CACHE[key];
-  if (cached && Date.now() - cached.ts < DAILY_TTL) {
-    console.log(`[OM] Cache hit daily for ${key}`);
-    return cached.data;
-  }
+  if (cached && Date.now() - cached.ts < DAILY_TTL) return cached.data;
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
-  console.log(`[OM] Fetching daily for ${key}`);
+  console.log(`[OM] Fetching daily for ${lat},${lon}`);
   const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
   const raw = await r.json();
@@ -193,6 +159,30 @@ async function fetchOpenMeteoDaily(lat, lon) {
   DAILY_CACHE[key] = { data, ts: Date.now() };
   console.log(`[OM] Daily OK: ${data.time.length} days`);
   return data;
+}
+
+async function fetchWeatherForPlace(placeKey) {
+  const p = PLACES[placeKey] || PLACES.sauze;
+  const vF = await fetchWeatherAPI(p.lat, p.lon);
+  await new Promise(r => setTimeout(r, 300));
+  const lF = adjustForElevation(vF, p.lifts - p.town);
+  // Open-Meteo daily — 7 giorni invece dei 3 di WeatherAPI
+  try {
+    const omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
+    vF.daily = omDaily;
+    const elevDiff = p.lifts - p.town;
+    lF.daily = {
+      time:               omDaily.time,
+      weather_code:       omDaily.weather_code,
+      temperature_2m_min: omDaily.temperature_2m_min.map(t => t - elevDiff/100*0.6),
+      temperature_2m_max: omDaily.temperature_2m_max.map(t => t - elevDiff/100*0.6),
+      precipitation_sum:  omDaily.precipitation_sum
+    };
+  } catch(e) {
+    console.warn(`[OM] Daily failed: ${e.message} — fallback WeatherAPI 3 days`);
+  }
+  const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
+  return { village: vF, lifts: lF, ski };
 }
 
 function adjustForElevation(data, elevDiff) {
@@ -302,6 +292,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use("/public", express.static(path.join(__dirname, "public")));
+// Serve Inter font da node_modules per Puppeteer (localhost allowed)
+app.use("/fonts", express.static(path.join(__dirname, "node_modules/@fontsource/inter/files")));
 
 function safe(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9_-]/g, "");
@@ -463,7 +455,15 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"]
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--font-render-hinting=none",  // rendering font più nitido su Linux headless
+      "--disable-font-subpixel-positioning",
+      "--force-color-profile=srgb"
+    ]
   });
   try {
     const page = await browser.newPage();
@@ -492,34 +492,34 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
       window.__WF_QR__ = qr; // WiFi QR string for welcome screen
     }, weatherJson, qrData);
 
-    // Render a 3x per testo più nitido, poi downsample a 1x
-    // 3x dà molto più informazione all'antialiasing rispetto a 2x
-    await page.setViewport({ width: w * 3, height: h * 3, deviceScaleFactor: 3 });
+    // Render a 2x per testo più nitido, poi downsample a 1x
+    await page.setViewport({ width: w * 2, height: h * 2, deviceScaleFactor: 2 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
     await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
-    await new Promise(r => setTimeout(r, 800));
+    // Aspetta che i font siano caricati — critico per nitidezza su Linux headless
+    await page.evaluateHandle(() => document.fonts.ready);
+    await new Promise(r => setTimeout(r, 500));
 
     if (format === "jpeg") {
-      // Per JPEG (Inkplate) renderizza a 1x direttamente
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
-      await new Promise(r => setTimeout(r, 500));
+      await page.evaluateHandle(() => document.fonts.ready);
+      await new Promise(r => setTimeout(r, 300));
       const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
       if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Per PNG/RAW (Waveshare) screenshot elemento 3x poi downsample a 1x
+      // Screenshot elemento preciso — niente banda grigia, downsample pulito
       const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
       const el = await page.$(selector);
       if (el) {
         const raw3x = await el.screenshot({ type: "png" });
         return downsample2x(raw3x, w, h);
       }
-      // Fallback pagina intera
       const raw3x = await page.screenshot({ type: "png" });
       return downsample2x(raw3x, w, h);
     }
