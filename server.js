@@ -10,30 +10,26 @@ const cookieParser = require("cookie-parser");
 const JWT_SECRET = process.env.JWT_SECRET || "wf-dev-secret-change-in-production";
 const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "superadmin2025";
 
-// Downscale 2x PNG to target size with threshold sharpening
-// Box filter average + soglia aggressiva per contorni netti su e-ink:
-// se il pixel medio è scuro (< 180) → nero puro, altrimenti → bianco puro
-// Questo evita i grigi intermedi che sull'e-ink appaiono sgranati
+// Downscale Nx PNG to target size using box filter
+// Funziona con qualsiasi scale factor (2x, 3x ecc)
 function downsample2x(pngBuffer, targetW, targetH) {
   const src = PNG.sync.read(pngBuffer);
   const dst = new PNG({ width: targetW, height: targetH });
+  const n = Math.round(src.width / targetW); // scala effettiva
   for (let y = 0; y < targetH; y++) {
     for (let x = 0; x < targetW; x++) {
       let r=0, g=0, b=0, a=0;
-      for (let dy=0; dy<2; dy++) for (let dx=0; dx<2; dx++) {
-        const si = ((y*2+dy)*src.width + (x*2+dx)) * 4;
+      for (let dy=0; dy<n; dy++) for (let dx=0; dx<n; dx++) {
+        const sx = Math.min(x*n+dx, src.width-1);
+        const sy = Math.min(y*n+dy, src.height-1);
+        const si = (sy*src.width + sx) * 4;
         r += src.data[si]; g += src.data[si+1];
         b += src.data[si+2]; a += src.data[si+3];
       }
-      // Media dei 4 pixel
-      r/=4; g/=4; b/=4; a/=4;
-      // Luminosità media
-      const lum = 0.299*r + 0.587*g + 0.114*b;
-      // Soglia: sotto 180 → nero, sopra → bianco (con alpha invariato)
-      const out = lum < 180 ? 0 : 255;
+      const c = n*n;
       const di = (y*targetW + x) * 4;
-      dst.data[di]=out; dst.data[di+1]=out;
-      dst.data[di+2]=out; dst.data[di+3]=Math.round(a);
+      dst.data[di]=r/c; dst.data[di+1]=g/c;
+      dst.data[di+2]=b/c; dst.data[di+3]=a/c;
     }
   }
   return PNG.sync.write(dst);
@@ -147,11 +143,56 @@ function convertWeatherAPI(raw) {
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
   const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 300));
   const lF = adjustForElevation(vF, p.lifts - p.town);
-  // Ski status — non bloccante, non blocca il render se fallisce
+
+  // Open-Meteo daily — 7 giorni, TTL 3 ore
+  // Sostituisce il daily di WeatherAPI (solo 3 giorni)
+  try {
+    const omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
+    vF.daily = omDaily;
+    lF.daily = {
+      time:               omDaily.time,
+      weather_code:       omDaily.weather_code,
+      temperature_2m_min: omDaily.temperature_2m_min.map(t => t - (p.lifts - p.town)/100*0.6),
+      temperature_2m_max: omDaily.temperature_2m_max.map(t => t - (p.lifts - p.town)/100*0.6),
+      precipitation_sum:  omDaily.precipitation_sum
+    };
+    console.log(`[OM] Daily injected for ${placeKey}: ${omDaily.time.length} days`);
+  } catch(e) {
+    console.warn(`[OM] Daily failed for ${placeKey}: ${e.message} — using WeatherAPI daily (3 days)`);
+  }
+
   const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
   return { village: vF, lifts: lF, ski };
+}
+
+// ── Open-Meteo daily (7 giorni, cache 3 ore) ─────────────────
+const DAILY_CACHE = {};
+const DAILY_TTL = 3 * 60 * 60 * 1000;
+
+async function fetchOpenMeteoDaily(lat, lon) {
+  const key = `${lat},${lon}`;
+  const cached = DAILY_CACHE[key];
+  if (cached && Date.now() - cached.ts < DAILY_TTL) {
+    console.log(`[OM] Cache hit daily for ${key}`);
+    return cached.data;
+  }
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
+  console.log(`[OM] Fetching daily for ${key}`);
+  const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
+  const raw = await r.json();
+  const data = {
+    time:               raw.daily.time,
+    weather_code:       raw.daily.weather_code,
+    temperature_2m_min: raw.daily.temperature_2m_min,
+    temperature_2m_max: raw.daily.temperature_2m_max,
+    precipitation_sum:  raw.daily.precipitation_sum
+  };
+  DAILY_CACHE[key] = { data, ts: Date.now() };
+  console.log(`[OM] Daily OK: ${data.time.length} days`);
+  return data;
 }
 
 function adjustForElevation(data, elevDiff) {
@@ -451,8 +492,9 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
       window.__WF_QR__ = qr; // WiFi QR string for welcome screen
     }, weatherJson, qrData);
 
-    // Render a 2x per testo più nitido, poi downsample a 1x
-    await page.setViewport({ width: w * 2, height: h * 2, deviceScaleFactor: 2 });
+    // Render a 3x per testo più nitido, poi downsample a 1x
+    // 3x dà molto più informazione all'antialiasing rispetto a 2x
+    await page.setViewport({ width: w * 3, height: h * 3, deviceScaleFactor: 3 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
@@ -461,16 +503,25 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
-      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
+      // Per JPEG (Inkplate) renderizza a 1x direttamente
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
       await new Promise(r => setTimeout(r, 500));
+      const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
+      if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Per PNG/RAW (Waveshare) usa 2x con downsample
-      const raw2x = await page.screenshot({ type: "png" });
-      return downsample2x(raw2x, w, h);
+      // Per PNG/RAW (Waveshare) screenshot elemento 3x poi downsample a 1x
+      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
+      const el = await page.$(selector);
+      if (el) {
+        const raw3x = await el.screenshot({ type: "png" });
+        return downsample2x(raw3x, w, h);
+      }
+      // Fallback pagina intera
+      const raw3x = await page.screenshot({ type: "png" });
+      return downsample2x(raw3x, w, h);
     }
   } finally {
     await browser.close();

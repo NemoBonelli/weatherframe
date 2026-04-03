@@ -115,11 +115,11 @@
     .profile-waveshare75 .skiHead         { margin-bottom: 6px; flex-shrink: 0; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
     .profile-waveshare75 .bands           { gap: 6px; flex: 1; display: flex; }
-    .profile-waveshare75 .band            { padding: 10px 6px 8px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .profile-waveshare75 .band            { padding: 10px 6px 8px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
     .profile-waveshare75 .time            { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; }
-    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; margin-top: 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; margin-top: 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .profile-waveshare75 .wxLabel         { font-size: 14px; font-weight: 900; }
-    .profile-waveshare75 .det             { font-size: 14px; font-weight: 900; margin-top: 8px; line-height: 1.5; text-align: center; }
+    .profile-waveshare75 .det             { font-size: 14px; font-weight: 900; line-height: 1.5; text-align: center; }
     .profile-waveshare75 .risk            { display: none; }
     .profile-waveshare75 .riskCommon      { font-size: 12px; font-weight: 900; margin-top: 6px; text-align: center; flex-shrink: 0; }
     /* S4: giorni */
@@ -1279,7 +1279,7 @@ async function refresh(){
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="28"').replace('height="32"','height="28"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRisk ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
@@ -1343,7 +1343,7 @@ async function refresh(){
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="28"').replace('height="32"','height="28"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
