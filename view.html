@@ -96,8 +96,8 @@
     .profile-waveshare75 .consigli        { padding: 6px 0 8px 10px; display: flex; flex-direction: column; justify-content: center; }
     .profile-waveshare75 .icoBox          { width: 36px; height: 36px; border: 1.5px solid #000 !important; }
     .profile-waveshare75 .hero            { grid-template-columns: 36px 1fr; gap: 7px; margin-top: 3px; }
-    .profile-waveshare75 .mainWx          { font-size: 21px; font-weight: 900; white-space: nowrap; line-height: 1.1; }
-    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; }
+    .profile-waveshare75 .mainWx          { font-size: 21px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 2px; }
     .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 3px; line-height: 1.3; }
     .profile-waveshare75 .adviceTitle     { display: none; }
     .profile-waveshare75 .adviceLines     { font-size: 16px; font-weight: 800; line-height: 1.35; color: #000; }
@@ -573,17 +573,8 @@
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-        <div class="hero">
-          <div class="icoBox" id="mainIconBox">
-            <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
-              <circle class="icoStroke" cx="24" cy="24" r="8"/>
-            </svg>
-          </div>
-          <div>
-            <div class="mainWx" id="mainWx">Variabile</div>
-            <div class="mainTemp" id="mainTemp">4°C</div>
-          </div>
-        </div>
+        <div class="mainWx" id="mainWx">Variabile</div>
+        <div class="mainTemp" id="mainTemp">4°C</div>
         <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
       <div class="panel consigli">
@@ -1231,8 +1222,7 @@ async function refresh(){
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
-    $("mainWx").textContent = wxToLabel(vNowCode, lang);
+    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="20"').replace('height="32"','height="20"') + ' ' + wxToLabel(vNowCode, lang);
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))

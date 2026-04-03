@@ -264,18 +264,6 @@ const DATA_DIR = path.join(__dirname, "data");
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
-// Invalida tutti i file render al boot — evita che file su disco
-// vengano serviti dopo un restart con cache meteo azzerata
-try {
-  const files = fs.readdirSync(OUT_DIR);
-  files.forEach(f => {
-    try { fs.utimesSync(path.join(OUT_DIR, f), new Date(0), new Date(0)); } catch {}
-  });
-  console.log(`[BOOT] Invalidated ${files.length} cached render files`);
-} catch(e) {
-  console.warn("[BOOT] Could not invalidate render cache:", e.message);
-}
-
 const FIRMWARE_DIR = path.join(__dirname, "public", "firmware");
 fs.mkdirSync(FIRMWARE_DIR, { recursive: true });
 
@@ -374,7 +362,7 @@ function saveWelcome(d) {
 
 // ── Cache helpers ─────────────────────────────────────────────
 // Smart cache: TTL 60 min, but can be invalidated per device
-const TTL = 30 * 60 * 1000; // 30 min — allineato al TTL meteo di 25 min
+const TTL = 60 * 60 * 1000; // 60 min
 
 function pngPath(place, lang, mode, profile) {
   return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.png`);
@@ -465,14 +453,21 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
-      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
       await new Promise(r => setTimeout(r, 500));
+      const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
+      if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Per PNG/RAW (Waveshare) usa 2x con downsample
+      // Screenshot elemento preciso — niente banda grigia, downsample pulito
+      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
+      const el = await page.$(selector);
+      if (el) {
+        const raw2x = await el.screenshot({ type: "png" });
+        return downsample2x(raw2x, w, h);
+      }
       const raw2x = await page.screenshot({ type: "png" });
       return downsample2x(raw2x, w, h);
     }
