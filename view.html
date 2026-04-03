@@ -36,9 +36,6 @@
   </script>
 
   <style>
-    /* Inter font via bunny.net — privacy-safe CDN, permesso da Puppeteer */
-    @import url('https://fonts.bunny.net/css?family=inter:400,700,800,900&display=block');
-  </style>
     :root{
       --w:600px; --h:800px;
       --pad:14px;
@@ -201,15 +198,11 @@
     }
     /* ─────────────────────────────────────────────────────────────────── */
     *{ box-sizing:border-box; }
-    html {
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
-    }
+    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
     body{
       margin:0;
       background:#cfcfcf;
-      font-family: 'Inter', "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
       color:var(--ink);
     }
     .inkplate{
