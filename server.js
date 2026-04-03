@@ -475,10 +475,10 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await page.setRequestInterception(true);
     page.on("request", req => {
       const url = req.url();
-      // Allow localhost + cdnjs for QR library
       if (url.startsWith("http://127.0.0.1") || 
           url.startsWith("http://localhost") ||
-          url.includes("cdnjs.cloudflare.com")) {
+          url.includes("cdnjs.cloudflare.com") ||
+          url.includes("fonts.bunny.net")) {  // Inter font CDN
         req.continue();
       } else {
         req.abort();
