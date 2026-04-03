@@ -10,8 +10,10 @@ const cookieParser = require("cookie-parser");
 const JWT_SECRET = process.env.JWT_SECRET || "wf-dev-secret-change-in-production";
 const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "superadmin2025";
 
-// Downscale 2x PNG to target size using box filter (average 2×2 pixels)
-// This gives much sharper text than rendering at 1x
+// Downscale 2x PNG to target size with threshold sharpening
+// Box filter average + soglia aggressiva per contorni netti su e-ink:
+// se il pixel medio è scuro (< 180) → nero puro, altrimenti → bianco puro
+// Questo evita i grigi intermedi che sull'e-ink appaiono sgranati
 function downsample2x(pngBuffer, targetW, targetH) {
   const src = PNG.sync.read(pngBuffer);
   const dst = new PNG({ width: targetW, height: targetH });
@@ -23,9 +25,15 @@ function downsample2x(pngBuffer, targetW, targetH) {
         r += src.data[si]; g += src.data[si+1];
         b += src.data[si+2]; a += src.data[si+3];
       }
+      // Media dei 4 pixel
+      r/=4; g/=4; b/=4; a/=4;
+      // Luminosità media
+      const lum = 0.299*r + 0.587*g + 0.114*b;
+      // Soglia: sotto 180 → nero, sopra → bianco (con alpha invariato)
+      const out = lum < 180 ? 0 : 255;
       const di = (y*targetW + x) * 4;
-      dst.data[di]=r/4; dst.data[di+1]=g/4;
-      dst.data[di+2]=b/4; dst.data[di+3]=a/4;
+      dst.data[di]=out; dst.data[di+1]=out;
+      dst.data[di+2]=out; dst.data[di+3]=Math.round(a);
     }
   }
   return PNG.sync.write(dst);
@@ -136,58 +144,12 @@ function convertWeatherAPI(raw) {
   };
 }
 
-// ── Open-Meteo daily forecast (solo daily, 7 giorni) ────────────────────
-const DAILY_CACHE = {};
-const DAILY_TTL = 3 * 60 * 60 * 1000; // 3 ore — i daily cambiano poco
-
-async function fetchOpenMeteoDaily(lat, lon) {
-  const key = `${lat},${lon}`;
-  const cached = DAILY_CACHE[key];
-  if (cached && Date.now() - cached.ts < DAILY_TTL) {
-    console.log(`[OM] Cache hit daily for ${key}`);
-    return cached.data;
-  }
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
-  console.log(`[OM] Fetching Open-Meteo daily for ${key}`);
-  const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
-  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
-  const raw = await r.json();
-  const data = {
-    time:                 raw.daily.time,
-    weather_code:         raw.daily.weather_code,
-    temperature_2m_min:   raw.daily.temperature_2m_min,
-    temperature_2m_max:   raw.daily.temperature_2m_max,
-    precipitation_sum:    raw.daily.precipitation_sum
-  };
-  DAILY_CACHE[key] = { data, ts: Date.now() };
-  console.log(`[OM] Open-Meteo daily OK for ${key} — ${data.time.length} days`);
-  return data;
-}
-
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
   const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 300));
+  await new Promise(r => setTimeout(r, 500));
   const lF = adjustForElevation(vF, p.lifts - p.town);
-
-  // Open-Meteo daily per previsioni 7 giorni — non bloccante
-  let omDaily = null;
-  try {
-    omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
-    // Sostituisce il daily di WeatherAPI (solo 3 giorni) con Open-Meteo (7 giorni)
-    vF.daily = omDaily;
-    // Aggiusta anche lF daily per elevation
-    lF.daily = {
-      time:                omDaily.time,
-      weather_code:        omDaily.weather_code,
-      temperature_2m_min:  omDaily.temperature_2m_min.map(t => t - (p.lifts - p.town) / 100 * 0.6),
-      temperature_2m_max:  omDaily.temperature_2m_max.map(t => t - (p.lifts - p.town) / 100 * 0.6),
-      precipitation_sum:   omDaily.precipitation_sum
-    };
-  } catch(e) {
-    console.warn(`[OM] Daily fetch failed: ${e.message} — using WeatherAPI daily`);
-  }
-
+  // Ski status — non bloccante, non blocca il render se fallisce
   const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
   return { village: vF, lifts: lF, ski };
 }

@@ -1237,12 +1237,12 @@ async function refresh(){
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="20"').replace('height="32"','height="20"') + ' ' + wxToLabel(vNowCode, lang);
-    $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
+    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="22"').replace('height="32"','height="22"') + ' ' + wxToLabel(vNowCode, lang);
+    $("mainTemp").textContent = `${vNowT.toFixed(1)}°C`;
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
       : Math.round(vNowT);
-    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°`;
+    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°C`;
 
     // STATO MONTAGNA / ESTATE
     const vDayCode = vF.daily.weather_code[dayIdx];
@@ -1257,7 +1257,7 @@ async function refresh(){
 
     if (isWinter) {
       renderSkiStatus(ski, lNowW, lNowT, lang);
-      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}°C · ${t.wind} ${round0(lNowW)} km/h`;
 
       // BANDS
       const slots = buildSlots(lF.hourly, lang, dayISO);
@@ -1280,7 +1280,7 @@ async function refresh(){
         div.innerHTML = `
           <div class="time">${s.time}</div>
           <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="28"').replace('height="32"','height="28"')}<span class="wxLabel">${s.label}</span></div>
-          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRisk ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
         bands.appendChild(div);
@@ -1310,10 +1310,10 @@ async function refresh(){
 
       // Row: quota escursioni con temp e vento
       const summerRow = (lang==="en")
-        ? `Altitude ${lNowT.toFixed(1)}°C · Wind ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        ? `Altitude ${lNowT.toFixed(1)}°CC · Wind ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
         : (lang==="fr")
-        ? `Altitude ${lNowT.toFixed(1)}°C · Vent ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
-        : `Quota ${lNowT.toFixed(1)}°C · Vento ${round0(lNowW)} km/h · Paese ${vNowT.toFixed(1)}°C`;
+        ? `Altitude ${lNowT.toFixed(1)}°CC · Vent ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        : `Quota ${lNowT.toFixed(1)}°CC · Vento ${round0(lNowW)} km/h · Paese ${vNowT.toFixed(1)}°C`;
       $("skiStatusRow").textContent = summerRow;
 
       const summerBadge = lNowW > 40 ? {it:"VENTOSO",en:"WINDY",fr:"VENTEUX"}
@@ -1344,7 +1344,7 @@ async function refresh(){
         div.innerHTML = `
           <div class="time">${s.time}</div>
           <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="28"').replace('height="32"','height="28"')}<span class="wxLabel">${s.label}</span></div>
-          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
         bandsS.appendChild(div);
@@ -1352,7 +1352,7 @@ async function refresh(){
       // Kickers estate
       $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDO" : "QUOTA ESCURSIONI";
       $("kSkiSub").textContent = (lang==="en") ? "CONDITIONS BY TIME" : (lang==="fr") ? "TRANCHES HORAIRES" : "FASCE ORARIE";
-      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}°C · ${t.wind} ${round0(lNowW)} km/h`;
     }
 
     // ADVICE
@@ -1384,8 +1384,8 @@ async function refresh(){
       box.className = "day";
       box.innerHTML = `
         <div class="dow">${d.dow}</div>
-        <div class="dayIco">${wxIconSVG(d.code)}</div>
-        <div class="temp">${round0(d.tmin)}° / ${round0(d.tmax)}°</div>
+        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}</div>
+        <div class="temp">${round0(d.tmin)}°C / ${round0(d.tmax)}°C</div>
         <div class="mm">${round0(d.mm)} ${t.mm}</div>
       `;
       days.appendChild(box);
