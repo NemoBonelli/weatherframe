@@ -136,12 +136,58 @@ function convertWeatherAPI(raw) {
   };
 }
 
+// ── Open-Meteo daily forecast (solo daily, 7 giorni) ────────────────────
+const DAILY_CACHE = {};
+const DAILY_TTL = 3 * 60 * 60 * 1000; // 3 ore — i daily cambiano poco
+
+async function fetchOpenMeteoDaily(lat, lon) {
+  const key = `${lat},${lon}`;
+  const cached = DAILY_CACHE[key];
+  if (cached && Date.now() - cached.ts < DAILY_TTL) {
+    console.log(`[OM] Cache hit daily for ${key}`);
+    return cached.data;
+  }
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
+  console.log(`[OM] Fetching Open-Meteo daily for ${key}`);
+  const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
+  const raw = await r.json();
+  const data = {
+    time:                 raw.daily.time,
+    weather_code:         raw.daily.weather_code,
+    temperature_2m_min:   raw.daily.temperature_2m_min,
+    temperature_2m_max:   raw.daily.temperature_2m_max,
+    precipitation_sum:    raw.daily.precipitation_sum
+  };
+  DAILY_CACHE[key] = { data, ts: Date.now() };
+  console.log(`[OM] Open-Meteo daily OK for ${key} — ${data.time.length} days`);
+  return data;
+}
+
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
   const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 300));
   const lF = adjustForElevation(vF, p.lifts - p.town);
-  // Ski status — non bloccante, non blocca il render se fallisce
+
+  // Open-Meteo daily per previsioni 7 giorni — non bloccante
+  let omDaily = null;
+  try {
+    omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
+    // Sostituisce il daily di WeatherAPI (solo 3 giorni) con Open-Meteo (7 giorni)
+    vF.daily = omDaily;
+    // Aggiusta anche lF daily per elevation
+    lF.daily = {
+      time:                omDaily.time,
+      weather_code:        omDaily.weather_code,
+      temperature_2m_min:  omDaily.temperature_2m_min.map(t => t - (p.lifts - p.town) / 100 * 0.6),
+      temperature_2m_max:  omDaily.temperature_2m_max.map(t => t - (p.lifts - p.town) / 100 * 0.6),
+      precipitation_sum:   omDaily.precipitation_sum
+    };
+  } catch(e) {
+    console.warn(`[OM] Daily fetch failed: ${e.message} — using WeatherAPI daily`);
+  }
+
   const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
   return { village: vF, lifts: lF, ski };
 }
@@ -453,21 +499,14 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
+      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
       await new Promise(r => setTimeout(r, 500));
-      const elJpeg = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
-      if (elJpeg) return await elJpeg.screenshot({ type: "jpeg", quality: 92 });
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      // Screenshot elemento preciso — niente banda grigia, downsample pulito
-      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
-      const el = await page.$(selector);
-      if (el) {
-        const raw2x = await el.screenshot({ type: "png" });
-        return downsample2x(raw2x, w, h);
-      }
+      // Per PNG/RAW (Waveshare) usa 2x con downsample
       const raw2x = await page.screenshot({ type: "png" });
       return downsample2x(raw2x, w, h);
     }
