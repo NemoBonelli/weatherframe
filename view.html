@@ -1237,7 +1237,7 @@ async function refresh(){
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="22"').replace('height="32"','height="22"') + ' ' + wxToLabel(vNowCode, lang);
+    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="40"').replace('height="32"','height="40"') + ' ' + wxToLabel(vNowCode, lang);
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°C`;
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
@@ -1279,7 +1279,7 @@ async function refresh(){
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}<span class="wxLabel">${s.label}</span></div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRisk ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
@@ -1343,7 +1343,7 @@ async function refresh(){
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}<span class="wxLabel">${s.label}</span></div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
           ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
@@ -1384,7 +1384,7 @@ async function refresh(){
       box.className = "day";
       box.innerHTML = `
         <div class="dow">${d.dow}</div>
-        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"','width="32"').replace('height="32"','height="32"')}</div>
+        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}</div>
         <div class="temp">${round0(d.tmin)}°C / ${round0(d.tmax)}°C</div>
         <div class="mm">${round0(d.mm)} ${t.mm}</div>
       `;
