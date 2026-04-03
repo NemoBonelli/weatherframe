@@ -264,6 +264,18 @@ const DATA_DIR = path.join(__dirname, "data");
 fs.mkdirSync(OUT_DIR, { recursive: true });
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
+// Invalida tutti i file render al boot — evita che file su disco
+// vengano serviti dopo un restart con cache meteo azzerata
+try {
+  const files = fs.readdirSync(OUT_DIR);
+  files.forEach(f => {
+    try { fs.utimesSync(path.join(OUT_DIR, f), new Date(0), new Date(0)); } catch {}
+  });
+  console.log(`[BOOT] Invalidated ${files.length} cached render files`);
+} catch(e) {
+  console.warn("[BOOT] Could not invalidate render cache:", e.message);
+}
+
 const FIRMWARE_DIR = path.join(__dirname, "public", "firmware");
 fs.mkdirSync(FIRMWARE_DIR, { recursive: true });
 
@@ -362,7 +374,7 @@ function saveWelcome(d) {
 
 // ── Cache helpers ─────────────────────────────────────────────
 // Smart cache: TTL 60 min, but can be invalidated per device
-const TTL = 60 * 60 * 1000; // 60 min
+const TTL = 30 * 60 * 1000; // 30 min — allineato al TTL meteo di 25 min
 
 function pngPath(place, lang, mode, profile) {
   return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.png`);

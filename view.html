@@ -90,7 +90,7 @@
     /* Kicker — tutti uguali, 12px uppercase */
     .profile-waveshare75 .kicker          { display: block; font-size: 12px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #000; margin-bottom: 3px; line-height: 1.3; }
     .profile-waveshare75 #kSkiSub         { margin-top: 1px; }
-    /* S1: paese + consigli — NO bordo esterno, solo linea divisoria verticale */
+    /* S1: paese + consigli — NO bordo esterno, solo linea divisoria */
     .profile-waveshare75 .grid2           { display: grid; grid-template-columns: 1fr 1fr; gap: 0; flex-shrink: 0; border: none; border-bottom: 2px solid #000; margin-bottom: 0; overflow: visible; border-radius: 0; }
     .profile-waveshare75 .paese           { padding: 6px 10px 8px 0; border-right: 1px solid #000; }
     .profile-waveshare75 .consigli        { padding: 6px 0 8px 10px; display: flex; flex-direction: column; justify-content: center; }
@@ -102,25 +102,25 @@
     .profile-waveshare75 .adviceTitle     { display: none; }
     .profile-waveshare75 .adviceLines     { font-size: 16px; font-weight: 800; line-height: 1.35; color: #000; }
     .profile-waveshare75 .adviceLines .line { font-size: 16px; font-weight: 800; }
-    /* S2: stato montagna — riga nera sopra */
+    /* S2: stato montagna — riga nera sopra, NO pannello */
     .profile-waveshare75 .skiStatus.panel { border: none !important; border-top: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
-    .profile-waveshare75 .skiStatus       { padding: 7px 0; flex-shrink: 0; margin-top: 7px; }
+    .profile-waveshare75 .skiStatus       { padding: 8px 0; flex-shrink: 0; margin-top: 8px; }
     .profile-waveshare75 .skiStatusMain   { font-size: 21px; font-weight: 900; line-height: 1.1; }
     .profile-waveshare75 .skiStatusRow    { font-size: 14px; font-weight: 700; margin-top: 3px; }
     .profile-waveshare75 .skiStatusBadge  { font-size: 12px; padding: 4px 11px; border: 2px solid #000; border-radius: 20px; }
-    /* S3: fasce sci — righe nere sopra e sotto, flex:1 per prendere tutto lo spazio */
+    /* S3: fasce sci — righe nere sopra e sotto, flex:1 */
     .profile-waveshare75 .ski.panel       { border: none !important; border-top: 2px solid #000 !important; border-bottom: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
-    .profile-waveshare75 .ski             { padding: 8px 0 10px; flex: 1; display: flex; flex-direction: column; margin-top: 7px; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 7px; flex-shrink: 0; }
+    .profile-waveshare75 .ski             { padding: 8px 0 9px; flex: 1; display: flex; flex-direction: column; margin-top: 8px; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 6px; flex-shrink: 0; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
-    .profile-waveshare75 .bands           { gap: 7px; flex: 1; }
-    .profile-waveshare75 .band            { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; }
-    .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
-    .profile-waveshare75 .wx              { font-size: 15px; font-weight: 900; margin-top: 5px; display: flex; align-items: center; gap: 4px; justify-content: center; }
-    .profile-waveshare75 .det             { font-size: 15px; font-weight: 900; margin-top: 7px; line-height: 1.5; }
+    .profile-waveshare75 .bands           { gap: 6px; flex: 1; }
+    .profile-waveshare75 .band            { padding: 8px 6px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; }
+    .profile-waveshare75 .time            { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; }
+    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; margin-top: 4px; display: flex; align-items: center; gap: 4px; justify-content: center; }
+    .profile-waveshare75 .det             { font-size: 14px; font-weight: 900; margin-top: 6px; line-height: 1.45; }
     .profile-waveshare75 .risk            { display: none; }
-    .profile-waveshare75 .riskCommon      { font-size: 12px; font-weight: 900; margin-top: 7px; text-align: center; flex-shrink: 0; }
-    /* S4: 3 giorni */
+    .profile-waveshare75 .riskCommon      { font-size: 12px; font-weight: 900; margin-top: 6px; text-align: center; flex-shrink: 0; }
+    /* S4: 3 giorni — kicker + box neri con sfondo grigio */
     .profile-waveshare75 .forecast.panel  { border: none !important; background: transparent !important; border-radius: 0 !important; }
     .profile-waveshare75 .forecast        { padding: 8px 0 0; flex-shrink: 0; }
     .profile-waveshare75 .days            { margin-top: 5px; gap: 6px; }
@@ -129,6 +129,7 @@
     .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
     .profile-waveshare75 .mm              { font-size: 12px; font-weight: 800; }
     .profile-waveshare75 .footer          { font-size: 11px; font-weight: 900; color: #000; margin-top: 5px; }
+    /* Override .panel generico — viene dopo per vincere la specificità */
     .profile-waveshare75 .panel           { border: 2px solid #000 !important; border-radius: 12px !important; }
     /* ───────────────────────────────────────────────────────────────────── */
 
@@ -1062,16 +1063,16 @@ function buildNext3(daily, lang, baseIdx){
   const days = [];
   for(let k=1;k<=3;k++){
     const i = baseIdx + k;
+    if (i >= daily.time.length) break;
     const dateISO = daily.time[i];
+    if (!dateISO) break;
+    const tmin = daily.temperature_2m_min[i];
+    const tmax = daily.temperature_2m_max[i];
+    if (tmin == null || tmax == null) break;
     const d = new Date(dateISO+"T12:00:00");
     const dow = fmtDow(d, lang);
     const code = daily.weather_code[i] ?? 2;
-    days.push({
-      dow, code,
-      tmin: daily.temperature_2m_min[i],
-      tmax: daily.temperature_2m_max[i],
-      mm: daily.precipitation_sum[i] ?? 0
-    });
+    days.push({ dow, code, tmin, tmax, mm: daily.precipitation_sum[i] ?? 0 });
   }
   return days;
 }
@@ -1190,21 +1191,27 @@ async function refresh(){
     ]);
 
     const now = new Date();
-    $("updated").textContent = `${t.updated}: ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    // Ora italiana — Render.com gira in UTC, WeatherAPI usa ora locale italiana
+    const nowItaly = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Rome" }));
+    $("updated").textContent = `${t.updated}: ${pad2(nowItaly.getHours())}:${pad2(nowItaly.getMinutes())}`;
 
     const dayISO = vF.daily.time[dayIdx];
 
-    // Temperatura "ora" — usa dato orario per l'ora corrente invece di current
-    // più accurato con cache da 25 min: il dato previsionale orario è stabile
+    // Temperatura oraria per l'ora corrente — più accurata di current con cache da 25 min
     function getHourlyNow(forecast) {
-      const nowISO = now.toISOString().slice(0, 13); // "2025-01-15T14"
-      const idx = forecast.hourly.time.findIndex(t => t.startsWith(nowISO));
+      // WeatherAPI restituisce "2025-04-04 09:00" in ora locale italiana
+      const localStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())} ${pad2(nowItaly.getHours())}:00`;
+      let idx = forecast.hourly.time.findIndex(t => t === localStr);
+      if (idx < 0) {
+        // fallback formato ISO con T
+        const isoStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())}T${pad2(nowItaly.getHours())}`;
+        idx = forecast.hourly.time.findIndex(t => t.replace(" ","T").startsWith(isoStr));
+      }
       if (idx >= 0) return {
         temp: forecast.hourly.temperature_2m[idx],
         code: forecast.hourly.weather_code[idx],
         wind: forecast.hourly.wind_speed_10m?.[idx] ?? forecast.current.wind_speed_10m ?? 0
       };
-      // fallback a current se ora non trovata
       return {
         temp: forecast.current.temperature_2m,
         code: forecast.current.weather_code,
