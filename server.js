@@ -10,22 +10,22 @@ const cookieParser = require("cookie-parser");
 const JWT_SECRET = process.env.JWT_SECRET || "wf-dev-secret-change-in-production";
 const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "superadmin2025";
 
-// Downscale Nx PNG → target size con box filter (funziona con 2x e 3x)
+// Downscale 2x PNG to target size using box filter (average 2×2 pixels)
+// This gives much sharper text than rendering at 1x
 function downsample2x(pngBuffer, targetW, targetH) {
   const src = PNG.sync.read(pngBuffer);
   const dst = new PNG({ width: targetW, height: targetH });
-  const n = Math.round(src.width / targetW);
   for (let y = 0; y < targetH; y++) {
     for (let x = 0; x < targetW; x++) {
       let r=0, g=0, b=0, a=0;
-      for (let dy=0; dy<n; dy++) for (let dx=0; dx<n; dx++) {
-        const sx = Math.min(x*n+dx, src.width-1);
-        const sy = Math.min(y*n+dy, src.height-1);
-        const si = (sy*src.width + sx) * 4;
-        r+=src.data[si]; g+=src.data[si+1]; b+=src.data[si+2]; a+=src.data[si+3];
+      for (let dy=0; dy<2; dy++) for (let dx=0; dx<2; dx++) {
+        const si = ((y*2+dy)*src.width + (x*2+dx)) * 4;
+        r += src.data[si]; g += src.data[si+1];
+        b += src.data[si+2]; a += src.data[si+3];
       }
-      const c=n*n, di=(y*targetW+x)*4;
-      dst.data[di]=r/c; dst.data[di+1]=g/c; dst.data[di+2]=b/c; dst.data[di+3]=a/c;
+      const di = (y*targetW + x) * 4;
+      dst.data[di]=r/4; dst.data[di+1]=g/4;
+      dst.data[di+2]=b/4; dst.data[di+3]=a/4;
     }
   }
   return PNG.sync.write(dst);
@@ -33,7 +33,7 @@ function downsample2x(pngBuffer, targetW, targetH) {
 
 // ── Open-Meteo fetch (server-side, with cache) ───────────────
 const WEATHER_CACHE = {};
-const WEATHER_TTL   = 25 * 60 * 1000; // 25 min — WeatherAPI aggiorna ogni 15-30 min
+const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
 const WEATHERAPI_KEY = "5b14deeb26e5493f9ee211416262003";
 
 const PLACES = {
@@ -136,54 +136,12 @@ function convertWeatherAPI(raw) {
   };
 }
 
-// ── Open-Meteo daily (7 giorni, cache 6 ore — evita 429) ────────────────
-const DAILY_CACHE = {};
-const DAILY_TTL = 6 * 60 * 60 * 1000;
-
-async function fetchOpenMeteoDaily(lat, lon) {
-  const key = `${lat},${lon}`;
-  const cached = DAILY_CACHE[key];
-  if (cached && Date.now() - cached.ts < DAILY_TTL) return cached.data;
-  await new Promise(r => setTimeout(r, 500));
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_min,temperature_2m_max,precipitation_sum&timezone=Europe%2FRome&forecast_days=7`;
-  console.log(`[OM] Fetching daily for ${lat},${lon}`);
-  const r = await fetch(url, {
-    signal: AbortSignal.timeout(15000),
-    headers: { "User-Agent": "WeatherFrame/1.0 (weatherframe.onrender.com)" }
-  });
-  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
-  const raw = await r.json();
-  const data = {
-    time:               raw.daily.time,
-    weather_code:       raw.daily.weather_code,
-    temperature_2m_min: raw.daily.temperature_2m_min,
-    temperature_2m_max: raw.daily.temperature_2m_max,
-    precipitation_sum:  raw.daily.precipitation_sum
-  };
-  DAILY_CACHE[key] = { data, ts: Date.now() };
-  console.log(`[OM] Daily OK: ${data.time.length} days`);
-  return data;
-}
-
 async function fetchWeatherForPlace(placeKey) {
   const p = PLACES[placeKey] || PLACES.sauze;
   const vF = await fetchWeatherAPI(p.lat, p.lon);
-  await new Promise(r => setTimeout(r, 300));
+  await new Promise(r => setTimeout(r, 500));
   const lF = adjustForElevation(vF, p.lifts - p.town);
-  try {
-    const omDaily = await fetchOpenMeteoDaily(p.lat, p.lon);
-    vF.daily = omDaily;
-    const ed = p.lifts - p.town;
-    lF.daily = {
-      time:               omDaily.time,
-      weather_code:       omDaily.weather_code,
-      temperature_2m_min: omDaily.temperature_2m_min.map(t => t - ed/100*0.6),
-      temperature_2m_max: omDaily.temperature_2m_max.map(t => t - ed/100*0.6),
-      precipitation_sum:  omDaily.precipitation_sum
-    };
-  } catch(e) {
-    console.warn(`[OM] Daily failed: ${e.message} — fallback WeatherAPI 3 days`);
-  }
+  // Ski status — non bloccante, non blocca il render se fallisce
   const ski = await getSkiStatus(placeKey, lF).catch(() => ({ status: "unknown", source: "error" }));
   return { village: vF, lifts: lF, ski };
 }
@@ -295,6 +253,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use("/public", express.static(path.join(__dirname, "public")));
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ ok: true, ts: Date.now() });
+});
 
 function safe(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9_-]/g, "");
@@ -456,60 +418,55 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: [
-      "--no-sandbox", "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage", "--disable-gpu",
-      "--font-render-hinting=none",
-      "--force-color-profile=srgb"
-    ]
+    args: ["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-gpu"]
   });
   try {
     const page = await browser.newPage();
     page.on("console", msg => console.log("[PAGE]", msg.text()));
     page.on("pageerror", err => console.error("[PAGEERROR]", err.message));
 
+    // Block all external requests — weather data is already injected,
+    // fonts/QR/APIs from internet would cause 404/429 in headless Chrome
     await page.setRequestInterception(true);
     page.on("request", req => {
-      const u = req.url();
-      if (u.startsWith("http://127.0.0.1") ||
-          u.startsWith("http://localhost") ||
-          u.includes("cdnjs.cloudflare.com")) {
+      const url = req.url();
+      // Allow localhost + cdnjs for QR library
+      if (url.startsWith("http://127.0.0.1") || 
+          url.startsWith("http://localhost") ||
+          url.includes("cdnjs.cloudflare.com")) {
         req.continue();
       } else {
         req.abort();
       }
     });
 
+    // Inject weather data + welcome QR data
     const qrData = welcomeData ? `WIFI:T:WPA;S:${welcomeData.wifiSsid || ""};P:${welcomeData.wifiPass || ""};;` : null;
     await page.evaluateOnNewDocument((json, qr) => {
       window.__WF_WEATHER__ = json ? JSON.parse(json) : null;
-      window.__WF_QR__ = qr;
+      window.__WF_QR__ = qr; // WiFi QR string for welcome screen
     }, weatherJson, qrData);
 
-    // 3x per antialiasing font più fine
-    await page.setViewport({ width: w * 3, height: h * 3, deviceScaleFactor: 3 });
+    // Render a 2x per testo più nitido, poi downsample a 1x
+    await page.setViewport({ width: w * 2, height: h * 2, deviceScaleFactor: 2 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
 
     const isWelcome = url.includes("welcome=1");
     await page.waitForSelector(isWelcome ? "#wlFooter" : "#title", { timeout: 30000 });
     await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 800));
 
     if (format === "jpeg") {
+      // Per JPEG (Inkplate) renderizza a 1x direttamente — il 3-bit gestisce la scala
       await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
       await page.reload({ waitUntil: "domcontentloaded" });
       await page.waitForFunction(() => window.__WF_READY__ === true, { timeout: 60000 });
-      await new Promise(r => setTimeout(r, 400));
-      const elJ = await page.$(isWelcome ? ".welcome-wrap" : ".inkplate");
-      if (elJ) return await elJ.screenshot({ type: "jpeg", quality: 92 });
+      await new Promise(r => setTimeout(r, 500));
       return await page.screenshot({ type: "jpeg", quality: 92 });
     } else {
-      const selector = isWelcome ? ".welcome-wrap" : ".inkplate";
-      const el = await page.$(selector);
-      const rawNx = el
-        ? await el.screenshot({ type: "png" })
-        : await page.screenshot({ type: "png" });
-      return downsample2x(rawNx, w, h);
+      // Per PNG/RAW (Waveshare) usa 2x con downsample
+      const raw2x = await page.screenshot({ type: "png" });
+      return downsample2x(raw2x, w, h);
     }
   } finally {
     await browser.close();
