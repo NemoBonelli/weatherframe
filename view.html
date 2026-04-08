@@ -112,7 +112,7 @@
     .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 2px; }
     .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 5px; line-height: 1.3; }
     .profile-waveshare75 .adviceTitle     { display: none; }
-    .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 700; line-height: 1.35; color: #000; }
+    .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 700; line-height: 1.35; color: #000; white-space: pre-line; }
     .profile-waveshare75 .adviceLines .line { font-size: 19px; font-weight: 700; color: #000; }
     /* S2: stato montagna — UNA sola riga nera sopra */
     .profile-waveshare75 .skiStatus.panel { border: none !important; border-top: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
@@ -876,129 +876,123 @@ function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayM
   const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
 
   if(isWinter){
-    // ── Casi critici ─────────────────────────────────────────
     if(thunder) return T(
-      `Temporale previsto in quota — le condizioni possono cambiare rapidamente. Meglio rientrare a valle prima delle ore più calde.`,
-      `Thunderstorms forecast at altitude — conditions can change very quickly. Best to head down before midday.`,
-      `Orages prévus en altitude — les conditions peuvent changer très vite. Mieux vaut descendre avant les heures chaudes.`
+      `Rientra a valle prima di mezzogiorno.\nTemporale previsto in quota nel pomeriggio.`,
+      `Head down before noon.\nThunderstorms forecast at altitude this afternoon.`,
+      `Descends avant midi.\nOrages prévus en altitude cet après-midi.`
     );
     if(veryWindy) return T(
-      `Vento molto forte in quota (${Math.round(lNowWind)} km/h) — probabile chiusura di alcuni impianti alti. Verificare sul sito Via Lattea prima di partire.`,
-      `Very strong winds at altitude (${Math.round(lNowWind)} km/h) — some upper lifts likely closed. Check the Via Lattea website before heading out.`,
-      `Vent très fort en altitude (${Math.round(lNowWind)} km/h) — fermeture probable de certaines remontées. Vérifier sur le site Via Lattea avant de partir.`
+      `Verifica gli impianti aperti prima di uscire.\nVento forte in quota: ${Math.round(lNowWind)} km/h.`,
+      `Check which lifts are open before heading out.\nStrong winds at altitude: ${Math.round(lNowWind)} km/h.`,
+      `Vérifie les remontées ouvertes avant de sortir.\nVent fort en altitude : ${Math.round(lNowWind)} km/h.`
     );
     if(foggy) return T(
-      `Nebbia o scarsa visibilità in quota — le piste alte potrebbero essere difficili da leggere. Meglio privilegiare le piste basse e i boschi.`,
-      `Fog or poor visibility at altitude — upper slopes may be hard to read. Better to stick to lower runs and tree lines.`,
-      `Brouillard ou mauvaise visibilité en altitude — les pistes hautes peuvent être difficiles à lire. Préférer les pistes basses et les forêts.`
+      `Preferisci le piste basse e i boschi.\nNebbia in quota, visibilità ridotta.`,
+      `Stick to lower runs and tree lines.\nFog at altitude, reduced visibility.`,
+      `Préfère les pistes basses et les forêts.\nBrouillard en altitude, visibilité réduite.`
     );
-    // ── Neve fresca ──────────────────────────────────────────
     if(freshSnow && sunny) return T(
-      `Neve fresca in quota con cielo sereno — giornata ideale per sciare. Le condizioni migliori si trovano al mattino presto, prima che il sole ammorbidisca la neve.`,
-      `Fresh snow at altitude with clear skies — ideal day on the slopes. Best conditions early in the morning before the sun softens the snow.`,
-      `Neige fraîche en altitude avec ciel dégagé — journée idéale pour skier. Les meilleures conditions se trouvent tôt le matin, avant que le soleil ramollisse la neige.`
+      `Giornata ideale per sciare — parti presto.\nNeve fresca in quota, cielo sereno.`,
+      `Ideal day on the slopes — head out early.\nFresh snow at altitude, clear skies.`,
+      `Journée idéale pour skier — pars tôt.\nNeige fraîche en altitude, ciel dégagé.`
     );
     if(freshSnow) return T(
-      `Neve fresca in quota — condizioni generalmente buone nonostante il cielo coperto. Visibilità variabile, attenzione ai tratti piatti.`,
-      `Fresh snow at altitude — generally good conditions despite overcast skies. Variable visibility, watch out on flat sections.`,
-      `Neige fraîche en altitude — bonnes conditions malgré le ciel couvert. Visibilité variable, attention aux sections plates.`
+      `Buone condizioni in quota — attenzione alla visibilità.\nNeve fresca, cielo coperto.`,
+      `Good conditions at altitude — watch for visibility.\nFresh snow, overcast skies.`,
+      `Bonnes conditions en altitude — attention à la visibilité.\nNeige fraîche, ciel couvert.`
     );
     if(snowVillage && lNowTemp<=0) return T(
-      `Neve in caduta anche al paese — strade innevate, attrezzatura invernale obbligatoria per i veicoli. In quota la neve fresca offre condizioni interessanti.`,
-      `Snowfall down to the village — roads may be snowy, winter equipment required for vehicles. At altitude, fresh snow offers interesting conditions.`,
-      `Chutes de neige jusqu'au village — routes enneigées, équipement hivernal obligatoire. En altitude, la neige fraîche offre de bonnes conditions.`
+      `Attrezzatura invernale obbligatoria in auto.\nNeve in caduta fino al paese.`,
+      `Winter tyres required for your vehicle.\nSnowfall down to village level.`,
+      `Équipement hiver obligatoire en voiture.\nChutes de neige jusqu'au village.`
     );
     if(snowLift && !snowVillage) return T(
-      `Neve in quota, sereno al paese — possibile neve fresca sopra i 2000 m. Ottimo momento per salire agli impianti alti.`,
-      `Snow at altitude, clear in the village — possible fresh snow above 2000 m. Great time to head for the upper lifts.`,
-      `Neige en altitude, beau au village — possible neige fraîche au-dessus de 2000 m. Bon moment pour monter aux remontées hautes.`
+      `Ottimo momento per gli impianti alti.\nNeve fresca sopra i 2000 m.`,
+      `Great time to head for the upper lifts.\nFresh snow above 2000 m.`,
+      `Bon moment pour les remontées hautes.\nNeige fraîche au-dessus de 2000 m.`
     );
-    // ── Temperature estreme ──────────────────────────────────
     if(veryCold && sunny) return T(
-      `Freddo intenso in quota (${lNowTemp.toFixed(1)}°) con cielo sereno — neve polverosa in ottime condizioni. Coprirsi bene, in particolare viso e mani.`,
-      `Intense cold at altitude (${lNowTemp.toFixed(1)}°) with clear skies — powdery snow in excellent condition. Cover up well, especially face and hands.`,
-      `Froid intense en altitude (${lNowTemp.toFixed(1)}°) avec ciel dégagé — neige poudreuse en excellentes conditions. Couvrez-vous bien, surtout le visage et les mains.`
+      `Copri bene viso e mani — neve eccellente.\nFreddo intenso in quota: ${lNowTemp.toFixed(0)}°C.`,
+      `Cover face and hands well — excellent snow.\nIntense cold at altitude: ${lNowTemp.toFixed(0)}°C.`,
+      `Couvre bien visage et mains — neige excellente.\nFroid intense en altitude : ${lNowTemp.toFixed(0)}°C.`
     );
     if(veryWarm && sunny) return T(
-      `Temperature miti in quota (${lNowTemp.toFixed(1)}°) — neve ancora compatta al mattino, si ammorbidisce nel pomeriggio. Ideale sciare prima delle 13.`,
-      `Mild temperatures at altitude (${lNowTemp.toFixed(1)}°) — snow still firm in the morning, softening in the afternoon. Ideal to ski before 1 PM.`,
-      `Températures douces en altitude (${lNowTemp.toFixed(1)}°) — neige encore compacte le matin, ramollissant l'après-midi. Idéal de skier avant 13h.`
+      `Meglio sciare al mattino — neve morbida dal pomeriggio.\nTemperature miti in quota: ${lNowTemp.toFixed(0)}°C.`,
+      `Best to ski in the morning — snow softens after noon.\nMild temperatures at altitude: ${lNowTemp.toFixed(0)}°C.`,
+      `Mieux skier le matin — neige ramollie l'après-midi.\nTempératures douces en altitude : ${lNowTemp.toFixed(0)}°C.`
     );
-    // ── Pioggia ──────────────────────────────────────────────
     if(rainVillage && !snowVillage && !snowLift) return T(
-      `Pioggia al paese — salendo di quota la pioggia lascia spazio alla neve. Le piste alte restano in buone condizioni.`,
-      `Rain in the village — higher up, rain gives way to snow. Upper slopes remain in good condition.`,
-      `Pluie au village — en prenant de l'altitude, la pluie laisse place à la neige. Les pistes hautes restent en bonnes conditions.`
+      `Sali in quota — neve oltre i 2000 m.\nPioggia al paese, neve in quota.`,
+      `Head up — snow above 2000 m.\nRain in the village, snow higher up.`,
+      `Monte en altitude — neige au-dessus de 2000 m.\nPluie au village, neige en hauteur.`
     );
     if(rainLift) return T(
-      `Precipitazioni in quota — possibile neve bagnata o pioggia gelata. Attenzione alle superfici ghiacciate, meglio le piste battute.`,
-      `Precipitation at altitude — wet snow or freezing rain possible. Watch for icy surfaces, groomed runs are safer.`,
-      `Précipitations en altitude — neige mouillée ou pluie verglaçante possible. Attention aux surfaces glacées, préférer les pistes damées.`
+      `Preferisci le piste battute — superfici scivolose.\nNeve bagnata o pioggia gelata in quota.`,
+      `Stick to groomed runs — slippery surfaces.\nWet snow or freezing rain at altitude.`,
+      `Préfère les pistes damées — surfaces glissantes.\nNeige mouillée ou pluie verglaçante en altitude.`
     );
-    // ── Vento moderato ───────────────────────────────────────
     if(windyLift) return T(
-      `Vento moderato in quota (${Math.round(lNowWind)} km/h) — possibili limitazioni su alcuni impianti alti. Le piste a mezza quota offrono le condizioni migliori.`,
-      `Moderate wind at altitude (${Math.round(lNowWind)} km/h) — possible restrictions on some upper lifts. Mid-mountain runs offer the best conditions.`,
-      `Vent modéré en altitude (${Math.round(lNowWind)} km/h) — restrictions possibles sur certaines remontées hautes. Les pistes à mi-hauteur offrent les meilleures conditions.`
+      `Piste a mezza quota — condizioni migliori.\nVento ${Math.round(lNowWind)} km/h, possibili limitazioni in alto.`,
+      `Mid-mountain runs — best conditions today.\nWind ${Math.round(lNowWind)} km/h, possible restrictions higher up.`,
+      `Pistes à mi-hauteur — meilleures conditions.\nVent ${Math.round(lNowWind)} km/h, restrictions possibles en haut.`
     );
-    // ── Bello ────────────────────────────────────────────────
     if(sunny) return T(
-      `Cielo sereno e buona visibilità — giornata ideale sulle piste. Consigliato partire presto per godere la neve ancora compatta.`,
-      `Clear skies and good visibility — ideal day on the slopes. Recommended to head out early while the snow is still firm.`,
-      `Ciel dégagé et bonne visibilité — journée idéale sur les pistes. Conseillé de partir tôt pour profiter de la neige encore compacte.`
+      `Giornata ideale sulle piste — parti presto.\nCielo sereno, neve compatta al mattino.`,
+      `Ideal day on the slopes — head out early.\nClear skies, firm snow in the morning.`,
+      `Journée idéale sur les pistes — pars tôt.\nCiel dégagé, neige compacte le matin.`
     );
     if(partlyCloudy) return T(
-      `Cielo parzialmente nuvoloso ma condizioni stabili — nessuna precipitazione prevista. Buona giornata per sciare senza particolari vincoli di orario.`,
-      `Partly cloudy but stable conditions — no precipitation expected. Good day to ski without particular time constraints.`,
-      `Partiellement nuageux mais conditions stables — aucune précipitation prévue. Bonne journée pour skier sans contraintes horaires particulières.`
+      `Buona giornata per sciare, nessun vincolo orario.\nCielo variabile, nessuna precipitazione prevista.`,
+      `Good day to ski, no time constraints.\nPartly cloudy, no precipitation expected.`,
+      `Bonne journée pour skier, sans contraintes horaires.\nCiel variable, aucune précipitation prévue.`
     );
     return T(
-      `Condizioni nella norma per la stagione — neve e impianti in assetto invernale standard.`,
-      `Normal conditions for the season — snow and lifts in standard winter setup.`,
-      `Conditions normales pour la saison — neige et remontées en configuration hivernale standard.`
+      `Condizioni nella norma — buona giornata sulle piste.\nNeve e impianti in assetto invernale.`,
+      `Normal conditions — good day on the slopes.\nSnow and lifts in standard winter setup.`,
+      `Conditions normales — bonne journée sur les pistes.\nNeige et remontées en configuration hivernale.`
     );
   }
 
   // ── Estate ───────────────────────────────────────────────
   if(thunder) return T(
-    `Temporale previsto — i temporali estivi in quota arrivano spesso nel primo pomeriggio. Pianificare le escursioni al mattino e rientrare entro mezzogiorno.`,
-    `Thunderstorms expected — summer storms at altitude often arrive in early afternoon. Plan hikes in the morning and be back by noon.`,
-    `Orages prévus — les orages d'été en altitude arrivent souvent en début d'après-midi. Planifier les randonnées le matin et rentrer avant midi.`
+    `Rientra entro mezzogiorno — temporale in arrivo.\nI temporali estivi colpiscono spesso nel primo pomeriggio.`,
+    `Be back by noon — storm incoming.\nSummer storms at altitude often hit early afternoon.`,
+    `Rentre avant midi — orage en approche.\nLes orages d'été frappent souvent en début d'après-midi.`
   );
   if(rainVillage && rainLift) return T(
-    `Precipitazioni previste su tutta la quota — sentieri e trail potrebbero essere scivolosi. Meglio rimandare le escursioni impegnative.`,
-    `Precipitation expected at all altitudes — trails may be slippery. Best to postpone demanding hikes.`,
-    `Précipitations prévues à toutes les altitudes — sentiers potentiellement glissants. Mieux vaut reporter les randonnées exigeantes.`
+    `Rimanda le escursioni impegnative a domani.\nPrecipitazioni previste su tutta la quota.`,
+    `Postpone demanding hikes until tomorrow.\nPrecipitation expected at all altitudes.`,
+    `Reporte les randonnées exigeantes à demain.\nPrécipitations prévues à toutes les altitudes.`
   );
   if(lNowTemp >= 20 && sunny) return T(
-    `Caldo in quota (${lNowTemp.toFixed(1)}°) — UV molto elevati, protezione solare indispensabile. Portare acqua abbondante e preferire le ore fresche del mattino.`,
-    `Hot at altitude (${lNowTemp.toFixed(1)}°) — very high UV, sun protection essential. Bring plenty of water and prefer the cooler morning hours.`,
-    `Chaud en altitude (${lNowTemp.toFixed(1)}°) — UV très élevés, protection solaire indispensable. Emporter beaucoup d'eau et préférer les heures fraîches du matin.`
+    `Esci al mattino — evita le ore centrali.\nCaldo in quota (${lNowTemp.toFixed(0)}°C), UV molto elevati.`,
+    `Go out in the morning — avoid midday heat.\nHot at altitude (${lNowTemp.toFixed(0)}°C), very high UV.`,
+    `Sors le matin — évite les heures chaudes.\nChaud en altitude (${lNowTemp.toFixed(0)}°C), UV très élevés.`
   );
   if(sunny && lNowTemp >= 8 && lNowTemp <= 18) return T(
-    `Cielo sereno con temperature fresche — condizioni ideali per escursioni e mountain bike. Visibilità eccellente su tutto il comprensorio.`,
-    `Clear skies with cool temperatures — ideal conditions for hiking and mountain biking. Excellent visibility across the whole area.`,
-    `Ciel dégagé avec températures fraîches — conditions idéales pour la randonnée et le VTT. Visibilité excellente sur tout le domaine.`
+    `Giornata ideale per escursioni e mountain bike.\nCielo sereno, temperature fresche in quota.`,
+    `Ideal day for hiking and mountain biking.\nClear skies, cool temperatures at altitude.`,
+    `Journée idéale pour randonnée et VTT.\nCiel dégagé, températures fraîches en altitude.`
   );
   if(sunny) return T(
-    `Giornata soleggiata — UV elevati nelle ore centrali. Consigliato crema solare e occhiali, soprattutto sulle creste esposte.`,
-    `Sunny day — high UV during midday hours. Sunscreen and sunglasses recommended, especially on exposed ridges.`,
-    `Journée ensoleillée — UV élevés en milieu de journée. Crème solaire et lunettes recommandées, surtout sur les crêtes exposées.`
+    `Crema solare e occhiali — UV alti nelle ore centrali.\nGiornata soleggiata in quota.`,
+    `Sunscreen and sunglasses — high UV at midday.\nSunny day at altitude.`,
+    `Crème solaire et lunettes — UV élevés à midi.\nJournée ensoleillée en altitude.`
   );
   if(windyLift) return T(
-    `Vento in quota (${Math.round(lNowWind)} km/h) — condizioni esposte sui crinali. Preferire i sentieri in quota riparata o nei boschi.`,
-    `Wind at altitude (${Math.round(lNowWind)} km/h) — exposed conditions on ridges. Prefer sheltered high-altitude paths or forest trails.`,
-    `Vent en altitude (${Math.round(lNowWind)} km/h) — conditions exposées sur les crêtes. Préférer les sentiers à l'abri ou en forêt.`
+    `Preferisci i sentieri riparati o nei boschi.\nVento in quota: ${Math.round(lNowWind)} km/h sui crinali.`,
+    `Prefer sheltered trails or forest paths.\nWind at altitude: ${Math.round(lNowWind)} km/h on ridges.`,
+    `Préfère les sentiers abrités ou en forêt.\nVent en altitude : ${Math.round(lNowWind)} km/h sur les crêtes.`
   );
   if(partlyCloudy) return T(
-    `Cielo variabile ma stabile — nessuna precipitazione significativa prevista. Buona giornata per attività all'aperto senza particolari precauzioni.`,
-    `Variable but stable sky — no significant precipitation expected. Good day for outdoor activities without special precautions.`,
-    `Ciel variable mais stable — aucune précipitation significative prévue. Bonne journée pour les activités de plein air sans précautions particulières.`
+    `Buona giornata per attività all'aperto.\nCielo variabile, nessuna precipitazione prevista.`,
+    `Good day for outdoor activities.\nVariable sky, no significant precipitation expected.`,
+    `Bonne journée pour les activités de plein air.\nCiel variable, aucune précipitation significative prévue.`
   );
   return T(
-    `Condizioni nella norma per la stagione estiva — temperatura e vento nella media per l'alta quota.`,
-    `Normal conditions for the summer season — temperature and wind within average for high altitude.`,
-    `Conditions normales pour la saison estivale — température et vent dans la moyenne pour la haute altitude.`
+    `Condizioni buone per le attività estive.\nTemperatura e vento nella norma per l'alta quota.`,
+    `Good conditions for summer activities.\nTemperature and wind within normal range for altitude.`,
+    `Bonnes conditions pour les activités estivales.\nTempérature et vent dans la normale pour l'altitude.`
   );
 }
 
