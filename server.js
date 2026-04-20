@@ -171,6 +171,17 @@ function adjustForElevation(data, elevDiff) {
 const SKI_CACHE = {};
 const SKI_TTL = 15 * 60 * 1000; // 15 min
 
+function isSummerSeason(date = new Date()) {
+  const year = date.getFullYear();
+  const summerStart = new Date(year, 3, 15, 0, 0, 0, 0); // 15 aprile
+  const winterStart = new Date(year, 10, 30, 0, 0, 0, 0); // 30 novembre
+  return date >= summerStart && date < winterStart;
+}
+
+function isWinterSeason(date = new Date()) {
+  return !isSummerSeason(date);
+}
+
 async function fetchSkiinfoStatus(placeKey) {
   const urls = {
     sauze:        "https://www.skiinfo.it/piemonte/sauze-doulx/bollettino-neve.html",
@@ -219,9 +230,8 @@ async function fetchSkiinfoStatus(placeKey) {
 function skiStatusFromWeather(liftWeather) {
   if (!liftWeather) return { status: "unknown", source: "model" };
   const wind  = liftWeather.current?.wind_speed_10m ?? 0;
-  const month = new Date().getMonth() + 1;
   let status = "unknown";
-  if (month >= 5 && month <= 11) status = "closed";
+  if (isSummerSeason()) status = "closed";
   else if (wind > 60) status = "closed";
   else if (wind > 35) status = "limited";
   else status = "open";
@@ -234,6 +244,15 @@ async function getSkiStatus(placeKey, liftWeather) {
     console.log(`[SKI] Cache hit for ${placeKey}`);
     return cached.data;
   }
+
+  // Dal 15 aprile al 29 novembre compreso: niente sci, sempre chiuso
+  if (isSummerSeason()) {
+    const data = { status: "closed", source: "season_override" };
+    SKI_CACHE[placeKey] = { data, ts: Date.now() };
+    console.log(`[SKI] ${placeKey}: season override -> closed`);
+    return data;
+  }
+
   let data;
   try {
     console.log(`[SKI] Fetching Skiinfo for ${placeKey}...`);
@@ -408,9 +427,8 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     }
   }
 
-  // Stagione: per display fisici sempre winter (auto da mese), solo preview browser può cambiare
-  const month = new Date().getMonth() + 1;
-  const season = (month >= 6 && month <= 9) ? "summer" : "winter";
+  // Stagione coerente con la view: estate dal 15 aprile al 29 novembre, inverno dal 30 novembre al 14 aprile
+  const season = isSummerSeason() ? "summer" : "winter";
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;

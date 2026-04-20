@@ -138,6 +138,11 @@
     .profile-waveshare75 .forecast        { padding: 8px 0 0; flex-shrink: 0; }
     .profile-waveshare75 .days            { margin-top: 5px; gap: 6px; }
     .profile-waveshare75 .day             { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 3px; background: #ddd; }
+    .profile-waveshare75 .day.advice-day  { background: #f3f3f3; align-items: flex-start; justify-content: flex-start; text-align: left; padding: 10px 8px; }
+    .profile-waveshare75 .day.advice-day .dow { font-size: 14px; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
+    .profile-waveshare75 .day.advice-day .temp { font-size: 16px; line-height: 1.15; white-space: normal; text-align: left; }
+    .profile-waveshare75 .day.advice-day .mm { font-size: 11px; line-height: 1.3; text-align: left; opacity: 1; }
+
     .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
     .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
     .profile-waveshare75 .mm              { font-size: 12px; font-weight: 800; }
@@ -477,6 +482,33 @@
       justify-content:center;
       gap:3px;
     }
+    .day.advice-day{
+      align-items:flex-start;
+      justify-content:flex-start;
+      text-align:left;
+      padding:10px 9px;
+      background:#f0f0f0;
+      gap:6px;
+    }
+    .day.advice-day .dow{
+      width:100%;
+      font-size:13px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .day.advice-day .temp{
+      font-size:16px;
+      line-height:1.15;
+      white-space:normal;
+      text-align:left;
+    }
+    .day.advice-day .mm{
+      font-size:12px;
+      line-height:1.3;
+      opacity:1;
+      text-align:left;
+    }
+
     .dow{
       font-size:16px;
       font-weight:950;
@@ -620,9 +652,9 @@
       <div class="riskCommon" id="riskCommon" style="display:none"></div>
     </div>
 
-    <!-- S4: 3 GIORNI -->
+    <!-- S4: 2 GIORNI + CONSIGLIO -->
     <div class="panel forecast">
-      <div class="kicker" id="kNext">PROSSIMI 3 GIORNI (PAESE)</div>
+      <div class="kicker" id="kNext">PROSSIMI 2 GIORNI + CONSIGLIO</div>
       <div class="days" id="days"></div>
       <div class="footer">
         <div id="updated">Aggiornato: --:--</div>
@@ -746,17 +778,15 @@ function pickDayIndex(mode){
 
 function pickSeason() {
   const params = new URLSearchParams(location.search);
-  // Parametro URL esplicito (es. ?season=summer) ha priorità
   if (params.get("season")) return params.get("season");
-  // Selector manuale nella preview browser
   const sel = document.getElementById("seasonSelect");
   if (sel && sel.value && sel.value !== "auto") return sel.value;
-  // Auto da calendario: estate dal 15 aprile al 30 novembre inclusi
   const now = new Date();
   const y = now.getFullYear();
-  const startSummer = new Date(y, 3, 15); // 15 aprile
-  const endSummer   = new Date(y, 10, 30, 23, 59, 59, 999); // 30 novembre
-  return (now >= startSummer && now <= endSummer) ? "summer" : "winter";
+  const summerStart = new Date(y, 3, 15);   // 15 aprile
+  const winterStart = new Date(y, 10, 30);  // 30 novembre
+  if (now >= summerStart && now < winterStart) return "summer";
+  return "winter";
 }
 
 function fmtDow(d, lang){
@@ -856,12 +886,13 @@ function riskLabel(mm, code, lang){
 
 /* =========================
    RICH SEASONAL ADVICE
-   Stagione da calendario (estate: 15 aprile–30 novembre)
+   Stagione rilevata dal mese (inverno: nov-apr, estate: mag-ott)
    Frasi descrittive, mai prescrittive.
    ========================= */
 function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
-  const season = pickSeason();
-  const isWinter = (season === "winter");
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const isWinter = (month >= 11 || month <= 4);
   const thunder     = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
   const snowLift    = [71,73,75,77,85,86].includes(lDayCode);
   const snowVillage = [71,73,75,77,85,86].includes(vDayCode);
@@ -1072,9 +1103,9 @@ function buildSlots(hourly, lang, dayISO){
   return out;
 }
 
-function buildNext3(daily, lang, baseIdx){
+function buildNext2(daily, lang, baseIdx){
   const days = [];
-  for(let k=1;k<=3;k++){
+  for(let k=1;k<=2;k++){
     const i = baseIdx + k;
     if (i >= daily.time.length) break;
     const dateISO = daily.time[i];
@@ -1085,9 +1116,131 @@ function buildNext3(daily, lang, baseIdx){
     const d = new Date(dateISO+"T12:00:00");
     const dow = fmtDow(d, lang);
     const code = daily.weather_code[i] ?? 2;
-    days.push({ dow, code, tmin, tmax, mm: daily.precipitation_sum[i] ?? 0 });
+    days.push({ dayIndex: i, dow, code, tmin, tmax, mm: daily.precipitation_sum[i] ?? 0 });
   }
   return days;
+}
+
+function dayMaxWind(hourly, dayISO){
+  const arr = [];
+  for(let i=0;i<hourly.time.length;i++){
+    const t = hourly.time[i];
+    const isoDate = t.slice(0,10);
+    if(isoDate === dayISO){
+      arr.push(hourly.wind_speed_10m?.[i] ?? 0);
+    }
+  }
+  return arr.length ? Math.max(...arr) : 0;
+}
+
+function buildTwoDayAdvice({lang, season, d1, d2}) {
+  const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
+  const classify = (d) => {
+    const thunder = [95,96,99].includes(d.code);
+    const snow = [71,73,75,77,85,86].includes(d.code);
+    const rainy = d.mm >= 3 || [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(d.code);
+    const heavy = d.mm >= 10;
+    const windy = d.wind >= 35;
+    const sunny = d.code <= 1;
+    const score = (sunny ? 3 : 0) + (!rainy ? 2 : 0) + (!windy ? 1 : 0) - (heavy ? 3 : 0) - (thunder ? 4 : 0);
+    return { ...d, thunder, snow, rainy, heavy, windy, sunny, score };
+  };
+
+  const a = classify(d1);
+  const b = classify(d2);
+
+  const shortReason = (d) => {
+    if (season === "winter") {
+      if (d.thunder) return T("tempo instabile in montagna", "unstable mountain weather", "temps instable en montagne");
+      if (d.windy) return T("meno vento in quota", "lighter wind at altitude", "moins de vent en altitude");
+      if (d.snow && !d.windy) return T("atmosfera pienamente invernale", "full winter atmosphere", "ambiance pleinement hivernale");
+      if (!d.rainy && d.sunny) return T("più luce e neve più leggibile", "more light and clearer snow", "plus de lumière et neige plus lisible");
+      return T("condizioni più tranquille", "calmer conditions", "conditions plus calmes");
+    }
+    if (d.thunder) return T("temporali meno presenti", "less storm risk", "moins de risque d'orage");
+    if (d.windy) return T("meno vento sui percorsi", "less wind on the trails", "moins de vent sur les sentiers");
+    if (!d.rainy && d.sunny) return T("più stabile e luminoso", "more stable and brighter", "plus stable et lumineux");
+    return T("più gradevole per stare fuori", "more pleasant for being outdoors", "plus agréable pour être dehors");
+  };
+
+  if (season === "summer") {
+    if (a.thunder && b.thunder) {
+      return {
+        title: T("Meglio uscire solo al mattino", "Best to head out only in the morning", "Mieux vaut sortir seulement le matin"),
+        detail: T("nel pomeriggio l'atmosfera si chiude", "afternoons look more unsettled", "l'après-midi s'annonce plus instable")
+      };
+    }
+    if (a.windy && b.windy) {
+      return {
+        title: T("Meglio restare su percorsi riparati", "Best to stick to sheltered trails", "Mieux vaut rester sur des sentiers abrités"),
+        detail: T("in quota il vento si fa sentire", "wind will be felt at altitude", "le vent se fait sentir en altitude")
+      };
+    }
+    if ((a.heavy || a.rainy) && (b.heavy || b.rainy)) {
+      return {
+        title: T("Due giorni da prendere con calma", "Two days to take gently", "Deux journées à vivre calmement"),
+        detail: T("meglio programmi morbidi e quota bassa", "better with easy plans and lower altitude", "mieux vaut des plans souples et des altitudes plus basses")
+      };
+    }
+    if (a.score >= b.score + 2) {
+      return {
+        title: T("Domani è la giornata migliore", "Tomorrow is the better day", "Demain est la meilleure journée"),
+        detail: shortReason(a)
+      };
+    }
+    if (b.score >= a.score + 2) {
+      return {
+        title: T("Dopodomani promette meglio", "The following day looks better", "Après-demain s'annonce mieux"),
+        detail: shortReason(b)
+      };
+    }
+    if (a.sunny && b.sunny && !a.rainy && !b.rainy && !a.windy && !b.windy) {
+      return {
+        title: T("Due giornate da vivere fuori", "Two days made for being outdoors", "Deux journées faites pour vivre dehors"),
+        detail: T("sentieri, aria buona e ritmo leggero", "trails, fresh air and an easy pace", "sentiers, bon air et rythme léger")
+      };
+    }
+    return {
+      title: T("Ottimo momento per stare all'aperto", "A good moment to be outdoors", "Un bon moment pour être dehors"),
+      detail: T("scegliendo bene l'orario migliore", "if you choose the best part of the day", "en choisissant bien le meilleur moment")
+    };
+  }
+
+  // winter
+  if (a.windy && b.windy) {
+    return {
+      title: T("Vento forte in quota, meglio flessibili", "Strong wind at altitude, stay flexible", "Vent fort en altitude, mieux vaut rester flexible"),
+      detail: T("possibili disagi nelle parti alte", "possible disruption on the upper slopes", "des gênes possibles en altitude")
+    };
+  }
+  if ((a.snow || a.rainy) && (b.snow || b.rainy) && (a.heavy || b.heavy)) {
+    return {
+      title: T("Neve e visibilità chiedono calma", "Snow and visibility call for a calmer plan", "Neige et visibilité demandent plus de calme"),
+      detail: T("giornate più raccolte che veloci", "these are days for atmosphere more than speed", "des journées plus d'ambiance que de performance")
+    };
+  }
+  if (a.score >= b.score + 2) {
+    return {
+      title: T("Domani ha più faccia da sci", "Tomorrow looks more like a ski day", "Demain a davantage l'allure d'une journée de ski"),
+      detail: shortReason(a)
+    };
+  }
+  if (b.score >= a.score + 2) {
+    return {
+      title: T("Dopodomani gira meglio", "The following day turns in your favour", "Après-demain tourne mieux"),
+      detail: shortReason(b)
+    };
+  }
+  if (a.sunny && b.sunny && !a.windy && !b.windy && !a.rainy && !b.rainy) {
+    return {
+      title: T("Ottimo momento per stare sulla neve", "A great moment to be on the snow", "Très bon moment pour profiter de la neige"),
+      detail: T("due giornate pulite e leggibili", "two clear and readable days", "deux journées claires et lisibles")
+    };
+  }
+  return {
+    title: T("Meglio prendersela con calma", "Better to take it easy", "Mieux vaut prendre son temps"),
+    detail: T("la montagna chiede un po' di tatto", "the mountain asks for a little tact", "la montagne demande un peu de tact")
+  };
 }
 
 /* =========================
@@ -1303,7 +1456,7 @@ async function refresh(){
         it: lNowW > 40 ? "Vento forte — escursioni difficili"
           : lNowT > 22 ? "Caldo in quota — protezione solare"
           : lNowT < 5  ? "Fresco in quota — abbigliamento a strati"
-          : "Buone condizioni per escursioni in quota",
+          : "Buone condizioni per escursioni",
         en: lNowW > 40 ? "Strong wind — difficult hiking"
           : lNowT > 22 ? "Hot at altitude — sun protection needed"
           : lNowT < 5  ? "Cool at altitude — bring layers"
@@ -1328,7 +1481,7 @@ async function refresh(){
         : lNowT < 5  ? {it:"FRESCO",en:"COOL",fr:"FRAIS"}
         : {it:"IDEALE",en:"IDEAL",fr:"IDÉAL"};
       $("skiStatusBadge").textContent = (summerBadge[lang] || summerBadge.it);
-      $("kSkiStatus").textContent = (lang==="en") ? "MOUNTAIN CONDITIONS" : (lang==="fr") ? "CONDITIONS MONTAGNE" : "CONDIZIONI MONTAGNA";
+      $("kSkiStatus").textContent = (lang==="en") ? "OUTDOOR CONDITIONS" : (lang==="fr") ? "CONDITIONS OUTDOOR" : "CONDIZIONI OUTDOOR";
 
       // BANDS estate
       const slotsS = buildSlots(lF.hourly, lang, dayISO);
@@ -1357,7 +1510,7 @@ async function refresh(){
         bandsS.appendChild(div);
       }
       // Kickers estate
-      $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDONNÉE" : "QUOTA ESCURSIONI";
+      $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDO" : "QUOTA ESCURSIONI";
       $("kSkiSub").textContent = (lang==="en") ? "CONDITIONS BY TIME" : (lang==="fr") ? "TRANCHES HORAIRES" : "FASCE ORARIE";
       $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}°C · ${t.wind} ${round0(lNowW)} km/h`;
     }
@@ -1377,15 +1530,18 @@ async function refresh(){
     });
     $("advice").textContent = advice;
 
-    // NEXT DAYS (quanti ne abbiamo — piano free WeatherAPI = max 2 giorni futuri)
-    const next = buildNext3(vF.daily, lang, dayIdx);
-    // Aggiorna kicker con numero reale di giorni
-    const nextLabel = next.length === 1
-      ? (lang==="en" ? "NEXT DAY (VILLAGE)" : lang==="fr" ? "JOUR SUIVANT (VILLAGE)" : "PROSSIMO GIORNO (PAESE)")
-      : (lang==="en" ? `NEXT ${next.length} DAYS (VILLAGE)` : lang==="fr" ? `${next.length} JOURS SUIVANTS (VILLAGE)` : `PROSSIMI ${next.length} GIORNI (PAESE)`);
+    // NEXT 2 DAYS + ADVICE
+    const next = buildNext2(vF.daily, lang, dayIdx);
+    const nextLabel = (lang==="en")
+      ? "NEXT 2 DAYS + ADVICE"
+      : (lang==="fr")
+      ? "2 PROCHAINS JOURS + CONSEIL"
+      : "PROSSIMI 2 GIORNI + CONSIGLIO";
     $("kNext").textContent = nextLabel;
+
     const days = $("days");
     days.innerHTML = "";
+
     for(const d of next){
       const box = document.createElement("div");
       box.className = "day";
@@ -1394,6 +1550,27 @@ async function refresh(){
         <div class="dayIco">${wxIconSVG(d.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}</div>
         <div class="temp">${round0(d.tmin)}°C / ${round0(d.tmax)}°C</div>
         <div class="mm">${round0(d.mm)} ${t.mm}</div>
+      `;
+      days.appendChild(box);
+    }
+
+    const adviceDay1 = next[0] ? {
+      ...next[0],
+      wind: dayMaxWind(vF.hourly, vF.daily.time[next[0].dayIndex] || "")
+    } : null;
+    const adviceDay2 = next[1] ? {
+      ...next[1],
+      wind: dayMaxWind(vF.hourly, vF.daily.time[next[1].dayIndex] || "")
+    } : null;
+
+    if (adviceDay1 && adviceDay2) {
+      const advice2d = buildTwoDayAdvice({ lang, season, d1: adviceDay1, d2: adviceDay2 });
+      const box = document.createElement("div");
+      box.className = "day advice-day";
+      box.innerHTML = `
+        <div class="dow">${lang==="en" ? "ADVICE" : lang==="fr" ? "CONSEIL" : "CONSIGLIO"}</div>
+        <div class="temp">${advice2d.title}</div>
+        <div class="mm">${advice2d.detail}</div>
       `;
       days.appendChild(box);
     }
@@ -1620,35 +1797,19 @@ async function refreshWelcome(params) {
   if (seasonSel) seasonSel.addEventListener("change", () => refresh());
 
   refresh();
-})();
-</script>
 
-<script>
-/* =========================
-   AUTO REFRESH / WATCHDOG
-   ========================= */
-(function autoRefreshSetup(){
-  const AUTO_REFRESH_MS = 60 * 60 * 1000;   // 60 minuti
-  const WATCHDOG_MS     = 75 * 60 * 1000;   // 75 minuti
-  const WATCHDOG_CHECK  = 5 * 60 * 1000;    // check ogni 5 minuti
-  const pageLoadedAt    = Date.now();
+  // Auto-refresh quadro: ogni 60 minuti
+  setTimeout(() => location.reload(), 60 * 60 * 1000);
 
-  setTimeout(() => {
-    console.log("[WF] Auto refresh 60 min");
-    location.reload();
-  }, AUTO_REFRESH_MS);
-
+  // Watchdog leggero: se resta aperto troppo a lungo, ricarica
   setInterval(() => {
-    if (Date.now() - pageLoadedAt > WATCHDOG_MS) {
-      console.log("[WF] Watchdog reload");
+    if (document.visibilityState === "visible") {
       location.reload();
     }
-  }, WATCHDOG_CHECK);
+  }, 75 * 60 * 1000);
 
-  window.addEventListener("online", () => {
-    console.log("[WF] Network back online → reload");
-    location.reload();
-  });
+  // Se torna online dopo una perdita di rete, ricarica
+  window.addEventListener("online", () => location.reload());
 })();
 </script>
 </body>
