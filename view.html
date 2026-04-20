@@ -107,13 +107,13 @@
     .profile-waveshare75 .paese           { padding: 6px 12px 10px 0; }
     .profile-waveshare75 .consigli        { padding: 6px 0 10px 12px; display: flex; flex-direction: column; justify-content: center; }
     .profile-waveshare75 .icoBox          { display: none; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; margin-top: 4px; }
+    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; justify-content: flex-start; gap: 0; margin-top: 4px; min-height: 40px; }
     .profile-waveshare75 .mainWx svg      { display: block; }
     .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 2px; }
     .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 5px; line-height: 1.3; }
     .profile-waveshare75 .adviceTitle     { display: none; }
-    .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 600; line-height: 1.35; color: #000; white-space: pre-line; }
-    .profile-waveshare75 .adviceLines .line { font-size: 19px; font-weight: 600; color: #000; }
+    .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 400; line-height: 1.35; color: #000; white-space: pre-line; }
+    .profile-waveshare75 .adviceLines .line { font-size: 19px; font-weight: 400; color: #000; }
     /* S2: stato montagna — UNA sola riga nera sopra */
     .profile-waveshare75 .skiStatus.panel { border: none !important; border-top: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
     .profile-waveshare75 .skiStatus       { padding: 8px 0; flex-shrink: 0; margin-top: 8px; }
@@ -140,7 +140,7 @@
     .profile-waveshare75 .day             { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 3px; background: #ddd; }
     .profile-waveshare75 .day.advice-day  { background: #f3f3f3; align-items: flex-start; justify-content: flex-start; text-align: left; padding: 10px 8px; }
     .profile-waveshare75 .day.advice-day .dow { font-size: 14px; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
-    .profile-waveshare75 .day.advice-day .temp { font-size: 16px; line-height: 1.15; white-space: normal; text-align: left; font-weight: 800; }
+    .profile-waveshare75 .day.advice-day .temp { font-size: 16px; line-height: 1.15; white-space: normal; text-align: left; }
     .profile-waveshare75 .day.advice-day .mm { font-size: 11px; line-height: 1.3; text-align: left; opacity: 1; }
 
     .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
@@ -316,11 +316,15 @@
     }
     .mainRow{ display:flex; align-items:baseline; gap:8px; }
     .mainWx{
-      font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
+      font-size:28px;
       font-weight:950;
       line-height:1.05;
       letter-spacing:-0.2px;
-      white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      min-height:40px;
     }
     .mainTemp{
       font-size:52px;
@@ -443,7 +447,7 @@
       font-size:16px;
       font-weight:900;
       display:flex;
-      gap:6px;
+      gap:0;
       align-items:center;
       justify-content:center;
       line-height:1;
@@ -542,6 +546,10 @@
       color:#000;
     }
 
+
+    .mainWx span, .wxLabel{ display:none !important; }
+    .risk, .riskCommon{ display:none !important; }
+
     /* SVG ICONS */
     svg{ display:block; }
     .icoStroke{ stroke:#000; fill:none; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; stroke-opacity:1; }
@@ -617,7 +625,7 @@
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-        <div class="mainWx" id="mainWx">Variabile</div>
+        <div class="mainWx" id="mainWx"></div>
         <div class="mainTemp" id="mainTemp">4°C</div>
         <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
@@ -889,8 +897,10 @@ function riskLabel(mm, code, lang){
    Stagione rilevata dal mese (inverno: nov-apr, estate: mag-ott)
    Frasi descrittive, mai prescrittive.
    ========================= */
-function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm, season}){
-  const isWinter = season === "winter";
+function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const isWinter = (month >= 11 || month <= 4);
   const thunder     = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
   const snowLift    = [71,73,75,77,85,86].includes(lDayCode);
   const snowVillage = [71,73,75,77,85,86].includes(vDayCode);
@@ -1131,7 +1141,6 @@ function dayMaxWind(hourly, dayISO){
   return arr.length ? Math.max(...arr) : 0;
 }
 
-
 function buildTwoDayAdvice({lang, season, d1, d2}) {
   const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
   const classify = (d) => {
@@ -1150,98 +1159,97 @@ function buildTwoDayAdvice({lang, season, d1, d2}) {
 
   const shortReason = (d) => {
     if (season === "winter") {
-      if (d.thunder) return T("tempo più instabile in montagna", "more unsettled mountain weather", "temps plus instable en montagne");
+      if (d.thunder) return T("tempo instabile in montagna", "unstable mountain weather", "temps instable en montagne");
       if (d.windy) return T("meno vento in quota", "lighter wind at altitude", "moins de vent en altitude");
-      if (d.snow && !d.windy) return T("atmosfera pienamente invernale", "a full winter feel", "une vraie ambiance hivernale");
-      if (!d.rainy && d.sunny) return T("più luce e neve più leggibile", "more light and a clearer snow surface", "plus de lumière et une neige plus lisible");
+      if (d.snow && !d.windy) return T("atmosfera pienamente invernale", "full winter atmosphere", "ambiance pleinement hivernale");
+      if (!d.rainy && d.sunny) return T("più luce e neve più leggibile", "more light and clearer snow", "plus de lumière et neige plus lisible");
       return T("condizioni più tranquille", "calmer conditions", "conditions plus calmes");
     }
-    if (d.thunder) return T("meno rischio di temporali", "less storm risk", "moins de risque d’orage");
+    if (d.thunder) return T("temporali meno presenti", "less storm risk", "moins de risque d'orage");
     if (d.windy) return T("meno vento sui percorsi", "less wind on the trails", "moins de vent sur les sentiers");
     if (!d.rainy && d.sunny) return T("più stabile e luminoso", "more stable and brighter", "plus stable et lumineux");
-    return T("più piacevole per stare fuori", "more pleasant for being outdoors", "plus agréable pour être dehors");
+    return T("più gradevole per stare fuori", "more pleasant for being outdoors", "plus agréable pour être dehors");
   };
 
   if (season === "summer") {
     if (a.thunder && b.thunder) {
       return {
-        title: T("Meglio puntare sul mattino", "Best to lean into the morning", "Mieux vaut miser sur le matin"),
-        detail: T("nel pomeriggio la montagna può chiudersi in fretta", "the mountain may close in quickly later on", "la montagne peut se refermer vite ensuite")
+        title: T("Meglio uscire solo al mattino", "Best to head out only in the morning", "Mieux vaut sortir seulement le matin"),
+        detail: T("nel pomeriggio l'atmosfera si chiude", "afternoons look more unsettled", "l'après-midi s'annonce plus instable")
       };
     }
     if (a.windy && b.windy) {
       return {
-        title: T("Due giorni da percorsi riparati", "Two days for sheltered routes", "Deux jours à réserver aux itinéraires abrités"),
-        detail: T("sui crinali il vento si farà sentire", "the wind will be felt on the ridges", "le vent se fera sentir sur les crêtes")
+        title: T("Meglio restare su percorsi riparati", "Best to stick to sheltered trails", "Mieux vaut rester sur des sentiers abrités"),
+        detail: T("in quota il vento si fa sentire", "wind will be felt at altitude", "le vent se fait sentir en altitude")
       };
     }
     if ((a.heavy || a.rainy) && (b.heavy || b.rainy)) {
       return {
-        title: T("Meglio programmi morbidi", "Better to keep plans gentle", "Mieux vaut garder des plans souples"),
-        detail: T("giorni più da rifugio e paese che da alta quota", "these feel more like refuge and village days than high-altitude ones", "des jours plus de refuge et de village que de haute altitude")
+        title: T("Due giorni da prendere con calma", "Two days to take gently", "Deux journées à vivre calmement"),
+        detail: T("meglio programmi morbidi e quota bassa", "better with easy plans and lower altitude", "mieux vaut des plans souples et des altitudes plus basses")
       };
     }
     if (a.score >= b.score + 2) {
       return {
-        title: T("Domani è la giornata da cogliere", "Tomorrow is the day to catch", "Demain est la journée à saisir"),
+        title: T("Domani è la giornata migliore", "Tomorrow is the better day", "Demain est la meilleure journée"),
         detail: shortReason(a)
       };
     }
     if (b.score >= a.score + 2) {
       return {
-        title: T("Dopodomani promette meglio", "The following day looks better", "Après-demain s’annonce mieux"),
+        title: T("Dopodomani promette meglio", "The following day looks better", "Après-demain s'annonce mieux"),
         detail: shortReason(b)
       };
     }
     if (a.sunny && b.sunny && !a.rainy && !b.rainy && !a.windy && !b.windy) {
       return {
-        title: T("Due giornate splendide in montagna", "Two beautiful mountain days", "Deux très belles journées en montagne"),
-        detail: T("quelle che fanno venire voglia di stare fuori a lungo", "the kind that make you want to stay outdoors for a long time", "de celles qui donnent envie de rester dehors longtemps")
+        title: T("Due giornate da vivere fuori", "Two days made for being outdoors", "Deux journées faites pour vivre dehors"),
+        detail: T("sentieri, aria buona e ritmo leggero", "trails, fresh air and an easy pace", "sentiers, bon air et rythme léger")
       };
     }
     return {
-      title: T("Ottimo momento per stare all’aperto", "A lovely moment to be outdoors", "Un très bon moment pour être dehors"),
-      detail: T("scegliendo il ritmo giusto della giornata", "if you follow the best rhythm of the day", "en suivant le bon rythme de la journée")
+      title: T("Ottimo momento per stare all'aperto", "A good moment to be outdoors", "Un bon moment pour être dehors"),
+      detail: T("scegliendo bene l'orario migliore", "if you choose the best part of the day", "en choisissant bien le meilleur moment")
     };
   }
 
   // winter
   if (a.windy && b.windy) {
     return {
-      title: T("Vento forte in quota", "Strong wind at altitude", "Vent fort en altitude"),
-      detail: T("meglio tenersi flessibili sulle parti alte", "best to stay flexible on the upper mountain", "mieux vaut rester flexible sur le haut du domaine")
+      title: T("Vento forte in quota, meglio flessibili", "Strong wind at altitude, stay flexible", "Vent fort en altitude, mieux vaut rester flexible"),
+      detail: T("possibili disagi nelle parti alte", "possible disruption on the upper slopes", "des gênes possibles en altitude")
     };
   }
   if ((a.snow || a.rainy) && (b.snow || b.rainy) && (a.heavy || b.heavy)) {
     return {
-      title: T("Due giorni da vivere con calma", "Two days to take more gently", "Deux journées à vivre plus calmement"),
-      detail: T("neve e visibilità chiedono un passo più morbido", "snow and visibility call for a softer pace", "neige et visibilité demandent un rythme plus doux")
+      title: T("Neve e visibilità chiedono calma", "Snow and visibility call for a calmer plan", "Neige et visibilité demandent plus de calme"),
+      detail: T("giornate più raccolte che veloci", "these are days for atmosphere more than speed", "des journées plus d'ambiance que de performance")
     };
   }
   if (a.score >= b.score + 2) {
     return {
-      title: T("Domani ha l’aria giusta", "Tomorrow has the better feel", "Demain a la meilleure allure"),
+      title: T("Domani ha più faccia da sci", "Tomorrow looks more like a ski day", "Demain a davantage l'allure d'une journée de ski"),
       detail: shortReason(a)
     };
   }
   if (b.score >= a.score + 2) {
     return {
-      title: T("Dopodomani gira meglio", "The following day turns out better", "Après-demain tourne mieux"),
+      title: T("Dopodomani gira meglio", "The following day turns in your favour", "Après-demain tourne mieux"),
       detail: shortReason(b)
     };
   }
   if (a.sunny && b.sunny && !a.windy && !b.windy && !a.rainy && !b.rainy) {
     return {
-      title: T("Ottimo momento sulla neve", "A lovely moment on the snow", "Un très bon moment sur la neige"),
-      detail: T("due giornate luminose e ben leggibili", "two bright, easy-to-read days", "deux journées lumineuses et bien lisibles")
+      title: T("Ottimo momento per stare sulla neve", "A great moment to be on the snow", "Très bon moment pour profiter de la neige"),
+      detail: T("due giornate pulite e leggibili", "two clear and readable days", "deux journées claires et lisibles")
     };
   }
   return {
     title: T("Meglio prendersela con calma", "Better to take it easy", "Mieux vaut prendre son temps"),
-    detail: T("la montagna chiede un po’ di tatto", "the mountain asks for a little tact", "la montagne demande un peu de tact")
+    detail: T("la montagna chiede un po' di tatto", "the mountain asks for a little tact", "la montagne demande un peu de tact")
   };
 }
-
 
 /* =========================
    RENDER UI
@@ -1397,7 +1405,7 @@ async function refresh(){
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="40"').replace('height="32"','height="40"') + '<span>' + wxToLabel(vNowCode, lang) + '</span>';
+    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="40"').replace('height="32"','height="40"');
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°C`;
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
@@ -1424,17 +1432,23 @@ async function refresh(){
       const bands = $("bands");
       bands.innerHTML = "";
 
+      const riskLabels = slots.map(s => riskLabel(s.mm, s.code, lang));
+      const allSameRisk = riskLabels.every(r => r === riskLabels[0]);
       const riskCommonEl = $("riskCommon");
-      riskCommonEl.style.display = "none";
+      if (allSameRisk) {
+        riskCommonEl.textContent = "";
+        riskCommonEl.style.display = "none";
+      } else {
+        riskCommonEl.style.display = "none";
+      }
 
       for(const s of slots){
         const div = document.createElement("div");
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}</div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
-          
         `;
         bands.appendChild(div);
       }
@@ -1481,8 +1495,15 @@ async function refresh(){
       const bandsS = $("bands");
       bandsS.innerHTML = "";
 
+      const riskLabelsS = slotsS.map(s => riskLabel(s.mm, s.code, lang));
+      const allSameRiskS = riskLabelsS.every(r => r === riskLabelsS[0]);
       const riskCommonElS = $("riskCommon");
-      riskCommonElS.style.display = "none";
+      if (allSameRiskS) {
+        riskCommonElS.textContent = "";
+        riskCommonElS.style.display = "none";
+      } else {
+        riskCommonElS.style.display = "none";
+      }
 
       for(const s of slotsS){
         const div = document.createElement("div");
@@ -1491,7 +1512,7 @@ async function refresh(){
           <div class="time">${s.time}</div>
           <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}<span class="wxLabel">${s.label}</span></div>
           <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
-          
+          ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
         bandsS.appendChild(div);
       }
@@ -1506,7 +1527,7 @@ async function refresh(){
                       ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
 
     const advice = chooseAdvice({
-      lang, mode, season,
+      lang, mode,
       vDayCode, lDayCode,
       lNowWind:lNowW,
       lNowTemp:lNowT,
