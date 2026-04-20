@@ -48,89 +48,45 @@
 
     /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
     .profile-waveshare75 {
-      --w: 480px; --h: 800px; --pad: 11px; --gap: 8px; --r: 12px;
+      --w: 480px; --h: 800px; --pad: 14px; --gap: 11px; --r: 12px;
       --ink: #000;
     }
-    .profile-waveshare75.inkplate {
-      display: flex;
-      flex-direction: column;
-      width: 480px;
-      height: 800px;
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-      box-sizing: border-box;
-      background: #fff;
-    }
-    /* Fixed canvas for Waveshare: no outer padding, only inner safe margins */
-    html.profile-waveshare75-body,
-    body.profile-waveshare75-body {
-      width: 480px !important;
-      height: 800px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      background: #fff !important;
-    }
-    .profile-waveshare75 h1,
-    .profile-waveshare75 .meta,
-    .profile-waveshare75 .rule,
-    .profile-waveshare75 .grid2,
-    .profile-waveshare75 .skiStatus,
-    .profile-waveshare75 .ski,
-    .profile-waveshare75 .forecast,
-    .profile-waveshare75 .controls {
-      margin-left: 11px;
-      margin-right: 11px;
-    }
-    /* Header */
-    .profile-waveshare75 h1               { font-size: 52px; line-height: 1; letter-spacing: -1.5px; }
-    .profile-waveshare75 .meta            { font-size: 14px; font-weight: 800; margin-top: 3px; }
-    .profile-waveshare75 .rule            { height: 2px; background: #000; margin: 7px 0 8px 0; flex-shrink: 0; }
-    /* Kicker — tutti uguali, 12px uppercase */
-    .profile-waveshare75 .kicker          { display: block; font-size: 12px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #000; margin-bottom: 3px; line-height: 1.3; }
-    .profile-waveshare75 #kSkiSub         { margin-top: 1px; }
-    /* S1: paese + consigli — NO bordo esterno, solo linea divisoria */
-    .profile-waveshare75 .grid2           { display: grid; grid-template-columns: 1fr 1fr; gap: 0; flex-shrink: 0; border: none; border-bottom: 2px solid #000; margin-bottom: 0; overflow: visible; border-radius: 0; }
-    .profile-waveshare75 .paese           { padding: 6px 10px 8px 0; border-right: 1px solid #000; }
-    .profile-waveshare75 .consigli        { padding: 6px 0 8px 10px; display: flex; flex-direction: column; justify-content: center; }
-    .profile-waveshare75 .icoBox          { width: 36px; height: 36px; border: 1.5px solid #000 !important; }
-    .profile-waveshare75 .hero            { grid-template-columns: 36px 1fr; gap: 7px; margin-top: 3px; }
-    .profile-waveshare75 .mainWx          { font-size: 21px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 2px; }
-    .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 3px; line-height: 1.3; }
-    .profile-waveshare75 .adviceTitle     { display: none; }
-    .profile-waveshare75 .adviceLines     { font-size: 16px; font-weight: 800; line-height: 1.35; color: #000; }
-    .profile-waveshare75 .adviceLines .line { font-size: 16px; font-weight: 800; }
-    /* S2: stato montagna — riga nera sopra, NO pannello */
-    .profile-waveshare75 .skiStatus.panel { border: none !important; border-top: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
-    .profile-waveshare75 .skiStatus       { padding: 8px 0; flex-shrink: 0; margin-top: 8px; }
-    .profile-waveshare75 .skiStatusMain   { font-size: 21px; font-weight: 900; line-height: 1.1; }
-    .profile-waveshare75 .skiStatusRow    { font-size: 14px; font-weight: 700; margin-top: 3px; }
-    .profile-waveshare75 .skiStatusBadge  { font-size: 12px; padding: 4px 11px; border: 2px solid #000; border-radius: 20px; }
-    /* S3: fasce sci — righe nere sopra e sotto, flex:1 */
-    .profile-waveshare75 .ski.panel       { border: none !important; border-top: 2px solid #000 !important; border-bottom: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
-    .profile-waveshare75 .ski             { padding: 8px 0 9px; flex: 1; display: flex; flex-direction: column; margin-top: 8px; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 6px; flex-shrink: 0; }
+    .profile-waveshare75 h1               { font-size: 44px; }
+    .profile-waveshare75 .meta            { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 5px; }
+    .profile-waveshare75 .rule            { height: 3px; opacity: 1; background: #000; margin: 10px 0 14px 0; }
+    .profile-waveshare75 .mainWx          { display:none; }
+    .profile-waveshare75 .mainTemp        { font-size: 34px; }
+    .profile-waveshare75 .sub             { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 3px; }
+    .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 400; line-height: 1.4; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 400; color: #000; opacity: 1; }
+    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; }
+    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
+    .profile-waveshare75 .time            { font-size: 14px; font-weight: 900; }
+    .profile-waveshare75 .wx              { font-size: 12px; font-weight: 900; }
+    .profile-waveshare75 .det             { font-size: 11px; font-weight: 800; opacity: 1; line-height: 1.2; }
+    .profile-waveshare75 .risk            { font-size: 12px; font-weight: 900; opacity: 1; }
+    .profile-waveshare75 .band            { min-height: 94px; padding: 6px 6px; border: 2px solid #000 !important; border-radius: 12px !important; }
+    .profile-waveshare75 .dow             { font-size: 16px; font-weight: 900; }
+    .profile-waveshare75 .temp            { font-size: 18px; font-weight: 900; }
+    .profile-waveshare75 .mm              { font-size: 13px; font-weight: 800; opacity: 1; }
+    .profile-waveshare75 .day             { min-height: 100px; padding: 9px 6px; border: 2px solid #000 !important; border-radius: 12px !important; }
+    .profile-waveshare75 .icoBox          { width: 38px; height: 38px; border: 2px solid #888 !important; }
+    .profile-waveshare75 .hero            { grid-template-columns: 38px 1fr; gap: 8px; }
+    .profile-waveshare75 .paese           { min-height: 116px; padding: 10px 10px 10px 12px; }
+    .profile-waveshare75 .consigli        { min-height: 116px; padding: 10px 12px; }
+    .profile-waveshare75 .trend           { padding: 9px 12px; min-height: 76px; }
+    .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
+    .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
+    .profile-waveshare75 .ski             { padding: 10px 14px 12px; }
+    .profile-waveshare75 .skiStatus       { padding: 8px 12px; margin-bottom: 8px; }
+    .profile-waveshare75 .skiStatusMain   { font-size: 18px; font-weight: 900; }
+    .profile-waveshare75 .skiStatusRow    { font-size: 13px; font-weight: 700; }
+    .profile-waveshare75 .skiStatusBadge  { font-size: 11px; padding: 4px 10px; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
-    .profile-waveshare75 .bands           { gap: 6px; flex: 1; }
-    .profile-waveshare75 .band            { padding: 8px 6px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; }
-    .profile-waveshare75 .time            { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; }
-    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; margin-top: 4px; display: flex; align-items: center; gap: 4px; justify-content: center; }
-    .profile-waveshare75 .det             { font-size: 14px; font-weight: 900; margin-top: 6px; line-height: 1.45; }
-    .profile-waveshare75 .risk            { display: none; }
-    .profile-waveshare75 .riskCommon      { font-size: 12px; font-weight: 900; margin-top: 6px; text-align: center; flex-shrink: 0; }
-    /* S4: 3 giorni — kicker + box neri con sfondo grigio */
-    .profile-waveshare75 .forecast.panel  { border: none !important; background: transparent !important; border-radius: 0 !important; }
-    .profile-waveshare75 .forecast        { padding: 8px 0 0; flex-shrink: 0; }
-    .profile-waveshare75 .days            { margin-top: 5px; gap: 6px; }
-    .profile-waveshare75 .day             { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 3px; background: #ddd; }
-    .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
-    .profile-waveshare75 .mm              { font-size: 12px; font-weight: 800; }
-    .profile-waveshare75 .footer          { font-size: 11px; font-weight: 900; color: #000; margin-top: 5px; }
-    /* Override .panel generico — viene dopo per vincere la specificità */
-    .profile-waveshare75 .panel           { border: 2px solid #000 !important; border-radius: 12px !important; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 6px; }
+    .profile-waveshare75 .forecast        { padding: 6px 12px 10px; }
+    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 900; opacity: 1; color: #000; margin-top: 6px; }
+    .profile-waveshare75 .days            { margin-top: 6px; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
@@ -210,7 +166,6 @@
       margin:0 auto;
       padding:var(--pad);
       overflow:hidden;
-      box-sizing: border-box;
     }
 
     /* HEADER */
@@ -299,11 +254,7 @@
     }
     .mainRow{ display:flex; align-items:baseline; gap:8px; }
     .mainWx{
-      font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
-      font-weight:950;
-      line-height:1.05;
-      letter-spacing:-0.2px;
-      white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
+      display:none;
     }
     .mainTemp{
       font-size:52px;
@@ -331,7 +282,7 @@
     }
     .adviceLines{
       font-size:16px;
-      font-weight:800;
+      font-weight:400;
       line-height:1.3;
       white-space:pre-line;
       color:#000;
@@ -340,7 +291,7 @@
       display:block;
       margin-top:6px;
       font-size:16px;
-      font-weight:700;
+      font-weight:400;
     }
 
     /* STATO MONTAGNA */
@@ -573,8 +524,17 @@
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-        <div class="mainWx" id="mainWx">Variabile</div>
-        <div class="mainTemp" id="mainTemp">4°C</div>
+        <div class="hero">
+          <div class="icoBox" id="mainIconBox">
+            <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
+              <circle class="icoStroke" cx="24" cy="24" r="8"/>
+            </svg>
+          </div>
+          <div>
+            <div class="mainWx" id="mainWx">Variabile</div>
+            <div class="mainTemp" id="mainTemp">4°C</div>
+          </div>
+        </div>
         <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
       <div class="panel consigli">
@@ -605,7 +565,6 @@
         <div class="skiNow" id="skiNow">Ora --.-° · Vento --</div>
       </div>
       <div class="bands" id="bands"></div>
-      <div class="riskCommon" id="riskCommon" style="display:none"></div>
     </div>
 
     <!-- S4: 3 GIORNI -->
@@ -739,9 +698,12 @@ function pickSeason() {
   // Selector manuale nella preview browser
   const sel = document.getElementById("seasonSelect");
   if (sel && sel.value && sel.value !== "auto") return sel.value;
-  // Auto da mese
-  const m = new Date().getMonth() + 1;
-  return (m >= 6 && m <= 9) ? "summer" : "winter";
+  // Auto: inverno dal 1 dicembre al 9 aprile, estate dal 10 aprile
+  const now = new Date();
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const winter = (m === 12) || (m >= 1 && m <= 3) || (m === 4 && d < 10);
+  return winter ? "winter" : "summer";
 }
 
 function fmtDow(d, lang){
@@ -847,7 +809,8 @@ function riskLabel(mm, code, lang){
 function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
   const now = new Date();
   const month = now.getMonth() + 1;
-  const isWinter = (month >= 11 || month <= 4);
+  const day = now.getDate();
+  const isWinter = (month === 12) || (month >= 1 && month <= 3) || (month === 4 && day < 10);
   const thunder    = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
   const snowLift   = [71,73,75,77,85,86].includes(lDayCode);
   const snowVillage= [71,73,75,77,85,86].includes(vDayCode);
@@ -1054,16 +1017,16 @@ function buildNext3(daily, lang, baseIdx){
   const days = [];
   for(let k=1;k<=3;k++){
     const i = baseIdx + k;
-    if (i >= daily.time.length) break;
     const dateISO = daily.time[i];
-    if (!dateISO) break;
-    const tmin = daily.temperature_2m_min[i];
-    const tmax = daily.temperature_2m_max[i];
-    if (tmin == null || tmax == null) break;
     const d = new Date(dateISO+"T12:00:00");
     const dow = fmtDow(d, lang);
     const code = daily.weather_code[i] ?? 2;
-    days.push({ dow, code, tmin, tmax, mm: daily.precipitation_sum[i] ?? 0 });
+    days.push({
+      dow, code,
+      tmin: daily.temperature_2m_min[i],
+      tmax: daily.temperature_2m_max[i],
+      mm: daily.precipitation_sum[i] ?? 0
+    });
   }
   return days;
 }
@@ -1117,8 +1080,11 @@ function renderSkiStatus(ski, windKph, tempC, lang) {
       fr: { open:"Ouverture totale",  partial:"Ouverture partielle",limited:"Ouverture limitée",closed:"Remontées fermées" }
     };
     mainText = (mainMap[lang] || mainMap.it)[ski.status] || ski.status;
-    // Mostriamo solo lo stato — i numeri impianti/neve da scraping non sono affidabili
-    rowText = "";
+    const parts = [];
+    if (ski.lifts_open != null && ski.lifts_total != null) parts.push(`Impianti ${ski.lifts_open}/${ski.lifts_total}`);
+    if (ski.slopes_open != null && ski.slopes_total != null) parts.push(`Piste ${ski.slopes_open}/${ski.slopes_total}`);
+    if (ski.snow_cm != null) parts.push(`Neve ${ski.snow_cm} cm`);
+    rowText = parts.join(" · ");
     badgeText = statusMap[ski.status] || ll.unknown;
   } else {
     // Fallback: stima da meteo
@@ -1182,48 +1148,25 @@ async function refresh(){
     ]);
 
     const now = new Date();
-    // Ora italiana — Render.com gira in UTC, WeatherAPI usa ora locale italiana
-    const nowItaly = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Rome" }));
-    $("updated").textContent = `${t.updated}: ${pad2(nowItaly.getHours())}:${pad2(nowItaly.getMinutes())}`;
+    $("updated").textContent = `${t.updated}: ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
 
     const dayISO = vF.daily.time[dayIdx];
 
-    // Temperatura oraria per l'ora corrente — più accurata di current con cache da 25 min
-    function getHourlyNow(forecast) {
-      // WeatherAPI restituisce "2025-04-04 09:00" in ora locale italiana
-      const localStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())} ${pad2(nowItaly.getHours())}:00`;
-      let idx = forecast.hourly.time.findIndex(t => t === localStr);
-      if (idx < 0) {
-        // fallback formato ISO con T
-        const isoStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())}T${pad2(nowItaly.getHours())}`;
-        idx = forecast.hourly.time.findIndex(t => t.replace(" ","T").startsWith(isoStr));
-      }
-      if (idx >= 0) return {
-        temp: forecast.hourly.temperature_2m[idx],
-        code: forecast.hourly.weather_code[idx],
-        wind: forecast.hourly.wind_speed_10m?.[idx] ?? forecast.current.wind_speed_10m ?? 0
-      };
-      return {
-        temp: forecast.current.temperature_2m,
-        code: forecast.current.weather_code,
-        wind: forecast.current.wind_speed_10m ?? 0
-      };
-    }
-
-    const vNow = getHourlyNow(vF);
-    const lNow = getHourlyNow(lF);
-    const vNowT    = vNow.temp;
-    const vNowCode = vNow.code;
-    const lNowT    = lNow.temp;
-    const lNowW    = lNow.wind;
-
-    // MAIN (Paese)
+    // MAIN (Paese) — ora + min/max/day mm
+    const vNowT = vF.current.temperature_2m;
+    const vNowCode = vF.current.weather_code;
     const vMin = vF.daily.temperature_2m_min[dayIdx];
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="20"').replace('height="32"','height="20"') + ' ' + wxToLabel(vNowCode, lang);
+    $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
+    $("mainWx").textContent = "";
     $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
+    // Perceived temp from wind chill approximation
+    // SKI NOW — definiti qui perché usati anche sopra
+    const lNowT = lF.current.temperature_2m;
+    const lNowW = lF.current.wind_speed_10m ?? 0;
+
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
       : Math.round(vNowT);
@@ -1248,25 +1191,14 @@ async function refresh(){
       const slots = buildSlots(lF.hourly, lang, dayISO);
       const bands = $("bands");
       bands.innerHTML = "";
-
-      const riskLabels = slots.map(s => riskLabel(s.mm, s.code, lang));
-      const allSameRisk = riskLabels.every(r => r === riskLabels[0]);
-      const riskCommonEl = $("riskCommon");
-      if (allSameRisk) {
-        riskCommonEl.textContent = riskLabels[0];
-        riskCommonEl.style.display = "";
-      } else {
-        riskCommonEl.style.display = "none";
-      }
-
       for(const s of slots){
         const div = document.createElement("div");
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="24"').replace('height="32"','height="24"')} ${s.label}</div>
-          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
-          ${!allSameRisk ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')}</div>
+          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · V ${round0(s.wind)}</div>
+          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
         `;
         bands.appendChild(div);
       }
@@ -1308,31 +1240,20 @@ async function refresh(){
       $("skiStatusBadge").textContent = (summerBadge[lang] || summerBadge.it);
       $("kSkiStatus").textContent = (lang==="en") ? "OUTDOOR CONDITIONS" : (lang==="fr") ? "CONDITIONS OUTDOOR" : "CONDIZIONI OUTDOOR";
 
-      // BANDS estate
+      // BANDS estate — quota escursioni (dati lifts) per fascia mattina/pomeriggio/sera
       const slotsS = buildSlots(lF.hourly, lang, dayISO);
-      const bandsS = $("bands");
-      bandsS.innerHTML = "";
-
-      const riskLabelsS = slotsS.map(s => riskLabel(s.mm, s.code, lang));
-      const allSameRiskS = riskLabelsS.every(r => r === riskLabelsS[0]);
-      const riskCommonElS = $("riskCommon");
-      if (allSameRiskS) {
-        riskCommonElS.textContent = riskLabelsS[0];
-        riskCommonElS.style.display = "";
-      } else {
-        riskCommonElS.style.display = "none";
-      }
-
+      const bands = $("bands");
+      bands.innerHTML = "";
       for(const s of slotsS){
         const div = document.createElement("div");
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="24"').replace('height="32"','height="24"')} ${s.label}</div>
-          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · ${t.wind} ${round0(s.wind)} km/h</div>
-          ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')}</div>
+          <div class="det">${s.temp.toFixed(1)}°<br/>${round0(s.mm)} ${t.mm} · V ${round0(s.wind)}</div>
+          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
         `;
-        bandsS.appendChild(div);
+        bands.appendChild(div);
       }
       // Kickers estate
       $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDO" : "QUOTA ESCURSIONI";
@@ -1364,7 +1285,7 @@ async function refresh(){
       box.className = "day";
       box.innerHTML = `
         <div class="dow">${d.dow}</div>
-        <div class="dayIco">${wxIconSVG(d.code)}</div>
+        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"', 'width="26"').replace('height="32"', 'height="18"')}</div>
         <div class="temp">${round0(d.tmin)}° / ${round0(d.tmax)}°</div>
         <div class="mm">${round0(d.mm)} ${t.mm}</div>
       `;
@@ -1550,8 +1471,6 @@ async function refreshWelcome(params) {
   // ── Profile ──────────────────────────────────────────────────
   const profile = (params.get("profile") || "inkplate6").toLowerCase();
   if (profile === "waveshare75") {
-    document.body.classList.add("profile-waveshare75-body");
-    document.documentElement.classList.add("profile-waveshare75-body");
     $("root").classList.add("profile-waveshare75");
     $("welcomeRoot").classList.add("profile-waveshare75");
     const mv = document.getElementById("metaViewport");
