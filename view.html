@@ -897,10 +897,8 @@ function riskLabel(mm, code, lang){
    Stagione rilevata dal mese (inverno: nov-apr, estate: mag-ott)
    Frasi descrittive, mai prescrittive.
    ========================= */
-function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const isWinter = (month >= 11 || month <= 4);
+function chooseAdvice({lang, mode, season, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
+  const isWinter = (season === 'winter');
   const thunder     = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
   const snowLift    = [71,73,75,77,85,86].includes(lDayCode);
   const snowVillage = [71,73,75,77,85,86].includes(vDayCode);
@@ -1527,7 +1525,7 @@ async function refresh(){
                       ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
 
     const advice = chooseAdvice({
-      lang, mode,
+      lang, season, mode,
       vDayCode, lDayCode,
       lNowWind:lNowW,
       lNowTemp:lNowT,
