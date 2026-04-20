@@ -36,6 +36,16 @@
   </script>
 
   <style>
+    /* Inter 900 — embedded base64, always available in Puppeteer */
+    @font-face {
+      font-family: 'Inter';
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: block;
+      src: url('data:font/woff2;base64,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') format('woff2');
+    }
+  </style>
+  <style>
     :root{
       --w:600px; --h:800px;
       --pad:14px;
@@ -48,59 +58,96 @@
 
     /* ── Waveshare 7.5" V2 portrait (480×800) ───────────────────────────── */
     .profile-waveshare75 {
-      --w: 480px; --h: 800px; --pad: 14px; --gap: 11px; --r: 12px;
+      --w: 480px; --h: 800px; --pad: 11px; --gap: 8px; --r: 12px;
       --ink: #000;
     }
-    .profile-waveshare75 h1               { font-size: 44px; }
-    .profile-waveshare75 .meta            { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 5px; }
-    .profile-waveshare75 .rule            { height: 3px; opacity: 1; background: #000; margin: 10px 0 14px 0; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; white-space: nowrap; }
-    .profile-waveshare75 .mainTemp        { font-size: 34px; }
-    .profile-waveshare75 .sub             { font-size: 13px; font-weight: 800; opacity: 1; margin-top: 3px; }
-    .profile-waveshare75 .adviceLines     { font-size: 15px; font-weight: 600; line-height: 1.5; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceLines .line { font-size: 14px; font-weight: 600; color: #000; opacity: 1; }
-    .profile-waveshare75 .adviceTitle     { font-size: 10px; font-weight: 900; letter-spacing: 2px; opacity: 1; color: #000; text-transform: uppercase; }
-    .profile-waveshare75 .trendLine       { font-size: 16px; font-weight: 800; }
-    .profile-waveshare75 .time            { font-size: 16px; font-weight: 900; }
-    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; }
-    .profile-waveshare75 .det             { font-size: 13px; font-weight: 800; opacity: 1; }
-    .profile-waveshare75 .risk            { font-size: 12px; font-weight: 900; opacity: 1; }
-    .profile-waveshare75 .band            { min-height: 116px; padding: 8px; border: 2px solid #000 !important; border-radius: 12px !important; }
-    .profile-waveshare75 .dow             { font-size: 16px; font-weight: 900; }
-    .profile-waveshare75 .temp            { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .mm              { font-size: 13px; font-weight: 800; opacity: 1; }
-    .profile-waveshare75 .day             { min-height: 100px; padding: 9px 6px; border: 2px solid #000 !important; border-radius: 12px !important; }
-    .profile-waveshare75 .icoBox          { width: 38px; height: 38px; border: 2px solid #888 !important; }
-    .profile-waveshare75 .hero            { grid-template-columns: 38px 1fr; gap: 8px; }
-    .profile-waveshare75 .paese           { min-height: 116px; padding: 10px 10px 10px 12px; }
-    .profile-waveshare75 .consigli        { min-height: 116px; padding: 10px 12px; }
-    .profile-waveshare75 .trend           { padding: 9px 12px; min-height: 76px; }
-    .profile-waveshare75 .kicker          { letter-spacing: 1.5px; font-size: 10px; font-weight: 900; opacity: 1; color: #000; }
-    .profile-waveshare75 .panel           { border: 2px solid #888 !important; }
-    .profile-waveshare75 .ski             { padding: 10px 14px 12px; }
-    .profile-waveshare75 .skiStatus       { padding: 8px 12px; margin-bottom: 8px; }
-    .profile-waveshare75 .skiStatusMain   { font-size: 18px; font-weight: 900; }
-    .profile-waveshare75 .skiStatusRow    { font-size: 13px; font-weight: 700; }
-    .profile-waveshare75 .skiStatusBadge  { font-size: 11px; padding: 4px 10px; }
+    .profile-waveshare75.inkplate {
+      display: flex;
+      flex-direction: column;
+      width: 480px;
+      height: 800px;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: #fff;
+    }
+    /* Fixed canvas for Waveshare: no outer padding, only inner safe margins */
+    html.profile-waveshare75-body,
+    body.profile-waveshare75-body {
+      width: 480px !important;
+      height: 800px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      background: #fff !important;
+    }
+    .profile-waveshare75 h1,
+    .profile-waveshare75 .meta,
+    .profile-waveshare75 .rule,
+    .profile-waveshare75 .grid2,
+    .profile-waveshare75 .skiStatus,
+    .profile-waveshare75 .ski,
+    .profile-waveshare75 .forecast,
+    .profile-waveshare75 .controls {
+      margin-left: 11px;
+      margin-right: 11px;
+    }
+    /* Header */
+    .profile-waveshare75 h1               { font-size: 52px; line-height: 1; letter-spacing: -1.5px; }
+    .profile-waveshare75 .meta            { font-size: 14px; font-weight: 800; margin-top: 3px; }
+    .profile-waveshare75 .rule            { height: 2px; background: #000; margin: 7px 0 8px 0; flex-shrink: 0; }
+    /* Kicker — tutti uguali, 12px uppercase */
+    .profile-waveshare75 .kicker          { display: block; font-size: 12px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: #000; margin-bottom: 3px; line-height: 1.3; }
+    .profile-waveshare75 #kSkiSub         { margin-top: 1px; }
+    /* S1: paese + consigli — NO bordi, solo linea sotto */
+    .profile-waveshare75 .grid2           { display: grid; grid-template-columns: 1fr 1fr; gap: 0; flex-shrink: 0; margin-bottom: 10px; overflow: visible; border-radius: 0; }
+    .profile-waveshare75 .paese.panel     { border: none !important; border-right: 1px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
+    .profile-waveshare75 .consigli.panel  { border: none !important; border-radius: 0 !important; background: transparent !important; }
+    .profile-waveshare75 .paese           { padding: 12px 12px 16px 0; }
+    .profile-waveshare75 .consigli        { padding: 12px 0 16px 12px; display: flex; flex-direction: column; justify-content: center; }
+    .profile-waveshare75 .icoBox          { display: none; }
+    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; justify-content: flex-start; gap: 0; margin-top: 8px; min-height: 46px; }
+    .profile-waveshare75 .mainWx svg      { display: block; }
+    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 6px; }
+    .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 9px; line-height: 1.35; }
+    .profile-waveshare75 .adviceTitle     { display: none; }
+    .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 400; line-height: 1.4; color: #000; white-space: pre-line; }
+    .profile-waveshare75 .adviceLines .line { font-size: 19px; font-weight: 400; color: #000; }
+    /* S2: stato montagna — UNA sola riga nera sopra */
+    .profile-waveshare75 .skiStatus.panel { border: none !important; border-top: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
+    .profile-waveshare75 .skiStatus       { padding: 8px 0; flex-shrink: 0; margin-top: 4px; }
+    .profile-waveshare75 .skiStatusMain   { font-size: 21px; font-weight: 900; line-height: 1.1; }
+    .profile-waveshare75 .skiStatusRow    { font-size: 14px; font-weight: 700; margin-top: 3px; }
+    .profile-waveshare75 .skiStatusBadge  { font-size: 12px; padding: 4px 11px; border: 2px solid #000; border-radius: 20px; }
+    /* S3: fasce sci — riga sopra e sotto, icone più grandi */
+    .profile-waveshare75 .ski.panel       { border: none !important; border-top: 2px solid #000 !important; border-bottom: 2px solid #000 !important; border-radius: 0 !important; background: transparent !important; }
+    .profile-waveshare75 .ski             { padding: 8px 0 9px; flex: 1; display: flex; flex-direction: column; margin-top: 8px; }
+    .profile-waveshare75 .skiHead         { margin-bottom: 6px; flex-shrink: 0; }
     .profile-waveshare75 .skiNow          { font-size: 15px; font-weight: 900; }
-    .profile-waveshare75 .skiHead         { margin-bottom: 6px; }
-    .profile-waveshare75 .forecast        { padding: 6px 12px 10px; }
-    .profile-waveshare75 .footer          { font-size: 13px; font-weight: 900; opacity: 1; color: #000; margin-top: 6px; }
-    .profile-waveshare75 .days            { margin-top: 6px; }
-    .profile-waveshare75 .mainWx          { display:none; }
-    .profile-waveshare75 .paese           { min-height: 138px; padding: 10px 10px 8px 12px; }
-    .profile-waveshare75 .consigli        { min-height: 138px; padding: 10px 12px 8px; }
-    .profile-waveshare75 .adviceLines     { font-size: 14px; font-weight: 400; line-height: 1.35; }
-    .profile-waveshare75 .adviceLines .line { font-size: 13px; font-weight: 400; }
-    .profile-waveshare75 .skiStatus       { padding: 7px 12px; margin-bottom: 6px; }
-    .profile-waveshare75 .ski             { padding: 8px 12px 8px; }
-    .profile-waveshare75 .band            { min-height: 94px; padding: 6px 6px; }
-    .profile-waveshare75 .time            { font-size: 14px; }
-    .profile-waveshare75 .wx              { font-size: 13px; gap: 0; margin-top: 2px; }
-    .profile-waveshare75 .det             { margin-top: 4px; font-size: 12px; line-height: 1.15; }
-    .profile-waveshare75 .risk            { padding-top: 4px; font-size: 11px; }
-    .profile-waveshare75 .forecast        { padding: 4px 12px 8px; }
+    .profile-waveshare75 .bands           { gap: 6px; flex: 1; display: flex; }
+    .profile-waveshare75 .band            { padding: 10px 6px 8px; border: 2px solid #000 !important; border-radius: 10px !important; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+    .profile-waveshare75 .time            { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; }
+    .profile-waveshare75 .wx              { font-size: 14px; font-weight: 900; margin-top: 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .profile-waveshare75 .wxLabel         { font-size: 14px; font-weight: 900; }
+    .profile-waveshare75 .det             { font-size: 14px; font-weight: 900; line-height: 1.5; text-align: center; }
+    .profile-waveshare75 .risk            { display: none; }
+    .profile-waveshare75 .riskCommon      { font-size: 12px; font-weight: 900; margin-top: 6px; text-align: center; flex-shrink: 0; }
+    /* S4: giorni */
+    .profile-waveshare75 .forecast.panel  { border: none !important; background: transparent !important; border-radius: 0 !important; }
+    .profile-waveshare75 .forecast        { padding: 8px 0 0; flex-shrink: 0; }
+    .profile-waveshare75 .days            { margin-top: 5px; gap: 6px; }
+    .profile-waveshare75 .day             { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 3px; background: #ddd; }
+    .profile-waveshare75 .day.advice-day  { background: #f3f3f3; align-items: flex-start; justify-content: flex-start; text-align: left; padding: 10px 8px; }
+    .profile-waveshare75 .day.advice-day .dow { font-size: 14px; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
+    .profile-waveshare75 .day.advice-day .temp { font-size: 16px; line-height: 1.15; white-space: normal; text-align: left; }
+    .profile-waveshare75 .day.advice-day .mm { font-size: 11px; line-height: 1.3; text-align: left; opacity: 1; }
 
+    .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
+    .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
+    .profile-waveshare75 .mm              { font-size: 12px; font-weight: 800; }
+    .profile-waveshare75 .footer          { font-size: 11px; font-weight: 900; color: #000; margin-top: 5px; }
+    .profile-waveshare75 .panel           { border: 2px solid #000 !important; border-radius: 12px !important; }
     /* ───────────────────────────────────────────────────────────────────── */
 
     /* ── Welcome screen ────────────────────────────────────────────────── */
@@ -170,7 +217,7 @@
     body{
       margin:0;
       background:#cfcfcf;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      font-family: 'Inter', "Helvetica Neue", Helvetica, Arial, sans-serif;
       color:var(--ink);
     }
     .inkplate{
@@ -180,6 +227,7 @@
       margin:0 auto;
       padding:var(--pad);
       overflow:hidden;
+      box-sizing: border-box;
     }
 
     /* HEADER */
@@ -268,11 +316,15 @@
     }
     .mainRow{ display:flex; align-items:baseline; gap:8px; }
     .mainWx{
-      font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
+      font-size:28px;
       font-weight:950;
       line-height:1.05;
       letter-spacing:-0.2px;
-      white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
+      white-space:nowrap;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      min-height:40px;
     }
     .mainTemp{
       font-size:52px;
@@ -395,7 +447,7 @@
       font-size:16px;
       font-weight:900;
       display:flex;
-      gap:6px;
+      gap:0;
       align-items:center;
       justify-content:center;
       line-height:1;
@@ -434,6 +486,33 @@
       justify-content:center;
       gap:3px;
     }
+    .day.advice-day{
+      align-items:flex-start;
+      justify-content:flex-start;
+      text-align:left;
+      padding:10px 9px;
+      background:#f0f0f0;
+      gap:6px;
+    }
+    .day.advice-day .dow{
+      width:100%;
+      font-size:13px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+    }
+    .day.advice-day .temp{
+      font-size:16px;
+      line-height:1.15;
+      white-space:normal;
+      text-align:left;
+    }
+    .day.advice-day .mm{
+      font-size:12px;
+      line-height:1.3;
+      opacity:1;
+      text-align:left;
+    }
+
     .dow{
       font-size:16px;
       font-weight:950;
@@ -466,6 +545,10 @@
       opacity:1;
       color:#000;
     }
+
+
+    .mainWx span, .wxLabel{ display:none !important; }
+    .risk, .riskCommon{ display:none !important; }
 
     /* SVG ICONS */
     svg{ display:block; }
@@ -542,17 +625,8 @@
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-        <div class="hero">
-          <div class="icoBox" id="mainIconBox">
-            <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true">
-              <circle class="icoStroke" cx="24" cy="24" r="8"/>
-            </svg>
-          </div>
-          <div>
-            <div class="mainWx" id="mainWx">Variabile</div>
-            <div class="mainTemp" id="mainTemp">4°C</div>
-          </div>
-        </div>
+        <div class="mainWx" id="mainWx"></div>
+        <div class="mainTemp" id="mainTemp">4°C</div>
         <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
       <div class="panel consigli">
@@ -583,11 +657,12 @@
         <div class="skiNow" id="skiNow">Ora --.-° · Vento --</div>
       </div>
       <div class="bands" id="bands"></div>
+      <div class="riskCommon" id="riskCommon" style="display:none"></div>
     </div>
 
-    <!-- S4: 3 GIORNI -->
+    <!-- S4: 2 GIORNI + CONSIGLIO -->
     <div class="panel forecast">
-      <div class="kicker" id="kNext">PROSSIMI 3 GIORNI (PAESE)</div>
+      <div class="kicker" id="kNext">PROSSIMI 2 GIORNI + CONSIGLIO</div>
       <div class="days" id="days"></div>
       <div class="footer">
         <div id="updated">Aggiornato: --:--</div>
@@ -709,18 +784,17 @@ function pickDayIndex(mode){
   return (mode==="domani") ? 1 : 0;
 }
 
-function pickSeason(modeParam) {
+function pickSeason() {
   const params = new URLSearchParams(location.search);
-  const explicitSeason = (params.get("season") || "").toLowerCase();
-  if (explicitSeason === "summer" || explicitSeason === "winter") return explicitSeason;
-  if (modeParam === "summer" || modeParam === "winter") return modeParam;
+  if (params.get("season")) return params.get("season");
   const sel = document.getElementById("seasonSelect");
-  if (sel && (sel.value === "summer" || sel.value === "winter")) return sel.value;
+  if (sel && sel.value && sel.value !== "auto") return sel.value;
   const now = new Date();
-  const m = now.getMonth() + 1;
-  const d = now.getDate();
-  if ((m === 12) || (m >= 1 && m <= 3) || (m === 4 && d < 10)) return "winter";
-  return "summer";
+  const y = now.getFullYear();
+  const summerStart = new Date(y, 3, 15);   // 15 aprile
+  const winterStart = new Date(y, 10, 30);  // 30 novembre
+  if (now >= summerStart && now < winterStart) return "summer";
+  return "winter";
 }
 
 function fmtDow(d, lang){
@@ -823,136 +897,142 @@ function riskLabel(mm, code, lang){
    Stagione rilevata dal mese (inverno: nov-apr, estate: mag-ott)
    Frasi descrittive, mai prescrittive.
    ========================= */
-function chooseAdvice({lang, mode, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const isWinter = (month >= 11 || month <= 4);
-  const thunder    = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
-  const snowLift   = [71,73,75,77,85,86].includes(lDayCode);
-  const snowVillage= [71,73,75,77,85,86].includes(vDayCode);
-  const rainVillage= [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(vDayCode) || vDayMm>=2;
-  const rainLift   = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(lDayCode) || (lDayMm||0)>=2;
-  const sunny      = vDayCode <= 1;
+function chooseAdvice({lang, mode, season, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike, lDayMm}){
+  const isWinter = (season === 'winter');
+  const thunder     = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
+  const snowLift    = [71,73,75,77,85,86].includes(lDayCode);
+  const snowVillage = [71,73,75,77,85,86].includes(vDayCode);
+  const rainVillage = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(vDayCode) || vDayMm>=2;
+  const rainLift    = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(lDayCode) || (lDayMm||0)>=2;
+  const sunny       = vDayCode <= 1;
   const partlyCloudy = [2,3].includes(vDayCode);
-  const foggy      = [45,48].includes(vDayCode) || [45,48].includes(lDayCode);
-  const windyLift  = lNowWind >= 40;
-  const veryWindy  = lNowWind >= 60;
-  const freshSnow  = snowLift && lNowTemp <= -2;
-  const veryWarm   = lNowTemp >= 5;
+  const foggy       = [45,48].includes(vDayCode) || [45,48].includes(lDayCode);
+  const windyLift   = lNowWind >= 40;
+  const veryWindy   = lNowWind >= 60;
+  const freshSnow   = snowLift && lNowTemp <= -2;
+  const veryWarm    = lNowTemp >= 5;
+  const veryCold    = lNowTemp <= -12;
   const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
 
-  if(thunder) return T(
-    "Temporale previsto in quota — condizioni in rapido cambiamento",
-    "Thunderstorms forecast at altitude — conditions can change quickly",
-    "Orages prévus en altitude — conditions en évolution rapide"
-  );
-  if(foggy){
-    if(isWinter) return T(
-      "Nebbia o scarsa visibilità in quota — piste basse più accessibili",
-      "Fog or low visibility at altitude — lower slopes more accessible",
-      "Brouillard ou faible visibilité en altitude — pistes basses plus accessibles"
-    );
-    return T(
-      "Visibilità ridotta in quota — condizioni in miglioramento attese nel corso della giornata",
-      "Reduced visibility at altitude — conditions expected to improve during the day",
-      "Visibilité réduite en altitude — amélioration attendue en cours de journée"
-    );
-  }
-  if(veryWindy) return T(
-    `Vento molto forte in quota (${Math.round(lNowWind)} km/h) — verificare apertura impianti sul sito Via Lattea`,
-    `Very strong winds at altitude (${Math.round(lNowWind)} km/h) — check lift status on Via Lattea website`,
-    `Vent très fort en altitude (${Math.round(lNowWind)} km/h) — vérifier l'ouverture des remontées sur Via Lattea`
-  );
   if(isWinter){
+    if(thunder) return T(
+      `Rientra a valle prima di mezzogiorno.\nTemporale previsto in quota nel pomeriggio.`,
+      `Head down before noon.\nThunderstorms forecast at altitude this afternoon.`,
+      `Descends avant midi.\nOrages prévus en altitude cet après-midi.`
+    );
+    if(veryWindy) return T(
+      `Verifica gli impianti aperti prima di uscire.\nVento forte in quota: ${Math.round(lNowWind)} km/h.`,
+      `Check which lifts are open before heading out.\nStrong winds at altitude: ${Math.round(lNowWind)} km/h.`,
+      `Vérifie les remontées ouvertes avant de sortir.\nVent fort en altitude : ${Math.round(lNowWind)} km/h.`
+    );
+    if(foggy) return T(
+      `Preferisci le piste basse e i boschi.\nNebbia in quota, visibilità ridotta.`,
+      `Stick to lower runs and tree lines.\nFog at altitude, reduced visibility.`,
+      `Préfère les pistes basses et les forêts.\nBrouillard en altitude, visibilité réduite.`
+    );
     if(freshSnow && sunny) return T(
-      "Neve fresca in quota con cielo sereno — condizioni generalmente ottime al mattino",
-      "Fresh snow at altitude with clear skies — generally excellent conditions in the morning",
-      "Neige fraîche en altitude avec ciel dégagé — conditions généralement excellentes le matin"
+      `Giornata ideale per sciare — parti presto.\nNeve fresca in quota, cielo sereno.`,
+      `Ideal day on the slopes — head out early.\nFresh snow at altitude, clear skies.`,
+      `Journée idéale pour skier — pars tôt.\nNeige fraîche en altitude, ciel dégagé.`
     );
     if(freshSnow) return T(
-      "Neve fresca in quota — condizioni generalmente buone, visibilità variabile",
-      "Fresh snow at altitude — generally good conditions, variable visibility",
-      "Neige fraîche en altitude — bonnes conditions généralement, visibilité variable"
+      `Buone condizioni in quota — attenzione alla visibilità.\nNeve fresca, cielo coperto.`,
+      `Good conditions at altitude — watch for visibility.\nFresh snow, overcast skies.`,
+      `Bonnes conditions en altitude — attention à la visibilité.\nNeige fraîche, ciel couvert.`
     );
     if(snowVillage && lNowTemp<=0) return T(
-      "Neve in caduta — strade innevate possibili, attrezzatura invernale consigliata per i veicoli",
-      "Snowfall — roads may be snowy, winter tyres recommended for vehicles",
-      "Chutes de neige — routes enneigées possibles, équipement hiver conseillé pour les véhicules"
+      `Attrezzatura invernale obbligatoria in auto.\nNeve in caduta fino al paese.`,
+      `Winter tyres required for your vehicle.\nSnowfall down to village level.`,
+      `Équipement hiver obligatoire en voiture.\nChutes de neige jusqu'au village.`
     );
     if(snowLift && !snowVillage) return T(
-      "Neve in quota — cielo più coperto in alto, verificare le condizioni agli impianti",
-      "Snow at altitude — overcast higher up, check conditions at the lifts",
-      "Neige en altitude — ciel couvert en hauteur, vérifier les conditions aux remontées"
+      `Ottimo momento per gli impianti alti.\nNeve fresca sopra i 2000 m.`,
+      `Great time to head for the upper lifts.\nFresh snow above 2000 m.`,
+      `Bon moment pour les remontées hautes.\nNeige fraîche au-dessus de 2000 m.`
     );
-    if(lNowTemp <= -12 && sunny) return T(
-      `Temperatura molto bassa in quota (${lNowTemp.toFixed(1)}°) — giornata soleggiata con freddo intenso`,
-      `Very cold at altitude (${lNowTemp.toFixed(1)}°) — sunny day but with intense cold`,
-      `Très froid en altitude (${lNowTemp.toFixed(1)}°) — journée ensoleillée mais froid intense`
+    if(veryCold && sunny) return T(
+      `Copri bene viso e mani — neve eccellente.\nFreddo intenso in quota: ${lNowTemp.toFixed(0)}°C.`,
+      `Cover face and hands well — excellent snow.\nIntense cold at altitude: ${lNowTemp.toFixed(0)}°C.`,
+      `Couvre bien visage et mains — neige excellente.\nFroid intense en altitude : ${lNowTemp.toFixed(0)}°C.`
     );
     if(veryWarm && sunny) return T(
-      `Temperatura in quota (${lNowTemp.toFixed(1)}°) — neve che si ammorbidisce nelle ore centrali`,
-      `Temperature at altitude (${lNowTemp.toFixed(1)}°) — snow softening during midday hours`,
-      `Température en altitude (${lNowTemp.toFixed(1)}°) — neige ramollissant en milieu de journée`
+      `Meglio sciare al mattino — neve morbida dal pomeriggio.\nTemperature miti in quota: ${lNowTemp.toFixed(0)}°C.`,
+      `Best to ski in the morning — snow softens after noon.\nMild temperatures at altitude: ${lNowTemp.toFixed(0)}°C.`,
+      `Mieux skier le matin — neige ramollie l'après-midi.\nTempératures douces en altitude : ${lNowTemp.toFixed(0)}°C.`
     );
     if(rainVillage && !snowVillage && !snowLift) return T(
-      "Pioggia al paese — neve possibile salendo di quota, condizioni variabili",
-      "Rain in the village — snow possible at higher altitudes, variable conditions",
-      "Pluie au village — neige possible en prenant de l'altitude, conditions variables"
+      `Sali in quota — neve oltre i 2000 m.\nPioggia al paese, neve in quota.`,
+      `Head up — snow above 2000 m.\nRain in the village, snow higher up.`,
+      `Monte en altitude — neige au-dessus de 2000 m.\nPluie au village, neige en hauteur.`
     );
     if(rainLift) return T(
-      "Precipitazioni in quota — neve bagnata o pioggia gelata possibile, condizioni da valutare",
-      "Precipitation at altitude — wet snow or freezing rain possible, conditions to assess",
-      "Précipitations en altitude — neige mouillée ou pluie verglaçante possible, conditions à évaluer"
+      `Preferisci le piste battute — superfici scivolose.\nNeve bagnata o pioggia gelata in quota.`,
+      `Stick to groomed runs — slippery surfaces.\nWet snow or freezing rain at altitude.`,
+      `Préfère les pistes damées — surfaces glissantes.\nNeige mouillée ou pluie verglaçante en altitude.`
     );
     if(windyLift) return T(
-      `Vento moderato in quota (${Math.round(lNowWind)} km/h) — possibili limitazioni su alcuni impianti`,
-      `Moderate wind at altitude (${Math.round(lNowWind)} km/h) — possible restrictions on some lifts`,
-      `Vent modéré en altitude (${Math.round(lNowWind)} km/h) — restrictions possibles sur certaines remontées`
+      `Piste a mezza quota — condizioni migliori.\nVento ${Math.round(lNowWind)} km/h, possibili limitazioni in alto.`,
+      `Mid-mountain runs — best conditions today.\nWind ${Math.round(lNowWind)} km/h, possible restrictions higher up.`,
+      `Pistes à mi-hauteur — meilleures conditions.\nVent ${Math.round(lNowWind)} km/h, restrictions possibles en haut.`
     );
     if(sunny) return T(
-      "Cielo sereno in quota — giornata soleggiata con buona visibilità",
-      "Clear skies at altitude — sunny day with good visibility",
-      "Ciel dégagé en altitude — journée ensoleillée avec bonne visibilité"
+      `Giornata ideale sulle piste — parti presto.\nCielo sereno, neve compatta al mattino.`,
+      `Ideal day on the slopes — head out early.\nClear skies, firm snow in the morning.`,
+      `Journée idéale sur les pistes — pars tôt.\nCiel dégagé, neige compacte le matin.`
     );
     if(partlyCloudy) return T(
-      "Cielo parzialmente nuvoloso — condizioni stabili senza precipitazioni previste",
-      "Partly cloudy skies — stable conditions with no precipitation forecast",
-      "Ciel partiellement nuageux — conditions stables sans précipitations prévues"
+      `Buona giornata per sciare, nessun vincolo orario.\nCielo variabile, nessuna precipitazione prevista.`,
+      `Good day to ski, no time constraints.\nPartly cloudy, no precipitation expected.`,
+      `Bonne journée pour skier, sans contraintes horaires.\nCiel variable, aucune précipitation prévue.`
     );
-    return T("Condizioni nella norma per la stagione","Normal conditions for the season","Conditions normales pour la saison");
+    return T(
+      `Condizioni nella norma — buona giornata sulle piste.\nNeve e impianti in assetto invernale.`,
+      `Normal conditions — good day on the slopes.\nSnow and lifts in standard winter setup.`,
+      `Conditions normales — bonne journée sur les pistes.\nNeige et remontées en configuration hivernale.`
+    );
   }
-  // Estate
+
+  // ── Estate ───────────────────────────────────────────────
+  if(thunder) return T(
+    `Rientra entro mezzogiorno — temporale in arrivo.\nI temporali estivi colpiscono spesso nel primo pomeriggio.`,
+    `Be back by noon — storm incoming.\nSummer storms at altitude often hit early afternoon.`,
+    `Rentre avant midi — orage en approche.\nLes orages d'été frappent souvent en début d'après-midi.`
+  );
   if(rainVillage && rainLift) return T(
-    "Precipitazioni previste — sentieri e trail potrebbero essere bagnati",
-    "Precipitation expected — trails and paths may be wet",
-    "Précipitations prévues — sentiers et pistes pourraient être mouillés"
+    `Rimanda le escursioni impegnative a domani.\nPrecipitazioni previste su tutta la quota.`,
+    `Postpone demanding hikes until tomorrow.\nPrecipitation expected at all altitudes.`,
+    `Reporte les randonnées exigeantes à demain.\nPrécipitations prévues à toutes les altitudes.`
   );
   if(lNowTemp >= 20 && sunny) return T(
-    `Temperatura elevata in quota (${lNowTemp.toFixed(1)}°) — irraggiamento solare intenso in alta quota`,
-    `High temperature at altitude (${lNowTemp.toFixed(1)}°) — intense solar radiation at high altitude`,
-    `Température élevée en altitude (${lNowTemp.toFixed(1)}°) — rayonnement solaire intense en haute altitude`
+    `Esci al mattino — evita le ore centrali.\nCaldo in quota (${lNowTemp.toFixed(0)}°C), UV molto elevati.`,
+    `Go out in the morning — avoid midday heat.\nHot at altitude (${lNowTemp.toFixed(0)}°C), very high UV.`,
+    `Sors le matin — évite les heures chaudes.\nChaud en altitude (${lNowTemp.toFixed(0)}°C), UV très élevés.`
   );
   if(sunny && lNowTemp >= 8 && lNowTemp <= 18) return T(
-    "Cielo sereno con temperature fresche in quota — condizioni generalmente buone per attività all'aperto",
-    "Clear skies with cool temperatures at altitude — generally good conditions for outdoor activities",
-    "Ciel dégagé avec températures fraîches en altitude — bonnes conditions pour les activités de plein air"
+    `Giornata ideale per escursioni e mountain bike.\nCielo sereno, temperature fresche in quota.`,
+    `Ideal day for hiking and mountain biking.\nClear skies, cool temperatures at altitude.`,
+    `Journée idéale pour randonnée et VTT.\nCiel dégagé, températures fraîches en altitude.`
   );
   if(sunny) return T(
-    "Giornata soleggiata — UV elevati in quota nelle ore centrali",
-    "Sunny day — high UV at altitude during midday hours",
-    "Journée ensoleillée — UV élevés en altitude en milieu de journée"
+    `Crema solare e occhiali — UV alti nelle ore centrali.\nGiornata soleggiata in quota.`,
+    `Sunscreen and sunglasses — high UV at midday.\nSunny day at altitude.`,
+    `Crème solaire et lunettes — UV élevés à midi.\nJournée ensoleillée en altitude.`
   );
   if(windyLift) return T(
-    `Vento in quota (${Math.round(lNowWind)} km/h) — condizioni esposte sui crinali`,
-    `Wind at altitude (${Math.round(lNowWind)} km/h) — exposed conditions on ridges`,
-    `Vent en altitude (${Math.round(lNowWind)} km/h) — conditions exposées sur les crêtes`
+    `Preferisci i sentieri riparati o nei boschi.\nVento in quota: ${Math.round(lNowWind)} km/h sui crinali.`,
+    `Prefer sheltered trails or forest paths.\nWind at altitude: ${Math.round(lNowWind)} km/h on ridges.`,
+    `Préfère les sentiers abrités ou en forêt.\nVent en altitude : ${Math.round(lNowWind)} km/h sur les crêtes.`
   );
   if(partlyCloudy) return T(
-    "Cielo variabile — condizioni stabili senza precipitazioni significative previste",
-    "Variable sky — stable conditions with no significant precipitation forecast",
-    "Ciel variable — conditions stables sans précipitations significatives prévues"
+    `Buona giornata per attività all'aperto.\nCielo variabile, nessuna precipitazione prevista.`,
+    `Good day for outdoor activities.\nVariable sky, no significant precipitation expected.`,
+    `Bonne journée pour les activités de plein air.\nCiel variable, aucune précipitation significative prévue.`
   );
-  return T("Condizioni nella norma per la stagione estiva","Normal conditions for the summer season","Conditions normales pour la saison estivale");
+  return T(
+    `Condizioni buone per le attività estive.\nTemperatura e vento nella norma per l'alta quota.`,
+    `Good conditions for summer activities.\nTemperature and wind within normal range for altitude.`,
+    `Bonnes conditions pour les activités estivales.\nTempérature et vent dans la normale pour l'altitude.`
+  );
 }
 
 
@@ -1029,22 +1109,144 @@ function buildSlots(hourly, lang, dayISO){
   return out;
 }
 
-function buildNext3(daily, lang, baseIdx){
+function buildNext2(daily, lang, baseIdx){
   const days = [];
-  for(let k=1;k<=3;k++){
+  for(let k=1;k<=2;k++){
     const i = baseIdx + k;
+    if (i >= daily.time.length) break;
     const dateISO = daily.time[i];
+    if (!dateISO) break;
+    const tmin = daily.temperature_2m_min[i];
+    const tmax = daily.temperature_2m_max[i];
+    if (tmin == null || tmax == null) break;
     const d = new Date(dateISO+"T12:00:00");
     const dow = fmtDow(d, lang);
     const code = daily.weather_code[i] ?? 2;
-    days.push({
-      dow, code,
-      tmin: daily.temperature_2m_min[i],
-      tmax: daily.temperature_2m_max[i],
-      mm: daily.precipitation_sum[i] ?? 0
-    });
+    days.push({ dayIndex: i, dow, code, tmin, tmax, mm: daily.precipitation_sum[i] ?? 0 });
   }
   return days;
+}
+
+function dayMaxWind(hourly, dayISO){
+  const arr = [];
+  for(let i=0;i<hourly.time.length;i++){
+    const t = hourly.time[i];
+    const isoDate = t.slice(0,10);
+    if(isoDate === dayISO){
+      arr.push(hourly.wind_speed_10m?.[i] ?? 0);
+    }
+  }
+  return arr.length ? Math.max(...arr) : 0;
+}
+
+function buildTwoDayAdvice({lang, season, d1, d2}) {
+  const T = (it, en, fr) => lang==="en" ? en : lang==="fr" ? fr : it;
+  const classify = (d) => {
+    const thunder = [95,96,99].includes(d.code);
+    const snow = [71,73,75,77,85,86].includes(d.code);
+    const rainy = d.mm >= 3 || [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(d.code);
+    const heavy = d.mm >= 10;
+    const windy = d.wind >= 35;
+    const sunny = d.code <= 1;
+    const score = (sunny ? 3 : 0) + (!rainy ? 2 : 0) + (!windy ? 1 : 0) - (heavy ? 3 : 0) - (thunder ? 4 : 0);
+    return { ...d, thunder, snow, rainy, heavy, windy, sunny, score };
+  };
+
+  const a = classify(d1);
+  const b = classify(d2);
+
+  const shortReason = (d) => {
+    if (season === "winter") {
+      if (d.thunder) return T("tempo instabile in montagna", "unstable mountain weather", "temps instable en montagne");
+      if (d.windy) return T("meno vento in quota", "lighter wind at altitude", "moins de vent en altitude");
+      if (d.snow && !d.windy) return T("atmosfera pienamente invernale", "full winter atmosphere", "ambiance pleinement hivernale");
+      if (!d.rainy && d.sunny) return T("più luce e neve più leggibile", "more light and clearer snow", "plus de lumière et neige plus lisible");
+      return T("condizioni più tranquille", "calmer conditions", "conditions plus calmes");
+    }
+    if (d.thunder) return T("temporali meno presenti", "less storm risk", "moins de risque d'orage");
+    if (d.windy) return T("meno vento sui percorsi", "less wind on the trails", "moins de vent sur les sentiers");
+    if (!d.rainy && d.sunny) return T("più stabile e luminoso", "more stable and brighter", "plus stable et lumineux");
+    return T("più gradevole per stare fuori", "more pleasant for being outdoors", "plus agréable pour être dehors");
+  };
+
+  if (season === "summer") {
+    if (a.thunder && b.thunder) {
+      return {
+        title: T("Meglio uscire solo al mattino", "Best to head out only in the morning", "Mieux vaut sortir seulement le matin"),
+        detail: T("nel pomeriggio l'atmosfera si chiude", "afternoons look more unsettled", "l'après-midi s'annonce plus instable")
+      };
+    }
+    if (a.windy && b.windy) {
+      return {
+        title: T("Meglio restare su percorsi riparati", "Best to stick to sheltered trails", "Mieux vaut rester sur des sentiers abrités"),
+        detail: T("in quota il vento si fa sentire", "wind will be felt at altitude", "le vent se fait sentir en altitude")
+      };
+    }
+    if ((a.heavy || a.rainy) && (b.heavy || b.rainy)) {
+      return {
+        title: T("Due giorni da prendere con calma", "Two days to take gently", "Deux journées à vivre calmement"),
+        detail: T("meglio programmi morbidi e quota bassa", "better with easy plans and lower altitude", "mieux vaut des plans souples et des altitudes plus basses")
+      };
+    }
+    if (a.score >= b.score + 2) {
+      return {
+        title: T("Domani è la giornata migliore", "Tomorrow is the better day", "Demain est la meilleure journée"),
+        detail: shortReason(a)
+      };
+    }
+    if (b.score >= a.score + 2) {
+      return {
+        title: T("Dopodomani promette meglio", "The following day looks better", "Après-demain s'annonce mieux"),
+        detail: shortReason(b)
+      };
+    }
+    if (a.sunny && b.sunny && !a.rainy && !b.rainy && !a.windy && !b.windy) {
+      return {
+        title: T("Due giornate da vivere fuori", "Two days made for being outdoors", "Deux journées faites pour vivre dehors"),
+        detail: T("sentieri, aria buona e ritmo leggero", "trails, fresh air and an easy pace", "sentiers, bon air et rythme léger")
+      };
+    }
+    return {
+      title: T("Ottimo momento per stare all'aperto", "A good moment to be outdoors", "Un bon moment pour être dehors"),
+      detail: T("scegliendo bene l'orario migliore", "if you choose the best part of the day", "en choisissant bien le meilleur moment")
+    };
+  }
+
+  // winter
+  if (a.windy && b.windy) {
+    return {
+      title: T("Vento forte in quota, meglio flessibili", "Strong wind at altitude, stay flexible", "Vent fort en altitude, mieux vaut rester flexible"),
+      detail: T("possibili disagi nelle parti alte", "possible disruption on the upper slopes", "des gênes possibles en altitude")
+    };
+  }
+  if ((a.snow || a.rainy) && (b.snow || b.rainy) && (a.heavy || b.heavy)) {
+    return {
+      title: T("Neve e visibilità chiedono calma", "Snow and visibility call for a calmer plan", "Neige et visibilité demandent plus de calme"),
+      detail: T("giornate più raccolte che veloci", "these are days for atmosphere more than speed", "des journées plus d'ambiance que de performance")
+    };
+  }
+  if (a.score >= b.score + 2) {
+    return {
+      title: T("Domani ha più faccia da sci", "Tomorrow looks more like a ski day", "Demain a davantage l'allure d'une journée de ski"),
+      detail: shortReason(a)
+    };
+  }
+  if (b.score >= a.score + 2) {
+    return {
+      title: T("Dopodomani gira meglio", "The following day turns in your favour", "Après-demain tourne mieux"),
+      detail: shortReason(b)
+    };
+  }
+  if (a.sunny && b.sunny && !a.windy && !b.windy && !a.rainy && !b.rainy) {
+    return {
+      title: T("Ottimo momento per stare sulla neve", "A great moment to be on the snow", "Très bon moment pour profiter de la neige"),
+      detail: T("due giornate pulite e leggibili", "two clear and readable days", "deux journées claires et lisibles")
+    };
+  }
+  return {
+    title: T("Meglio prendersela con calma", "Better to take it easy", "Mieux vaut prendre son temps"),
+    detail: T("la montagna chiede un po' di tatto", "the mountain asks for a little tact", "la montagne demande un peu de tact")
+  };
 }
 
 /* =========================
@@ -1096,11 +1298,8 @@ function renderSkiStatus(ski, windKph, tempC, lang) {
       fr: { open:"Ouverture totale",  partial:"Ouverture partielle",limited:"Ouverture limitée",closed:"Remontées fermées" }
     };
     mainText = (mainMap[lang] || mainMap.it)[ski.status] || ski.status;
-    const parts = [];
-    if (ski.lifts_open != null && ski.lifts_total != null) parts.push(`Impianti ${ski.lifts_open}/${ski.lifts_total}`);
-    if (ski.slopes_open != null && ski.slopes_total != null) parts.push(`Piste ${ski.slopes_open}/${ski.slopes_total}`);
-    if (ski.snow_cm != null) parts.push(`Neve ${ski.snow_cm} cm`);
-    rowText = parts.join(" · ");
+    // Mostriamo solo lo stato — i numeri impianti/neve da scraping non sono affidabili
+    rowText = "";
     badgeText = statusMap[ski.status] || ll.unknown;
   } else {
     // Fallback: stima da meteo
@@ -1141,7 +1340,7 @@ async function refresh(){
   const t = I18N[lang] || I18N.it;
 
   const mode = pickMode(modeParam);
-  const season = pickSeason(modeParam);
+  const season = pickSeason();
   const dayIdx = pickDayIndex(mode);
 
   // Entrambe le stagioni mostrano le stesse sezioni, solo con contenuto diverso
@@ -1164,29 +1363,52 @@ async function refresh(){
     ]);
 
     const now = new Date();
-    $("updated").textContent = `${t.updated}: ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+    // Ora italiana — Render.com gira in UTC, WeatherAPI usa ora locale italiana
+    const nowItaly = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Rome" }));
+    $("updated").textContent = `${t.updated}: ${pad2(nowItaly.getHours())}:${pad2(nowItaly.getMinutes())}`;
 
     const dayISO = vF.daily.time[dayIdx];
 
-    // MAIN (Paese) — ora + min/max/day mm
-    const vNowT = vF.current.temperature_2m;
-    const vNowCode = vF.current.weather_code;
+    // Temperatura oraria per l'ora corrente — più accurata di current con cache da 25 min
+    function getHourlyNow(forecast) {
+      // WeatherAPI restituisce "2025-04-04 09:00" in ora locale italiana
+      const localStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())} ${pad2(nowItaly.getHours())}:00`;
+      let idx = forecast.hourly.time.findIndex(t => t === localStr);
+      if (idx < 0) {
+        // fallback formato ISO con T
+        const isoStr = `${nowItaly.getFullYear()}-${pad2(nowItaly.getMonth()+1)}-${pad2(nowItaly.getDate())}T${pad2(nowItaly.getHours())}`;
+        idx = forecast.hourly.time.findIndex(t => t.replace(" ","T").startsWith(isoStr));
+      }
+      if (idx >= 0) return {
+        temp: forecast.hourly.temperature_2m[idx],
+        code: forecast.hourly.weather_code[idx],
+        wind: forecast.hourly.wind_speed_10m?.[idx] ?? forecast.current.wind_speed_10m ?? 0
+      };
+      return {
+        temp: forecast.current.temperature_2m,
+        code: forecast.current.weather_code,
+        wind: forecast.current.wind_speed_10m ?? 0
+      };
+    }
+
+    const vNow = getHourlyNow(vF);
+    const lNow = getHourlyNow(lF);
+    const vNowT    = vNow.temp;
+    const vNowCode = vNow.code;
+    const lNowT    = lNow.temp;
+    const lNowW    = lNow.wind;
+
+    // MAIN (Paese)
     const vMin = vF.daily.temperature_2m_min[dayIdx];
     const vMax = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
 
-    $("mainIconBox").innerHTML = wxIconSVG(vNowCode);
-    $("mainWx").textContent = "";
-    $("mainTemp").textContent = `${vNowT.toFixed(1)}°`;
-    // Perceived temp from wind chill approximation
-    // SKI NOW — definiti qui perché usati anche sopra
-    const lNowT = lF.current.temperature_2m;
-    const lNowW = lF.current.wind_speed_10m ?? 0;
-
+    $("mainWx").innerHTML = wxIconSVG(vNowCode).replace('width="32"','width="40"').replace('height="32"','height="40"');
+    $("mainTemp").textContent = `${vNowT.toFixed(1)}°C`;
     const perceivedT = (vNowT < 10 && lNowW > 5)
       ? Math.round(13.12 + 0.6215*vNowT - 11.37*Math.pow(lNowW,0.16) + 0.3965*vNowT*Math.pow(lNowW,0.16))
       : Math.round(vNowT);
-    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°`;
+    $("mainSub").textContent = `${round0(vMin)}° / ${round0(vMax)}°C · ${round0(vDayMm)} mm · perc. ${perceivedT}°C`;
 
     // STATO MONTAGNA / ESTATE
     const vDayCode = vF.daily.weather_code[dayIdx];
@@ -1201,20 +1423,30 @@ async function refresh(){
 
     if (isWinter) {
       renderSkiStatus(ski, lNowW, lNowT, lang);
-      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}°C · ${t.wind} ${round0(lNowW)} km/h`;
 
       // BANDS
       const slots = buildSlots(lF.hourly, lang, dayISO);
       const bands = $("bands");
       bands.innerHTML = "";
+
+      const riskLabels = slots.map(s => riskLabel(s.mm, s.code, lang));
+      const allSameRisk = riskLabels.every(r => r === riskLabels[0]);
+      const riskCommonEl = $("riskCommon");
+      if (allSameRisk) {
+        riskCommonEl.textContent = "";
+        riskCommonEl.style.display = "none";
+      } else {
+        riskCommonEl.style.display = "none";
+      }
+
       for(const s of slots){
         const div = document.createElement("div");
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')}</div>
-          <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
-          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}</div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
         `;
         bands.appendChild(div);
       }
@@ -1243,10 +1475,10 @@ async function refresh(){
 
       // Row: quota escursioni con temp e vento
       const summerRow = (lang==="en")
-        ? `Altitude ${lNowT.toFixed(1)}°C · Wind ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        ? `Altitude ${lNowT.toFixed(1)}°CC · Wind ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
         : (lang==="fr")
-        ? `Altitude ${lNowT.toFixed(1)}°C · Vent ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
-        : `Quota ${lNowT.toFixed(1)}°C · Vento ${round0(lNowW)} km/h · Paese ${vNowT.toFixed(1)}°C`;
+        ? `Altitude ${lNowT.toFixed(1)}°CC · Vent ${round0(lNowW)} km/h · Village ${vNowT.toFixed(1)}°C`
+        : `Quota ${lNowT.toFixed(1)}°CC · Vento ${round0(lNowW)} km/h · Paese ${vNowT.toFixed(1)}°C`;
       $("skiStatusRow").textContent = summerRow;
 
       const summerBadge = lNowW > 40 ? {it:"VENTOSO",en:"WINDY",fr:"VENTEUX"}
@@ -1256,25 +1488,36 @@ async function refresh(){
       $("skiStatusBadge").textContent = (summerBadge[lang] || summerBadge.it);
       $("kSkiStatus").textContent = (lang==="en") ? "OUTDOOR CONDITIONS" : (lang==="fr") ? "CONDITIONS OUTDOOR" : "CONDIZIONI OUTDOOR";
 
-      // BANDS estate — quota escursioni (dati lifts) per fascia mattina/pomeriggio/sera
+      // BANDS estate
       const slotsS = buildSlots(lF.hourly, lang, dayISO);
-      const bands = $("bands");
-      bands.innerHTML = "";
+      const bandsS = $("bands");
+      bandsS.innerHTML = "";
+
+      const riskLabelsS = slotsS.map(s => riskLabel(s.mm, s.code, lang));
+      const allSameRiskS = riskLabelsS.every(r => r === riskLabelsS[0]);
+      const riskCommonElS = $("riskCommon");
+      if (allSameRiskS) {
+        riskCommonElS.textContent = "";
+        riskCommonElS.style.display = "none";
+      } else {
+        riskCommonElS.style.display = "none";
+      }
+
       for(const s of slotsS){
         const div = document.createElement("div");
         div.className = "band";
         div.innerHTML = `
           <div class="time">${s.time}</div>
-          <div class="wx">${wxIconSVG(s.code).replace('width="32"', 'width="16"').replace('height="32"', 'height="16"')}</div>
-          <div class="det">${s.temp.toFixed(1)}° · ${round0(s.mm)} ${t.mm}<br/>${t.wind} ${round0(s.wind)} km/h</div>
-          <div class="risk">${riskLabel(s.mm, s.code, lang)}</div>
+          <div class="wx">${wxIconSVG(s.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}<span class="wxLabel">${s.label}</span></div>
+          <div class="det">${s.temp.toFixed(1)}°C<br/>${round0(s.mm)} ${t.mm} ${lang==="en"?"rain":lang==="fr"?"pluie":"pioggia"}<br/>${t.wind} ${round0(s.wind)} km/h</div>
+          ${!allSameRiskS ? `<div class="risk">${riskLabel(s.mm, s.code, lang)}</div>` : ''}
         `;
-        bands.appendChild(div);
+        bandsS.appendChild(div);
       }
       // Kickers estate
       $("kSki").textContent = (lang==="en") ? "HIKING ALTITUDE" : (lang==="fr") ? "ALTITUDE RANDO" : "QUOTA ESCURSIONI";
       $("kSkiSub").textContent = (lang==="en") ? "CONDITIONS BY TIME" : (lang==="fr") ? "TRANCHES HORAIRES" : "FASCE ORARIE";
-      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}° · ${t.wind} ${round0(lNowW)} km/h`;
+      $("skiNow").textContent = `${t.now} ${lNowT.toFixed(1)}°C · ${t.wind} ${round0(lNowW)} km/h`;
     }
 
     // ADVICE
@@ -1282,7 +1525,7 @@ async function refresh(){
                       ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
 
     const advice = chooseAdvice({
-      lang, mode,
+      lang, season, mode,
       vDayCode, lDayCode,
       lNowWind:lNowW,
       lNowTemp:lNowT,
@@ -1292,18 +1535,47 @@ async function refresh(){
     });
     $("advice").textContent = advice;
 
-    // NEXT 3 DAYS (dal giorno base)
-    const next = buildNext3(vF.daily, lang, dayIdx);
+    // NEXT 2 DAYS + ADVICE
+    const next = buildNext2(vF.daily, lang, dayIdx);
+    const nextLabel = (lang==="en")
+      ? "NEXT 2 DAYS + ADVICE"
+      : (lang==="fr")
+      ? "2 PROCHAINS JOURS + CONSEIL"
+      : "PROSSIMI 2 GIORNI + CONSIGLIO";
+    $("kNext").textContent = nextLabel;
+
     const days = $("days");
     days.innerHTML = "";
+
     for(const d of next){
       const box = document.createElement("div");
       box.className = "day";
       box.innerHTML = `
         <div class="dow">${d.dow}</div>
-        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"', 'width="26"').replace('height="32"', 'height="18"')}</div>
-        <div class="temp">${round0(d.tmin)}° / ${round0(d.tmax)}°</div>
+        <div class="dayIco">${wxIconSVG(d.code).replace('width="32"','width="40"').replace('height="32"','height="40"')}</div>
+        <div class="temp">${round0(d.tmin)}°C / ${round0(d.tmax)}°C</div>
         <div class="mm">${round0(d.mm)} ${t.mm}</div>
+      `;
+      days.appendChild(box);
+    }
+
+    const adviceDay1 = next[0] ? {
+      ...next[0],
+      wind: dayMaxWind(vF.hourly, vF.daily.time[next[0].dayIndex] || "")
+    } : null;
+    const adviceDay2 = next[1] ? {
+      ...next[1],
+      wind: dayMaxWind(vF.hourly, vF.daily.time[next[1].dayIndex] || "")
+    } : null;
+
+    if (adviceDay1 && adviceDay2) {
+      const advice2d = buildTwoDayAdvice({ lang, season, d1: adviceDay1, d2: adviceDay2 });
+      const box = document.createElement("div");
+      box.className = "day advice-day";
+      box.innerHTML = `
+        <div class="dow">${lang==="en" ? "ADVICE" : lang==="fr" ? "CONSEIL" : "CONSIGLIO"}</div>
+        <div class="temp">${advice2d.title}</div>
+        <div class="mm">${advice2d.detail}</div>
       `;
       days.appendChild(box);
     }
@@ -1487,6 +1759,8 @@ async function refreshWelcome(params) {
   // ── Profile ──────────────────────────────────────────────────
   const profile = (params.get("profile") || "inkplate6").toLowerCase();
   if (profile === "waveshare75") {
+    document.body.classList.add("profile-waveshare75-body");
+    document.documentElement.classList.add("profile-waveshare75-body");
     $("root").classList.add("profile-waveshare75");
     $("welcomeRoot").classList.add("profile-waveshare75");
     const mv = document.getElementById("metaViewport");
@@ -1504,34 +1778,43 @@ async function refreshWelcome(params) {
 
   populateSelects(place, lang);
   $("modeSelect").value = ["auto","oggi","domani"].includes(mode) ? mode : "auto";
-  if ($("seasonSelect")) $("seasonSelect").value = pickSeason(mode);
 
   $("placeSelect").addEventListener("change", ()=>{
     const p = $("placeSelect").value;
     const l = $("langSelect").value;
     const m = $("modeSelect").value;
-    const s = $("seasonSelect").value;
-    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}&season=${encodeURIComponent(s)}${renderFlag?"&render=1":""}`;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
   });
   $("langSelect").addEventListener("change", ()=>{
     const p = $("placeSelect").value;
     const l = $("langSelect").value;
     const m = $("modeSelect").value;
-    const s = $("seasonSelect").value;
-    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}&season=${encodeURIComponent(s)}${renderFlag?"&render=1":""}`;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
   });
   $("modeSelect").addEventListener("change", ()=>{
     const p = $("placeSelect").value;
     const l = $("langSelect").value;
     const m = $("modeSelect").value;
-    const s = $("seasonSelect").value;
-    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}&season=${encodeURIComponent(s)}${renderFlag?"&render=1":""}`;
+    location.search = `?place=${encodeURIComponent(p)}&lang=${encodeURIComponent(l)}&mode=${encodeURIComponent(m)}${renderFlag?"&render=1":""}`;
   });
   // Season switch — non ricarica la pagina, aggiorna direttamente
   const seasonSel = $("seasonSelect");
   if (seasonSel) seasonSel.addEventListener("change", () => refresh());
 
   refresh();
+
+  // Auto-refresh quadro: ogni 60 minuti
+  setTimeout(() => location.reload(), 60 * 60 * 1000);
+
+  // Watchdog leggero: se resta aperto troppo a lungo, ricarica
+  setInterval(() => {
+    if (document.visibilityState === "visible") {
+      location.reload();
+    }
+  }, 75 * 60 * 1000);
+
+  // Se torna online dopo una perdita di rete, ricarica
+  window.addEventListener("online", () => location.reload());
 })();
 </script>
 </body>
