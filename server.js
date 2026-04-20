@@ -171,17 +171,6 @@ function adjustForElevation(data, elevDiff) {
 const SKI_CACHE = {};
 const SKI_TTL = 15 * 60 * 1000; // 15 min
 
-function isSummerSeason(date = new Date()) {
-  const year = date.getFullYear();
-  const summerStart = new Date(year, 3, 15, 0, 0, 0, 0); // 15 aprile
-  const winterStart = new Date(year, 10, 30, 0, 0, 0, 0); // 30 novembre
-  return date >= summerStart && date < winterStart;
-}
-
-function isWinterSeason(date = new Date()) {
-  return !isSummerSeason(date);
-}
-
 async function fetchSkiinfoStatus(placeKey) {
   const urls = {
     sauze:        "https://www.skiinfo.it/piemonte/sauze-doulx/bollettino-neve.html",
@@ -230,8 +219,9 @@ async function fetchSkiinfoStatus(placeKey) {
 function skiStatusFromWeather(liftWeather) {
   if (!liftWeather) return { status: "unknown", source: "model" };
   const wind  = liftWeather.current?.wind_speed_10m ?? 0;
+  const month = new Date().getMonth() + 1;
   let status = "unknown";
-  if (isSummerSeason()) status = "closed";
+  if (month >= 5 && month <= 11) status = "closed";
   else if (wind > 60) status = "closed";
   else if (wind > 35) status = "limited";
   else status = "open";
@@ -244,15 +234,6 @@ async function getSkiStatus(placeKey, liftWeather) {
     console.log(`[SKI] Cache hit for ${placeKey}`);
     return cached.data;
   }
-
-  // Dal 15 aprile al 29 novembre compreso: niente sci, sempre chiuso
-  if (isSummerSeason()) {
-    const data = { status: "closed", source: "season_override" };
-    SKI_CACHE[placeKey] = { data, ts: Date.now() };
-    console.log(`[SKI] ${placeKey}: season override -> closed`);
-    return data;
-  }
-
   let data;
   try {
     console.log(`[SKI] Fetching Skiinfo for ${placeKey}...`);
@@ -272,10 +253,6 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use("/public", express.static(path.join(__dirname, "public")));
-
-app.get("/health", (req, res) => {
-  res.status(200).json({ ok: true, ts: Date.now() });
-});
 
 function safe(s) {
   return String(s || "").toLowerCase().replace(/[^a-z0-9_-]/g, "");
@@ -427,8 +404,9 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     }
   }
 
-  // Stagione coerente con la view: estate dal 15 aprile al 29 novembre, inverno dal 30 novembre al 14 aprile
-  const season = isSummerSeason() ? "summer" : "winter";
+  // Stagione: per display fisici sempre winter (auto da mese), solo preview browser può cambiare
+  const month = new Date().getMonth() + 1;
+  const season = (month >= 6 && month <= 9) ? "summer" : "winter";
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
@@ -513,18 +491,46 @@ function pngToRaw1Bit(pngBuffer, profile) {
   return raw;
 }
 
+function hasFile(file) {
+  try { return fs.existsSync(file) && fs.statSync(file).size > 0; }
+  catch { return false; }
+}
+
 async function ensureRendered(place, lang, mode, profile) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
   const pJpg = jpgPath(place, lang, mode, profile);
-  if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw, jpg: pJpg };
-  const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
-  fs.writeFileSync(pPng, pngBuffer);
-  fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
-  // Genera anche JPEG per Inkplate (supporta JPEG da URL, non PNG)
-  const jpgBuffer = await renderJpgBuffer(place, lang, mode, profile);
-  fs.writeFileSync(pJpg, jpgBuffer);
-  return { png: pPng, raw: pRaw, jpg: pJpg };
+
+  const freshPng = isFresh(pPng);
+  const freshRaw = isFresh(pRaw);
+  const freshJpg = isFresh(pJpg);
+
+  if (freshPng && freshRaw && freshJpg) {
+    return { png: pPng, raw: pRaw, jpg: pJpg, stale: false };
+  }
+
+  try {
+    const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
+    fs.writeFileSync(pPng, pngBuffer);
+    fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
+
+    // Genera anche JPEG per Inkplate (supporta JPEG da URL, non PNG)
+    const jpgBuffer = await renderJpgBuffer(place, lang, mode, profile);
+    fs.writeFileSync(pJpg, jpgBuffer);
+
+    return { png: pPng, raw: pRaw, jpg: pJpg, stale: false };
+  } catch (err) {
+    const hasPng = hasFile(pPng);
+    const hasRaw = hasFile(pRaw);
+    const hasJpg = hasFile(pJpg);
+
+    if (hasPng && hasRaw) {
+      console.warn(`[RENDER] Using stale cached render for ${place}/${lang}/${mode}/${profile}: ${err.message}`);
+      return { png: pPng, raw: pRaw, jpg: hasJpg ? pJpg : null, stale: true };
+    }
+
+    throw err;
+  }
 }
 
 async function renderJpgBuffer(place, lang, mode, profile) {
@@ -652,6 +658,7 @@ app.get("/raw", async (req, res) => {
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", RAW_SIZE);
     res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
     fs.createReadStream(files.raw).pipe(res);
   } catch (e) {
     console.error(e);
@@ -670,6 +677,7 @@ app.get("/img", async (req, res) => {
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Content-Length", stat.size);
     res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
     fs.createReadStream(files.png).pipe(res);
   } catch (e) {
     console.error(e);
@@ -685,11 +693,13 @@ app.get("/jpg", async (req, res) => {
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
   try {
     const files = await ensureRendered(place, lang, mode, profile);
-    const stat = fs.statSync(files.jpg);
+    const jpgFile = files.jpg || jpgPath(place, lang, mode, profile);
+    const stat = fs.statSync(jpgFile);
     res.setHeader("Content-Type", "image/jpeg");
     res.setHeader("Content-Length", stat.size);
     res.setHeader("Cache-Control", "no-store");
-    fs.createReadStream(files.jpg).pipe(res);
+    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
+    fs.createReadStream(jpgFile).pipe(res);
   } catch (e) {
     console.error(e);
     res.status(500).send("JPEG render error");
