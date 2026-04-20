@@ -107,8 +107,9 @@
     .profile-waveshare75 .paese           { padding: 6px 12px 10px 0; }
     .profile-waveshare75 .consigli        { padding: 6px 0 10px 12px; display: flex; flex-direction: column; justify-content: center; }
     .profile-waveshare75 .icoBox          { display: none; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; margin-top: 4px; }
-    .profile-waveshare75 .mainWx svg      { display: block; }
+    .profile-waveshare75 .mainWx          { font-size: 18px; font-weight: 900; line-height: 1.05; display: flex; flex-direction: row; align-items: center; gap: 6px; margin-top: 4px; white-space: normal; }
+    .profile-waveshare75 .mainWx svg      { display: block; flex: 0 0 auto; }
+    .profile-waveshare75 #kPaese         { display: none; }
     .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 2px; }
     .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 5px; line-height: 1.3; }
     .profile-waveshare75 .adviceTitle     { display: none; }
@@ -140,8 +141,8 @@
     .profile-waveshare75 .day             { padding: 9px 6px; border: 2px solid #000 !important; border-radius: 10px !important; gap: 3px; background: #ddd; }
     .profile-waveshare75 .day.advice-day  { background: #f3f3f3; align-items: flex-start; justify-content: flex-start; text-align: left; padding: 10px 8px; }
     .profile-waveshare75 .day.advice-day .dow { font-size: 14px; width: 100%; text-transform: uppercase; letter-spacing: 1px; }
-    .profile-waveshare75 .day.advice-day .temp { font-size: 16px; line-height: 1.15; white-space: normal; text-align: left; }
-    .profile-waveshare75 .day.advice-day .mm { font-size: 11px; line-height: 1.3; text-align: left; opacity: 1; }
+    .profile-waveshare75 .day.advice-day .temp { font-size: 15px; line-height: 1.08; white-space: normal; text-align: left; }
+    .profile-waveshare75 .day.advice-day .mm { font-size: 10px; line-height: 1.18; text-align: left; opacity: 1; }
 
     .profile-waveshare75 .dow             { font-size: 18px; font-weight: 900; }
     .profile-waveshare75 .temp            { font-size: 20px; font-weight: 950; letter-spacing: -0.3px; }
@@ -316,12 +317,17 @@
     }
     .mainRow{ display:flex; align-items:baseline; gap:8px; }
     .mainWx{
-      font-size:28px;      /* <-- più piccolo (nuvoloso ecc) */
+      font-size:24px;
       font-weight:950;
       line-height:1.05;
       letter-spacing:-0.2px;
-      white-space:nowrap;  /* <-- resta a sinistra, non “spinge” */
+      white-space:normal;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex-wrap:wrap;
     }
+    .mainWx svg{ flex:0 0 auto; }
     .mainTemp{
       font-size:52px;
       font-weight:950;
@@ -1243,6 +1249,34 @@ function buildTwoDayAdvice({lang, season, d1, d2}) {
   };
 }
 
+
+function fitAdviceBox(){
+  const box = document.querySelector('.day.advice-day');
+  if(!box) return;
+  const title = box.querySelector('.temp');
+  const detail = box.querySelector('.mm');
+  if(!title || !detail) return;
+
+  box.classList.remove('advice-compact','advice-tight');
+
+  const overflows = () => box.scrollHeight > box.clientHeight + 1;
+
+  if (overflows()) {
+    box.classList.add('advice-compact');
+    title.style.fontSize = '14px';
+    title.style.lineHeight = '1.05';
+    detail.style.fontSize = '10px';
+    detail.style.lineHeight = '1.12';
+  }
+  if (overflows()) {
+    box.classList.add('advice-tight');
+    title.style.fontSize = '13px';
+    title.style.lineHeight = '1.0';
+    detail.style.fontSize = '9px';
+    detail.style.lineHeight = '1.05';
+  }
+}
+
 /* =========================
    RENDER UI
    ========================= */
@@ -1573,6 +1607,7 @@ async function refresh(){
         <div class="mm">${advice2d.detail}</div>
       `;
       days.appendChild(box);
+      fitAdviceBox();
     }
 
     // READY per puppeteer
