@@ -4,38 +4,30 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="WeatherFrame"/>
-  <meta name="theme-color" content="#080c14"/>
+  <meta name="theme-color" content="#ffffff"/>
   <title>WeatherFrame</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root {
-      --bg:        #080c14;
-      --bg2:       #0f1420;
-      --bg3:       #161d2e;
-      --card:      #111827;
-      --card2:     #1a2235;
-      --border:    rgba(255,255,255,0.07);
-      --border2:   rgba(255,255,255,0.12);
-      --text:      #f0f4ff;
-      --muted:     rgba(240,244,255,0.45);
-      --muted2:    rgba(240,244,255,0.25);
-      --accent:    #4d9fff;
-      --accent2:   #7cc4ff;
-      --snow:      #a8d4ff;
-      --warm:      #ff9a5c;
-      --cold:      #7cc4ff;
-      --safe:      #5dde8f;
-      --warn:      #ffd166;
-      --danger:    #ff6b6b;
-      --r:         20px;
-      --r2:        14px;
-      --safe-area-top: env(safe-area-inset-top, 44px);
-      --safe-area-bottom: env(safe-area-inset-bottom, 34px);
+      --bg:       #f5f5f3;
+      --white:    #ffffff;
+      --ink:      #111111;
+      --soft:     #d8d8d6;
+      --mist:     #f0f0ee;
+      --mid:      #888884;
+      --faint:    #b8b8b4;
+      --accent:   #111111;
+      --r:        18px;
+      --r2:       12px;
+      --pad:      18px;
+      --gap:      10px;
+      --safe-top: env(safe-area-inset-top, 44px);
+      --safe-bot: env(safe-area-inset-bottom, 34px);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -43,47 +35,67 @@
     html, body {
       height: 100%;
       background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       overscroll-behavior: none;
     }
 
     body {
       overflow-x: hidden;
       overflow-y: auto;
-      padding-bottom: calc(var(--safe-area-bottom) + 20px);
-    }
-
-    /* ── ANIMATED BACKGROUND ── */
-    .bg-orbs {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.18;
-      animation: orbFloat 12s ease-in-out infinite;
-    }
-    .orb1 { width: 340px; height: 340px; background: #1a4a8a; top: -80px; right: -60px; animation-delay: 0s; }
-    .orb2 { width: 260px; height: 260px; background: #0a2a5e; bottom: 20%; left: -80px; animation-delay: -4s; }
-    .orb3 { width: 200px; height: 200px; background: #1e3a6a; top: 40%; right: -40px; animation-delay: -8s; }
-    @keyframes orbFloat {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-30px) scale(1.05); }
+      padding-bottom: calc(var(--safe-bot) + 24px);
     }
 
     /* ── LAYOUT ── */
     .app {
-      position: relative;
-      z-index: 1;
       max-width: 430px;
       margin: 0 auto;
-      padding: calc(var(--safe-area-top) + 16px) 16px 0;
+      padding: calc(var(--safe-top) + 14px) var(--pad) 0;
+    }
+
+    /* ── LOADER ── */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: opacity 0.4s, visibility 0.4s;
+    }
+    .loader.hidden { opacity: 0; visibility: hidden; }
+    .loader-title {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--ink);
+    }
+    .loader-sub {
+      font-size: 13px;
+      color: var(--mid);
+      font-weight: 500;
+    }
+    .loader-bar {
+      width: 120px;
+      height: 2px;
+      background: var(--soft);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .loader-bar-fill {
+      height: 100%;
+      background: var(--ink);
+      border-radius: 1px;
+      animation: barSlide 1.4s ease-in-out infinite;
+    }
+    @keyframes barSlide {
+      0%   { width: 0%; margin-left: 0%; }
+      50%  { width: 60%; margin-left: 20%; }
+      100% { width: 0%; margin-left: 100%; }
     }
 
     /* ── HEADER ── */
@@ -91,212 +103,220 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 4px;
-      animation: fadeUp 0.6s ease both;
+      margin-bottom: 2px;
+      animation: fadeUp 0.5s ease both;
     }
     .place-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 38px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 42px;
       font-weight: 900;
       line-height: 1;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #f0f4ff 0%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: -0.6px;
+      color: var(--ink);
     }
     .header-right {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       gap: 6px;
-      padding-top: 6px;
-    }
-    .mode-pills {
-      display: flex;
-      gap: 6px;
-    }
-    .pill {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--muted);
-    }
-    .pill.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
+      padding-top: 8px;
     }
     .place-select {
       appearance: none;
-      background: var(--card);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      border: 1px solid var(--soft);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       padding: 5px 10px;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
       outline: none;
     }
+    .mode-pills {
+      display: flex;
+      gap: 5px;
+    }
+    .pill {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.18s;
+      border: 1.5px solid var(--soft);
+      background: transparent;
+      color: var(--mid);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .pill.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #fff;
+    }
     .meta-row {
       font-size: 13px;
-      color: var(--muted);
-      font-weight: 400;
-      margin-bottom: 20px;
-      animation: fadeUp 0.6s 0.05s ease both;
+      color: var(--mid);
+      font-weight: 500;
+      margin-bottom: 16px;
+      animation: fadeUp 0.5s 0.04s ease both;
+    }
+    .rule {
+      height: 2px;
+      background: var(--ink);
+      margin-bottom: 14px;
+      animation: scaleX 0.5s 0.08s ease both;
+      transform-origin: left;
+    }
+    @keyframes scaleX {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
     }
 
-    /* ── HERO CARD ── */
-    .hero-card {
-      background: linear-gradient(145deg, #0d1e3a 0%, #091628 60%, #0d1520 100%);
-      border: 1px solid rgba(77,159,255,0.2);
-      border-radius: 28px;
-      padding: 24px;
-      margin-bottom: 14px;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp 0.6s 0.1s ease both;
+    /* ── CARD BASE ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--soft);
+      border-radius: var(--r);
     }
-    .hero-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(77,159,255,0.5), transparent);
+
+    /* ── HERO ── */
+    .hero {
+      padding: 18px;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.1s ease both;
     }
     .hero-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
+    .hero-left {}
     .hero-temp {
-      font-family: 'Syne', sans-serif;
-      font-size: 76px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 72px;
       font-weight: 900;
       line-height: 1;
-      letter-spacing: -3px;
+      letter-spacing: -1px;
+      color: var(--ink);
     }
     .hero-temp sup {
-      font-size: 32px;
-      vertical-align: super;
+      font-size: 30px;
       letter-spacing: 0;
-    }
-    .hero-icon-wrap {
-      padding-top: 8px;
-    }
-    .hero-icon-wrap svg {
-      width: 64px;
-      height: 64px;
-      filter: drop-shadow(0 0 16px rgba(77,159,255,0.4));
+      vertical-align: super;
     }
     .hero-wx {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent2);
-      margin-bottom: 4px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-top: 2px;
     }
     .hero-sub {
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 400;
+      font-size: 13px;
+      color: var(--mid);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+    .hero-icon {
+      padding-top: 6px;
+    }
+    .hero-icon svg {
+      width: 60px;
+      height: 60px;
     }
     .hero-stats {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
+      gap: 8px;
+      padding-top: 14px;
+      border-top: 1px solid var(--soft);
     }
     .stat {
       text-align: center;
+      padding: 10px 6px;
+      background: var(--mist);
+      border-radius: var(--r2);
     }
     .stat-val {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 20px;
-      font-weight: 800;
+      font-weight: 900;
       line-height: 1;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .stat-lbl {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    /* ── ADVICE CARD ── */
-    .advice-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.15s ease both;
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-    .advice-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--safe);
-      flex-shrink: 0;
-      box-shadow: 0 0 8px var(--safe);
-    }
-    .advice-dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
-    .advice-dot.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
-    .advice-text {
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.4;
-      color: var(--text);
-    }
-
-    /* ── SECTION TITLE ── */
-    .section-title {
-      font-size: 11px;
+      color: var(--mid);
       font-weight: 700;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 10px;
-      margin-top: 4px;
     }
 
-    /* ── CHART CARD ── */
+    /* ── ADVICE ── */
+    .advice {
+      padding: 14px 16px;
+      margin-bottom: var(--gap);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      animation: fadeUp 0.5s 0.14s ease both;
+    }
+    .advice-kicker {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--mid);
+      font-weight: 800;
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+    .advice-text {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--ink);
+    }
+    .advice-badge {
+      flex-shrink: 0;
+      margin-top: 2px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .badge-safe   { background: #e8f8ef; }
+    .badge-warn   { background: #fef8e8; }
+    .badge-danger { background: #fef0f0; }
+
+    /* ── SECTION KICKER ── */
+    .kicker {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      color: var(--mid);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    /* ── CHART ── */
     .chart-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 18px 16px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.2s ease both;
+      padding: 16px;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.18s ease both;
     }
     .chart-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
-    }
-    .chart-title {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--muted);
+      margin-bottom: 14px;
     }
     .chart-legend {
       display: flex;
@@ -306,44 +326,127 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 500;
+      font-size: 10px;
+      color: var(--mid);
+      font-weight: 600;
     }
-    .legend-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
+    .legend-line {
+      width: 16px;
+      height: 2px;
+      border-radius: 1px;
     }
-    .chart-wrap {
-      position: relative;
-      height: 110px;
+    .legend-line.dashed {
+      background: repeating-linear-gradient(90deg, var(--faint) 0 4px, transparent 4px 7px);
     }
     canvas#tempChart {
       width: 100% !important;
-      height: 110px !important;
+      height: 100px !important;
     }
+
+    /* ── ALTITUDE GRID ── */
+    .alt-card {
+      padding: 16px;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .alt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .alt-item {
+      background: var(--mist);
+      border-radius: var(--r2);
+      padding: 12px;
+    }
+    .alt-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--mid);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .alt-wx {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 4px;
+    }
+    .alt-wx svg { width: 20px; height: 20px; }
+    .alt-wx-label {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .alt-det {
+      font-size: 11px;
+      color: var(--mid);
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    /* ── SNOW ── */
+    .snow-card {
+      padding: 16px;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.22s ease both;
+    }
+    .snow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .snow-stat {
+      background: var(--mist);
+      border-radius: var(--r2);
+      padding: 14px;
+      text-align: center;
+    }
+    .snow-val {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .snow-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--mid);
+      font-weight: 700;
+    }
+    .snow-insight {
+      background: var(--mist);
+      border-radius: var(--r2);
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 500;
+      line-height: 1.45;
+    }
+    .snow-insight strong { font-weight: 700; }
 
     /* ── SKI BANDS ── */
     .bands-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
       padding: 16px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.25s ease both;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.24s ease both;
     }
-    .bands-header {
+    .bands-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .ski-now {
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent2);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
     }
     .bands-grid {
       display: grid;
@@ -351,333 +454,301 @@
       gap: 8px;
     }
     .band {
-      background: var(--bg3);
-      border: 1px solid var(--border);
+      border: 1px solid var(--soft);
       border-radius: var(--r2);
-      padding: 12px 10px;
+      padding: 11px 8px;
       text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
+      background: var(--white);
     }
-    .band:active { transform: scale(0.97); }
     .band-time {
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 7px;
+      letter-spacing: -0.3px;
     }
     .band-wx {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       margin-bottom: 6px;
-      color: var(--accent2);
+      color: var(--ink);
     }
     .band-wx svg { width: 14px; height: 14px; }
     .band-det {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.5;
+      font-size: 10px;
+      color: var(--mid);
       font-weight: 500;
+      line-height: 1.5;
     }
     .band-risk {
-      margin-top: 8px;
-      font-size: 10px;
-      font-weight: 700;
+      margin-top: 7px;
+      font-size: 9px;
+      font-weight: 800;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
       padding: 3px 6px;
       border-radius: 6px;
       display: inline-block;
     }
-    .risk-low  { background: rgba(93,222,143,0.15); color: var(--safe); }
-    .risk-mid  { background: rgba(255,209,102,0.15); color: var(--warn); }
-    .risk-high { background: rgba(255,107,107,0.15); color: var(--danger); }
+    .risk-low  { background: #e8f8ef; color: #1a7a40; }
+    .risk-mid  { background: #fef8e8; color: #8a6200; }
+    .risk-high { background: #fef0f0; color: #b03030; }
 
-    /* ── SNOW CARD ── */
-    .snow-card {
-      background: linear-gradient(135deg, #0a1e3a 0%, #0d1a2e 100%);
-      border: 1px solid rgba(168,212,255,0.2);
-      border-radius: var(--r);
-      padding: 18px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.3s ease both;
-      position: relative;
-      overflow: hidden;
-    }
-    .snow-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(168,212,255,0.4), transparent);
-    }
-    .snow-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .snow-stat {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: var(--r2);
-      padding: 14px;
-      text-align: center;
-    }
-    .snow-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--snow);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .snow-lbl {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .snow-trend {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 14px;
-      padding: 12px;
-      background: rgba(255,255,255,0.03);
-      border-radius: var(--r2);
-      border: 1px solid var(--border);
-    }
-    .snow-trend-text {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 400;
-      line-height: 1.4;
-    }
-    .snow-trend-text strong { color: var(--snow); font-weight: 600; }
 
-    /* ── ALTITUDE CARD ── */
-    .alt-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
+
+    /* ── TODAY IN TOWN ── */
+    .town-card {
       padding: 16px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.28s ease both;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.21s ease both;
     }
-    .alt-grid {
+    .town-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
     }
-    .alt-item {
-      background: var(--bg3);
-      border: 1px solid var(--border);
+    .town-item {
+      background: var(--mist);
       border-radius: var(--r2);
-      padding: 14px;
+      padding: 12px 13px;
     }
-    .alt-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--muted);
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .alt-wx {
+    .town-head {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 10px;
       margin-bottom: 6px;
     }
-    .alt-wx svg { width: 20px; height: 20px; }
-    .alt-wx-label {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
+    .town-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--mid);
+      font-weight: 800;
     }
-    .alt-detail {
+    .town-title {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--ink);
+    }
+    .town-copy {
+      font-size: 13px;
+      color: var(--mid);
+      font-weight: 500;
+      line-height: 1.45;
+      margin-top: 4px;
+    }
+    .town-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .town-link {
+      border: 1px solid var(--soft);
+      border-radius: 12px;
+      background: var(--white);
+      padding: 10px 12px;
+      text-decoration: none;
+      color: var(--ink);
+      display: block;
+    }
+    .town-link strong {
+      display: block;
       font-size: 12px;
-      color: var(--muted);
-      font-weight: 400;
-      line-height: 1.5;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+    .town-link span {
+      display: block;
+      font-size: 11px;
+      color: var(--mid);
+      line-height: 1.35;
     }
 
-    /* ── FORECAST ── */
+    /* ── FORECAST 7 DAYS ── */
     .forecast-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
       padding: 16px;
-      margin-bottom: 14px;
-      animation: fadeUp 0.6s 0.35s ease both;
+      margin-bottom: var(--gap);
+      animation: fadeUp 0.5s 0.28s ease both;
     }
-    .days-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
+    .days-list { margin-top: 10px; }
     .day-row {
       display: grid;
-      grid-template-columns: 80px 32px 1fr auto;
+      grid-template-columns: 72px 28px 1fr 68px;
       align-items: center;
-      gap: 12px;
-      padding: 13px 0;
-      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--soft);
     }
     .day-row:last-child { border-bottom: none; }
     .day-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      font-weight: 800;
     }
-    .day-name.today { color: var(--accent2); }
-    .day-ico svg { width: 28px; height: 28px; }
-    .day-bar-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .day-name.today { opacity: 0.4; }
+    .day-ico svg { width: 26px; height: 26px; }
+    .day-bar-wrap { }
     .day-bar-track {
-      height: 4px;
-      background: var(--bg3);
+      height: 3px;
+      background: var(--mist);
       border-radius: 2px;
       position: relative;
-      overflow: hidden;
+      margin-bottom: 3px;
     }
     .day-bar-fill {
       position: absolute;
       top: 0; bottom: 0;
       border-radius: 2px;
-      background: linear-gradient(90deg, var(--cold), var(--warm));
+      background: var(--ink);
     }
     .day-mm {
-      font-size: 11px;
-      color: var(--snow);
+      font-size: 10px;
+      color: var(--mid);
       font-weight: 600;
     }
     .day-temps {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 800;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      font-weight: 900;
       text-align: right;
       white-space: nowrap;
+      letter-spacing: -0.3px;
     }
-    .day-temps .tmin { color: var(--cold); }
-    .day-temps .tmax { color: var(--warm); }
+    .tmin { opacity: 0.4; }
 
     /* ── FOOTER ── */
-    .footer-bar {
+    .footer {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 12px 0 4px;
       font-size: 11px;
-      color: var(--muted2);
+      color: var(--faint);
       font-weight: 500;
-      animation: fadeUp 0.6s 0.4s ease both;
-    }
-
-    /* ── LOADER ── */
-    .loader {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      transition: opacity 0.5s, visibility 0.5s;
-    }
-    .loader.hidden { opacity: 0; visibility: hidden; }
-    .loader-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 28px;
-      font-weight: 900;
-      background: linear-gradient(135deg, #f0f4ff, var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .loader-dots {
-      display: flex;
-      gap: 8px;
-    }
-    .loader-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: dotPulse 1.2s ease-in-out infinite;
-    }
-    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
-    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes dotPulse {
-      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-      40% { transform: scale(1); opacity: 1; }
+      padding: 10px 0 4px;
+      animation: fadeUp 0.5s 0.32s ease both;
     }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── SVG ICONS ── */
-    .ico-stroke { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  </style>
+    /* ── ICONS ── */
+    .ico { stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  
+/* ── RESPONSIVE DESIGN ── */
+
+/* Base mobile-first already ok */
+
+/* Tablet (iPad) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .hero-wx {
+    font-size: 48px;
+  }
+
+  .town-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .town-links {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
+
+/* Large tablet / small desktop */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 900px;
+  }
+
+  .hero-wx {
+    font-size: 56px;
+  }
+
+  .town-title {
+    font-size: 18px;
+  }
+
+  .town-copy {
+    font-size: 14px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1100px;
+  }
+
+  .hero-wx {
+    font-size: 64px;
+  }
+
+  .card {
+    padding: 24px;
+  }
+}
+
+</style>
 </head>
 <body>
 
 <!-- Loader -->
 <div class="loader" id="loader">
-  <div class="loader-name" id="loaderName">WeatherFrame</div>
-  <div class="loader-dots">
-    <div class="loader-dot"></div>
-    <div class="loader-dot"></div>
-    <div class="loader-dot"></div>
-  </div>
+  <div class="loader-title" id="loaderName">WeatherFrame</div>
+  <div class="loader-sub">Caricamento meteo…</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
 </div>
 
-<!-- Background orbs -->
-<div class="bg-orbs">
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
-</div>
-
-<!-- App -->
 <div class="app">
 
+  <!-- Header -->
   <div class="header">
-    <div>
-      <div class="place-name" id="title">Sauze d'Oulx</div>
-    </div>
+    <div class="place-name" id="title">Sauze d'Oulx</div>
     <div class="header-right">
       <select class="place-select" id="placeSelect"></select>
       <div class="mode-pills">
-        <button class="pill active" id="pillOggi" onclick="setMode('oggi')">Oggi</button>
-        <button class="pill" id="pillDomani" onclick="setMode('domani')">Domani</button>
+        <button class="pill active" id="pillOggi"    onclick="setMode('oggi')">Oggi</button>
+        <button class="pill"        id="pillDomani"  onclick="setMode('domani')">Domani</button>
+      </div>
+      <div class="mode-pills">
+        <button class="pill" id="pillWinter" onclick="setSeason('winter')">Inverno</button>
+        <button class="pill" id="pillSummer" onclick="setSeason('summer')">Estate</button>
       </div>
     </div>
   </div>
-  <div class="meta-row" id="meta">Via Lattea · 1509 m · 2300 m quota</div>
+  <div class="meta-row" id="meta">Via Lattea · Paese 1509 m · Quota 2300 m</div>
+  <div class="rule"></div>
 
   <!-- Hero -->
-  <div class="hero-card" id="heroCard">
+  <div class="card hero">
     <div class="hero-top">
-      <div>
+      <div class="hero-left">
         <div class="hero-temp" id="heroTemp">—<sup>°</sup></div>
-        <div class="hero-wx" id="heroWx">Caricamento…</div>
-        <div class="hero-sub" id="heroSub">Min — · Max —</div>
+        <div class="hero-wx"  id="heroWx">Caricamento…</div>
+        <div class="hero-sub" id="heroSub">Min — · Max — · 0 mm</div>
+        <div class="hero-sub" id="heroRainLine">Pioggia non prevista</div>
       </div>
-      <div class="hero-icon-wrap" id="heroIcon"></div>
+      <div class="hero-icon" id="heroIcon"></div>
     </div>
     <div class="hero-stats">
       <div class="stat">
@@ -696,85 +767,70 @@
   </div>
 
   <!-- Advice -->
-  <div class="advice-card" id="adviceCard">
-    <div class="advice-dot" id="adviceDot"></div>
-    <div class="advice-text" id="adviceText">Caricamento…</div>
+  <div class="card advice">
+    <div class="advice-badge badge-safe" id="adviceBadge">🎿</div>
+    <div>
+      <div class="advice-kicker" id="kAdvice">Consigli per oggi</div>
+      <div class="advice-text" id="adviceText">Caricamento…</div>
+    </div>
   </div>
 
-  <!-- Temp Chart -->
-  <div class="chart-card">
+  <div class="card town-card">
+    <div class="kicker">Oggi in paese</div>
+    <div class="town-grid">
+      <div class="town-item">
+        <div class="town-head">
+          <div class="town-label">Momento migliore</div>
+        </div>
+        <div class="town-title" id="townBestTitle">Caricamento…</div>
+        <div class="town-copy" id="townBestCopy">—</div>
+      </div>
+      <div class="town-item">
+        <div class="town-head">
+          <div class="town-label">Cosa conviene fare</div>
+        </div>
+        <div class="town-title" id="townDoTitle">Caricamento…</div>
+        <div class="town-copy" id="townDoCopy">—</div>
+      </div>
+    </div>
+    <div class="town-links">
+      <a class="town-link" href="https://turismotorino.org/en/visit/plan-your-trip/tourist-offices/sauze-doulx-ufficio-del-turismo" target="_blank" rel="noopener noreferrer">
+        <strong>Ufficio Turismo</strong>
+        <span>orari, eventi, mostre, info utili</span>
+      </a>
+      <a class="town-link" href="https://www.vialattea.it/en/events/" target="_blank" rel="noopener noreferrer">
+        <strong>Eventi Via Lattea</strong>
+        <span>gare, attività, aperture stagionali</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Temp chart -->
+  <div class="card chart-card">
     <div class="chart-header">
-      <div class="chart-title">Temperatura 24h</div>
+      <div class="kicker" style="margin:0">Temperatura 24h</div>
       <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Paese</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--snow)"></div> Quota</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--ink)"></div>Paese</div>
+        <div class="legend-item"><div class="legend-line dashed"></div>Quota</div>
       </div>
     </div>
-    <div class="chart-wrap">
-      <canvas id="tempChart"></canvas>
-    </div>
+    <canvas id="tempChart"></canvas>
   </div>
 
-  <!-- Altitude comparison -->
-  <div class="section-title">Confronto Quote · Oggi</div>
-  <div class="alt-card" style="margin-top:0">
-    <div class="alt-grid" id="altGrid">
-      <div class="alt-item">
-        <div class="alt-label">Paese</div>
-        <div class="alt-wx" id="altVillageWx"></div>
-        <div class="alt-detail" id="altVillageDet">—</div>
-      </div>
-      <div class="alt-item">
-        <div class="alt-label">Quota Impianti</div>
-        <div class="alt-wx" id="altLiftWx"></div>
-        <div class="alt-detail" id="altLiftDet">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Snow card -->
-  <div class="snow-card" id="snowCard">
-    <div class="section-title" style="color:var(--snow);margin-bottom:0">❄ Stato Neve</div>
-    <div class="snow-grid">
-      <div class="snow-stat">
-        <div class="snow-val" id="snowTempLift">—°</div>
-        <div class="snow-lbl">Temp. Quota</div>
-      </div>
-      <div class="snow-stat">
-        <div class="snow-val" id="snowPrecip">— mm</div>
-        <div class="snow-lbl">Precip. Attesa</div>
-      </div>
-    </div>
-    <div class="snow-trend" id="snowTrend">
-      <svg width="18" height="18" viewBox="0 0 24 24" style="color:var(--snow);flex-shrink:0"><path class="ico-stroke" d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg>
-      <div class="snow-trend-text" id="snowTrendText">Analisi neve in corso…</div>
-    </div>
-  </div>
-
-  <!-- Ski bands -->
-  <div class="bands-card">
-    <div class="bands-header">
-      <div class="section-title" style="margin:0">Fasce Sci · Quota</div>
-      <div class="ski-now" id="skiNow">— °</div>
-    </div>
-    <div class="bands-grid" id="bands"></div>
-  </div>
-
-  <!-- Forecast -->
-  <div class="forecast-card">
-    <div class="section-title">Prossimi 7 Giorni</div>
+  <!-- 7-day forecast -->
+  <div class="card forecast-card">
+    <div class="kicker">Prossimi 7 Giorni (Paese)</div>
     <div class="days-list" id="daysList"></div>
   </div>
 
-  <div class="footer-bar">
+  <div class="footer">
     <div id="updated">Aggiornato: —</div>
-    <div>Open-Meteo</div>
+    <div>Fonte: Open-Meteo</div>
   </div>
 
 </div>
 
 <script>
-/* ── PLACES ── */
 const PLACES = [
   { key:"bardonecchia", name:"Bardonecchia", town:1312, lifts:2400, lat:45.0760, lon:6.7030 },
   { key:"cesana",       name:"Cesana",       town:1354, lifts:2300, lat:44.9543, lon:6.7923 },
@@ -786,25 +842,26 @@ const PLACES = [
 ];
 
 const $ = id => document.getElementById(id);
-
-/* ── MODE ── */
 let currentMode = "oggi";
+let currentSeason = "winter";
+let chartInstance = null;
+
 function setMode(m) {
   currentMode = m;
   $("pillOggi").classList.toggle("active", m === "oggi");
   $("pillDomani").classList.toggle("active", m === "domani");
+  $("kAdvice").textContent = m === "domani" ? "Consigli per domani" : "Consigli per oggi";
+  const url = new URL(location.href);
+  url.searchParams.set("mode", currentMode);
+  url.searchParams.set("season", currentSeason || autoSeasonByDate());
+  history.replaceState({}, "", url);
   refresh();
 }
 
-/* ── WX CODES ── */
 function wxLabel(code) {
   if (code <= 1) return "Sereno";
   if (code <= 3) return "Variabile";
-  if (code <= 9) return "Nebbia";
-  if (code <= 19) return "Pioviggine";
-  if (code <= 29) return "Pioggia";
-  if (code <= 39) return "Neve";
-  if (code <= 49) return "Foschia";
+  if (code <= 49) return "Nebbia";
   if (code <= 59) return "Pioviggine";
   if (code <= 69) return "Pioggia";
   if (code <= 79) return "Neve";
@@ -813,69 +870,200 @@ function wxLabel(code) {
   return "Temporale forte";
 }
 
-function wxIconSVG(code, color = "currentColor") {
-  const s = `stroke="${color}" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"`;
-  if (code <= 1) return `<svg viewBox="0 0 48 48"><circle ${s} cx="24" cy="24" r="10"/><line ${s} x1="24" y1="6" x2="24" y2="10"/><line ${s} x1="24" y1="38" x2="24" y2="42"/><line ${s} x1="6" y1="24" x2="10" y2="24"/><line ${s} x1="38" y1="24" x2="42" y2="24"/><line ${s} x1="11.5" y1="11.5" x2="14.3" y2="14.3"/><line ${s} x1="33.7" y1="33.7" x2="36.5" y2="36.5"/><line ${s} x1="36.5" y1="11.5" x2="33.7" y2="14.3"/><line ${s} x1="14.3" y1="33.7" x2="11.5" y2="36.5"/></svg>`;
-  if (code <= 3) return `<svg viewBox="0 0 48 48"><circle ${s} cx="20" cy="26" r="9"/><path ${s} d="M28 18a8 8 0 0 1 0 16H16"/><path ${s} d="M14 26a6 6 0 0 1 6-6"/></svg>`;
-  if (code <= 69) return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><line ${s} x1="20" y1="36" x2="18" y2="42"/><line ${s} x1="28" y1="36" x2="26" y2="42"/></svg>`;
-  if (code <= 79) return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><path ${s} d="M20 38 l-2 4 l4-2 l-2 4"/><path ${s} d="M28 38 l-2 4 l4-2 l-2 4"/></svg>`;
-  return `<svg viewBox="0 0 48 48"><path ${s} d="M32 20a8 8 0 0 0-8-8 8 8 0 0 0-7.9 7H14a8 8 0 0 0 0 16h18a8 8 0 0 0 0-16z"/><path ${s} d="M24 34 L20 44 M28 34 L24 44"/><path ${s} d="M20 38 L28 38"/></svg>`;
+function wxIconSVG(code, size = 32) {
+  const s = `class="ico" width="${size}" height="${size}" viewBox="0 0 48 48"`;
+  if (code <= 1) return `<svg ${s}><circle class="ico" cx="24" cy="24" r="9"/><line class="ico" x1="24" y1="5" x2="24" y2="10"/><line class="ico" x1="24" y1="38" x2="24" y2="43"/><line class="ico" x1="5" y1="24" x2="10" y2="24"/><line class="ico" x1="38" y1="24" x2="43" y2="24"/><line class="ico" x1="11" y1="11" x2="14.5" y2="14.5"/><line class="ico" x1="33.5" y1="33.5" x2="37" y2="37"/><line class="ico" x1="37" y1="11" x2="33.5" y2="14.5"/><line class="ico" x1="14.5" y1="33.5" x2="11" y2="37"/></svg>`;
+  if (code <= 3) return `<svg ${s}><path class="ico" d="M14 30a10 10 0 1 1 8-16 8 8 0 1 1 10 14Z"/></svg>`;
+  if (code <= 69) return `<svg ${s}><path class="ico" d="M14 30a10 10 0 1 1 8-16 8 8 0 1 1 10 14Z"/><line class="ico" x1="20" y1="36" x2="18" y2="42"/><line class="ico" x1="28" y1="36" x2="26" y2="42"/></svg>`;
+  if (code <= 79) return `<svg ${s}><path class="ico" d="M14 30a10 10 0 1 1 8-16 8 8 0 1 1 10 14Z"/><path class="ico" d="M19 37 l-2 5 l4-3 l-2 5"/><path class="ico" d="M27 37 l-2 5 l4-3 l-2 5"/></svg>`;
+  return `<svg ${s}><path class="ico" d="M14 30a10 10 0 1 1 8-16 8 8 0 1 1 10 14Z"/><path class="ico" d="M24 34 L20 44 M28 34 L24 44"/><line class="ico" x1="19" y1="39" x2="29" y2="39"/></svg>`;
 }
 
-function wxColor(code) {
-  if (code <= 1) return "#ffd166";
-  if (code <= 3) return "#a8d4ff";
-  if (code <= 69) return "#7cc4ff";
-  if (code <= 79) return "#c8e8ff";
-  return "#ff9a5c";
-}
-
-/* ── OPEN-METEO ── */
 async function fetchForecast(lat, lon, elevation) {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
   url.searchParams.set("latitude", lat);
   url.searchParams.set("longitude", lon);
   url.searchParams.set("elevation", elevation);
   url.searchParams.set("timezone", "Europe/Rome");
-  url.searchParams.set("current", ["temperature_2m","weather_code","precipitation","wind_speed_10m"].join(","));
-  url.searchParams.set("hourly", ["temperature_2m","weather_code","precipitation","wind_speed_10m"].join(","));
-  url.searchParams.set("daily", ["weather_code","temperature_2m_min","temperature_2m_max","precipitation_sum"].join(","));
+  url.searchParams.set("current", ["temperature_2m","weather_code","precipitation","wind_speed_10m","wind_direction_10m"].join(","));
+  url.searchParams.set("hourly", ["temperature_2m","weather_code","precipitation","wind_speed_10m","wind_direction_10m"].join(","));
+  url.searchParams.set("daily",  ["weather_code","temperature_2m_min","temperature_2m_max","precipitation_sum"].join(","));
   url.searchParams.set("forecast_days", "7");
-  const r = await fetch(url.toString());
+  const r = await fetch(url);
   if (!r.ok) throw new Error("Fetch failed");
   return r.json();
 }
 
 function pickDayIndex(mode) {
   const h = new Date().getHours();
-  if (mode === "domani") return 1;
-  if (mode === "auto" && h >= 17) return 1;
-  return 0;
+  return (mode === "domani" || (mode === "auto" && h >= 17)) ? 1 : 0;
+}
+
+function autoSeasonByDate() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  if ((month === 4 && day >= 15) || (month >= 5 && month <= 11)) return "summer";
+  return "winter";
+}
+
+function setSeason(s) {
+  currentSeason = s;
+  $("pillWinter").classList.toggle("active", s === "winter");
+  $("pillSummer").classList.toggle("active", s === "summer");
+  const url = new URL(location.href);
+  url.searchParams.set("season", currentSeason);
+  url.searchParams.set("mode", currentMode);
+  history.replaceState({}, "", url);
+  refresh();
+}
+
+function firstRainInfo(hourly, dayISO) {
+  const rainCodes = new Set([51,53,55,56,57,61,63,65,66,67,80,81,82,95,96,99]);
+  let firstIdx = -1;
+  let lastIdx = -1;
+  for (let i = 0; i < hourly.time.length; i++) {
+    if (hourly.time[i].slice(0,10) !== dayISO) continue;
+    const mm = hourly.precipitation?.[i] ?? 0;
+    const code = hourly.weather_code?.[i] ?? 0;
+    if (mm >= 0.2 || rainCodes.has(code)) {
+      if (firstIdx === -1) firstIdx = i;
+      lastIdx = i;
+    }
+  }
+  if (firstIdx === -1) return "Pioggia non prevista";
+  const start = hourly.time[firstIdx].slice(11,16);
+  const end = hourly.time[lastIdx].slice(11,16);
+  return start == end ? `Pioggia dalle ${start}` : `Pioggia dalle ${start} alle ${end}`;
+}
+
+function chooseAdviceRich({ season, vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lDayMm }) {
+  const thunder = [95,96,99].includes(vDayCode) || [95,96,99].includes(lDayCode);
+  const snowLift = [71,73,75,77,85,86].includes(lDayCode);
+  const snowVillage = [71,73,75,77,85,86].includes(vDayCode);
+  const rainVillage = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(vDayCode) || vDayMm >= 2;
+  const sunny = vDayCode <= 1;
+  const partly = [2,3].includes(vDayCode);
+  const windyLift = lNowWind >= 40;
+  const veryWindy = lNowWind >= 60;
+  const freshSnow = snowLift && lNowTemp <= -2;
+
+  if (season === "winter") {
+    if (thunder) return { text:"Rientra prima di mezzogiorno — temporali previsti in quota", level:"danger", emoji:"⚡" };
+    if (veryWindy) return { text:`Vento forte in quota (${Math.round(lNowWind)} km/h) — verifica gli impianti`, level:"warn", emoji:"💨" };
+    if (freshSnow && sunny) return { text:"Giornata ideale per sciare — neve fresca e buona luce", level:"safe", emoji:"🎿" };
+    if (snowVillage) return { text:"Neve fino al paese — attrezzatura invernale consigliata", level:"warn", emoji:"❄️" };
+    if (rainVillage && !snowLift) return { text:"Pioggia al paese — meglio salire in quota", level:"warn", emoji:"🌧️" };
+    if (windyLift) return { text:"Meglio le piste a mezza quota — sopra è più ventoso", level:"warn", emoji:"🏔️" };
+    if (sunny) return { text:"Giornata molto bella sulle piste — neve compatta al mattino", level:"safe", emoji:"☀️" };
+    if (partly) return { text:"Buona giornata per sciare — cielo variabile ma stabile", level:"safe", emoji:"🎿" };
+    return { text:"Condizioni invernali nella norma — giornata da vivere con calma", level:"safe", emoji:"🎿" };
+  }
+
+  if (thunder) return { text:"Meglio uscire presto — temporali possibili nel pomeriggio", level:"danger", emoji:"⚡" };
+  if (rainVillage && lDayMm >= 2) return { text:"Precipitazioni diffuse — meglio attività leggere e quota bassa", level:"warn", emoji:"🌧️" };
+  if (lNowTemp >= 20 && sunny) return { text:"Giornata ideale al mattino — ore centrali più calde in quota", level:"warn", emoji:"🌿" };
+  if (windyLift) return { text:"Meglio sentieri riparati o bosco — vento sui crinali", level:"warn", emoji:"💨" };
+  if (sunny) return { text:"Giornata ideale per escursioni e outdoor", level:"safe", emoji:"🥾" };
+  if (partly) return { text:"Buona giornata all’aperto — condizioni variabili ma tranquille", level:"safe", emoji:"🌤️" };
+  return { text:"Condizioni buone per attività estive — scegli l’orario migliore", level:"safe", emoji:"🌿" };
+}
+
+function villageTownMoment({ season, dayCode, mm, temp, mode }) {
+  const rainy = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(dayCode) || mm >= 2;
+  const thunder = [95,96,99].includes(dayCode);
+  const sunny = dayCode <= 1;
+  const partly = [2,3].includes(dayCode);
+
+  if (thunder) {
+    return {
+      title: "Meglio muoversi la mattina",
+      copy: "Nel pomeriggio l’atmosfera può chiudersi. Centro paese, pranzo lungo e rientro presto funzionano meglio."
+    };
+  }
+  if (rainy) {
+    return {
+      title: "Paese più comodo della quota",
+      copy: "Con precipitazioni previste conviene tenersi bassi: borgo, caffè, shopping e pausa lenta sono la scelta più sensata."
+    };
+  }
+  if (season === "winter" && sunny) {
+    return {
+      title: "Centro bello nel tardo pomeriggio",
+      copy: "Dopo la neve o le piste, il paese rende bene verso aperitivo: luce più morbida e atmosfera più viva."
+    };
+  }
+  if (season === "summer" && sunny && temp >= 16) {
+    return {
+      title: "Fuori bene fino a metà pomeriggio",
+      copy: "Se il tempo è aperto conviene stare all’aperto e tenere il centro per aperitivo o cena."
+    };
+  }
+  if (partly) {
+    return {
+      title: "Giornata flessibile",
+      copy: "Cielo variabile ma gestibile: puoi alternare passeggiata in paese, terrazza e un’uscita breve."
+    };
+  }
+  return {
+    title: "Paese da vivere con calma",
+    copy: "Condizioni tranquille: ottimo giorno per stare in giro senza fretta e decidere sul momento."
+  };
+}
+
+function villageTownPlan({ season, dayCode, mm, temp, liftTemp }) {
+  const rainy = [51,53,55,56,57,61,63,65,66,67,80,81,82].includes(dayCode) || mm >= 2;
+  const thunder = [95,96,99].includes(dayCode);
+  const sunny = dayCode <= 1;
+
+  if (season === "winter") {
+    if (rainy || thunder) {
+      return {
+        title: "Borgo, rifugio, aperitivo",
+        copy: "Oggi il valore è più nel paese che nella velocità: centro storico, pausa al caldo e cena senza correre."
+      };
+    }
+    return {
+      title: "Piste prima, paese dopo",
+      copy: "Se la giornata gira bene, il ritmo migliore è neve al mattino e centro paese nel tardo pomeriggio."
+    };
+  }
+
+  if (rainy || thunder) {
+    return {
+      title: "Giro corto + centro",
+      copy: "Con tempo instabile conviene puntare su una passeggiata breve e poi tenersi il meglio per il paese."
+    };
+  }
+  if (sunny && liftTemp >= 10) {
+    return {
+      title: "Outdoor + aperitivo",
+      copy: "Tempo buono: prima aria aperta, trekking leggero o terrazza, poi centro e aperitivo al tramonto."
+    };
+  }
+  return {
+    title: "Passeggiata e tavolino fuori",
+    copy: "Giornata semplice ma piacevole: centro paese, sole quando esce e programmi leggeri."
+  };
 }
 
 function buildSlots(hourly, dayISO) {
-  const slotDefs = [
+  return [
     { label:"09–13", from:9, to:13 },
     { label:"13–15", from:13, to:15 },
     { label:"15–18", from:15, to:18 },
-  ];
-  return slotDefs.map(s => {
-    const idxs = hourly.time.reduce((a, t, i) => {
+  ].map(s => {
+    const idxs = hourly.time.reduce((a,t,i) => {
       if (t.slice(0,10) !== dayISO) return a;
       const h = new Date(t).getHours();
       if (h >= s.from && h < s.to) a.push(i);
       return a;
     }, []);
-    if (!idxs.length) return { time: s.label, code: 2, label: wxLabel(2), mm: 0, wind: 0, temp: 0 };
+    if (!idxs.length) return { time:s.label, code:2, label:wxLabel(2), mm:0, wind:0, temp:0 };
     const mid = idxs[Math.floor(idxs.length/2)];
-    const code = hourly.weather_code[mid] ?? 2;
-    const temp = hourly.temperature_2m[mid] ?? 0;
     let mm = 0, wind = 0;
-    idxs.forEach(i => {
-      mm += hourly.precipitation[i] ?? 0;
-      wind = Math.max(wind, hourly.wind_speed_10m[i] ?? 0);
-    });
-    return { time: s.label, code, label: wxLabel(code), mm, wind, temp };
+    idxs.forEach(i => { mm += hourly.precipitation[i]??0; wind = Math.max(wind, hourly.wind_speed_10m[i]??0); });
+    return { time:s.label, code:hourly.weather_code[mid]??2, label:wxLabel(hourly.weather_code[mid]??2), mm, wind, temp:hourly.temperature_2m[mid]??0 };
   });
 }
 
@@ -890,103 +1078,57 @@ function riskText(mm, code) {
   return "Basso";
 }
 
-const DOW = ["dom","lun","mar","mer","gio","ven","sab"];
 
-/* ── CHART ── */
-let chartInstance = null;
+
+function chooseAdvice({ vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike }) {
+  if (lNowWind > 60) return { text:"Vento forte in quota — verificare apertura impianti", level:"warn", emoji:"💨" };
+  if ([95,96,99].includes(lDayCode)) return { text:"Temporale previsto in quota — valutare con cautela", level:"danger", emoji:"⚡" };
+  if ([71,73,75,77,85,86].includes(lDayCode) && lNowTemp < -5) return { text:"Nevicate con freddo intenso — attrezzatura adeguata", level:"warn", emoji:"🌨" };
+  if (vDayCode <= 1 && lDayCode <= 3 && lNowWind < 30) return { text:"Condizioni ottime — giornata ideale per sciare", level:"safe", emoji:"🎿" };
+  if (vDayMm > 3) return { text:"Precipitazioni attese — possibile neve fresca in quota", level:"safe", emoji:"❄️" };
+  if (lSnowLike) return { text:"Sta nevicando — lascia l'auto in garage se puoi", level:"warn", emoji:"🚗" };
+  return { text:"Condizioni nella norma — buona giornata sulle piste", level:"safe", emoji:"🎿" };
+}
+
 function drawChart(labels, village, lifts) {
+  if (!window.Chart) return;
   const canvas = $("tempChart");
   const ctx = canvas.getContext("2d");
-
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
 
-  // Gradient fill village
-  const gradV = ctx.createLinearGradient(0, 0, 0, 110);
-  gradV.addColorStop(0, "rgba(77,159,255,0.35)");
-  gradV.addColorStop(1, "rgba(77,159,255,0)");
-
-  const gradL = ctx.createLinearGradient(0, 0, 0, 110);
-  gradL.addColorStop(0, "rgba(168,212,255,0.2)");
-  gradL.addColorStop(1, "rgba(168,212,255,0)");
-
-  // Inline Chart.js from CDN via dynamic script
-  if (!window.Chart) return;
-
-  chartInstance = new window.Chart(ctx, {
+  chartInstance = new Chart(ctx, {
     type: "line",
     data: {
       labels,
       datasets: [
-        {
-          label: "Paese",
-          data: village,
-          borderColor: "#4d9fff",
-          backgroundColor: gradV,
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.4,
-          fill: true,
-        },
-        {
-          label: "Quota",
-          data: lifts,
-          borderColor: "#a8d4ff",
-          backgroundColor: gradL,
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0.4,
-          fill: true,
-          borderDash: [4, 3],
-        }
+        { label:"Paese", data:village, borderColor:"#111", backgroundColor:"rgba(17,17,17,0.06)", borderWidth:2, pointRadius:0, tension:0.4, fill:true },
+        { label:"Quota", data:lifts,   borderColor:"#888", backgroundColor:"transparent",            borderWidth:1.5, pointRadius:0, tension:0.4, fill:false, borderDash:[4,3] }
       ]
     },
     options: {
       responsive: false,
-      animation: { duration: 600 },
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: "rgba(15,20,32,0.95)",
-        titleColor: "#f0f4ff",
-        bodyColor: "#a8d4ff",
-        borderColor: "rgba(77,159,255,0.3)",
-        borderWidth: 1,
-        padding: 10,
-        callbacks: {
-          label: ctx => ` ${ctx.parsed.y.toFixed(1)}°`
+      animation: { duration: 500 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor:"#fff", titleColor:"#111", bodyColor:"#888",
+          borderColor:"#d8d8d6", borderWidth:1, padding:10,
+          callbacks: { label: c => ` ${c.parsed.y.toFixed(1)}°` }
         }
-      }},
+      },
       scales: {
-        x: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "rgba(240,244,255,0.4)", font: { size: 10 }, maxTicksLimit: 8 }
-        },
-        y: {
-          grid: { color: "rgba(255,255,255,0.05)" },
-          ticks: { color: "rgba(240,244,255,0.4)", font: { size: 10 }, callback: v => v + "°" }
-        }
+        x: { grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{ color:"#aaa", font:{ size:10, family:"DM Sans" }, maxTicksLimit:7 } },
+        y: { grid:{ color:"rgba(0,0,0,0.05)" }, ticks:{ color:"#aaa", font:{ size:10, family:"DM Sans" }, callback:v=>v+"°" } }
       }
     }
   });
 }
 
-/* ── ADVICE ── */
-function chooseAdvice({ vDayCode, lDayCode, lNowWind, lNowTemp, vDayMm, lSnowLike }) {
-  if (lNowWind > 60) return { text: "Vento forte in quota — verificare apertura impianti", level: "warn" };
-  if ([95,96,99].includes(lDayCode)) return { text: "Temporale previsto in quota — valutare con cautela", level: "danger" };
-  if ([71,73,75,77,85,86].includes(lDayCode) && lNowTemp < -5)
-    return { text: "Nevicate in quota con freddo intenso — attrezzatura adeguata", level: "warn" };
-  if (vDayCode <= 1 && lDayCode <= 3 && lNowWind < 30)
-    return { text: "Condizioni ottime — giornata ideale per sciare", level: "safe" };
-  if (vDayMm > 3)
-    return { text: "Precipitazioni attese — possibile neve fresca in quota", level: "safe" };
-  if (lSnowLike)
-    return { text: "Sta nevicando — lascia l'auto in garage se puoi", level: "warn" };
-  return { text: "Condizioni nella norma — buona giornata sulle piste", level: "safe" };
-}
+const DOW_IT = ["dom","lun","mar","mer","gio","ven","sab"];
 
-/* ── REFRESH ── */
 async function refresh() {
   const placeKey = $("placeSelect").value || "sauze";
-  const place = PLACES.find(p => p.key === placeKey) || PLACES.find(p => p.key === "sauze");
+  const place = PLACES.find(p=>p.key===placeKey) || PLACES[5];
 
   $("loaderName").textContent = place.name;
   $("loader").classList.remove("hidden");
@@ -1000,116 +1142,158 @@ async function refresh() {
     const dayIdx = pickDayIndex(currentMode);
     const dayISO = vF.daily.time[dayIdx];
 
-    // Header
     $("title").textContent = place.name;
-    $("meta").textContent = `Via Lattea · Paese ${place.town} m · Quota ${place.lifts} m`;
+    $("meta").textContent  = `Via Lattea · Paese ${place.town} m · Quota ${place.lifts} m`;
+    $("altLiftTitle").textContent = currentSeason === "winter" ? "Quota Impianti" : "Quota Escursioni";
+    $("snowTitle").textContent = currentSeason === "winter" ? "❄ Stato Neve" : "☀️ Stato Outdoor";
+    $("bandsTitle").textContent = currentSeason === "winter" ? "Fasce Sci · Quota Impianti" : "Fasce Giornata · Quota Escursioni";
 
     // Hero
     const vNowT = vF.current.temperature_2m;
     const vNowCode = vF.current.weather_code;
-    const vMin = vF.daily.temperature_2m_min[dayIdx];
-    const vMax = vF.daily.temperature_2m_max[dayIdx];
+    const vMin  = vF.daily.temperature_2m_min[dayIdx];
+    const vMax  = vF.daily.temperature_2m_max[dayIdx];
     const vDayMm = vF.daily.precipitation_sum[dayIdx] ?? 0;
     const lNowT = lF.current.temperature_2m;
     const lNowW = lF.current.wind_speed_10m ?? 0;
 
     $("heroTemp").innerHTML = `${vNowT.toFixed(1)}<sup>°</sup>`;
-    $("heroWx").textContent = wxLabel(vNowCode);
+    $("heroWx").textContent  = wxLabel(vNowCode);
     $("heroSub").textContent = `Min ${Math.round(vMin)}° · Max ${Math.round(vMax)}° · ${Math.round(vDayMm)} mm`;
-    $("heroIcon").innerHTML = wxIconSVG(vNowCode, wxColor(vNowCode));
+    $("heroRainLine").textContent = firstRainInfo(vF.hourly, dayISO);
+    $("heroIcon").innerHTML  = wxIconSVG(vNowCode, 60);
     $("statWind").textContent = Math.round(lNowW);
-    $("statMm").textContent = Math.round(vDayMm);
+    $("statMm").textContent   = Math.round(vDayMm);
     $("statLifts").textContent = lNowT.toFixed(1);
 
     // Advice
-    const lSnowLike = [71,73,75,77,85,86].includes(lF.current.weather_code) ||
-                      ((lF.current.precipitation ?? 0) >= 1.0 && lNowT <= 0);
-    const adv = chooseAdvice({
+    const adv = chooseAdviceRich({
+      season: currentSeason,
       vDayCode: vF.daily.weather_code[dayIdx],
       lDayCode: lF.daily.weather_code[dayIdx],
-      lNowWind: lNowW, lNowTemp: lNowT,
-      vDayMm, lSnowLike
+      lNowWind: lNowW,
+      lNowTemp: lNowT,
+      vDayMm,
+      lDayMm
     });
     $("adviceText").textContent = adv.text;
-    $("adviceDot").className = "advice-dot" + (adv.level !== "safe" ? ` ${adv.level}` : "");
+    $("adviceBadge").textContent = adv.emoji;
+    $("adviceBadge").className = `advice-badge badge-${adv.level}`;
 
-    // Chart — next 24h from now
+    const townBest = villageTownMoment({
+      season: currentSeason,
+      dayCode: vF.daily.weather_code[dayIdx],
+      mm: vDayMm,
+      temp: vNowT,
+      mode: currentMode
+    });
+    const townPlan = villageTownPlan({
+      season: currentSeason,
+      dayCode: vF.daily.weather_code[dayIdx],
+      mm: vDayMm,
+      temp: vNowT,
+      liftTemp: lNowT
+    });
+    $("townBestTitle").textContent = townBest.title;
+    $("townBestCopy").textContent = townBest.copy;
+    $("townDoTitle").textContent = townPlan.title;
+    $("townDoCopy").textContent = townPlan.copy;
+
+    // Chart
     const nowISO = new Date().toISOString().slice(0,13);
-    const chartLabels = [], chartV = [], chartL = [];
-    vF.hourly.time.forEach((t, i) => {
-      if (t.slice(0,13) >= nowISO && chartLabels.length < 24) {
-        const h = new Date(t).getHours();
-        chartLabels.push(`${String(h).padStart(2,"0")}:00`);
-        chartV.push(vF.hourly.temperature_2m[i]);
-        chartL.push(lF.hourly.temperature_2m[i]);
+    const labels=[], village=[], lifts=[];
+    vF.hourly.time.forEach((t,i) => {
+      if (t.slice(0,13)>=nowISO && labels.length<24) {
+        labels.push(`${String(new Date(t).getHours()).padStart(2,"0")}:00`);
+        village.push(vF.hourly.temperature_2m[i]);
+        lifts.push(lF.hourly.temperature_2m[i]);
       }
     });
-    drawChart(chartLabels, chartV, chartL);
+    drawChart(labels, village, lifts);
 
-    // Altitude comparison
+    // Wind
+    const windLabels = [], windVals = [];
+    lF.hourly.time.forEach((t,i) => {
+      if (t.slice(0,13) >= nowISO && windLabels.length < 24) {
+        windLabels.push(`${String(new Date(t).getHours()).padStart(2,"0")}:00`);
+        windVals.push(lF.hourly.wind_speed_10m?.[i] ?? 0);
+      }
+    });
+    drawWindChart(windLabels, windVals);
+
+    const currentWindDir = lF.current.wind_direction_10m ?? 0;
+
+    const phases = buildWindPhases(lF.hourly, dayISO);
+    $("windPhases").innerHTML = phases.map(p => `
+      <div class="wind-phase">
+        <div class="wind-phase-time">${p.label}</div>
+        <div class="wind-phase-val">${p.speed}</div>
+        <div class="wind-phase-dir">${windDirLabel(p.dir).split(" · ")[0]}</div>
+      </div>
+    `).join("");
+
+    // Altitude
     const vDayCode = vF.daily.weather_code[dayIdx];
     const lDayCode = lF.daily.weather_code[dayIdx];
     const lMin = lF.daily.temperature_2m_min[dayIdx];
     const lMax = lF.daily.temperature_2m_max[dayIdx];
-    const lDayMm = lF.daily.precipitation_sum[dayIdx] ?? 0;
-
-    $("altVillageWx").innerHTML = wxIconSVG(vDayCode, wxColor(vDayCode)) + `<span class="alt-wx-label">${wxLabel(vDayCode)}</span>`;
+    const lDayMm = lF.daily.precipitation_sum[dayIdx]??0;
+    $("altVillageWx").innerHTML = wxIconSVG(vDayCode,20)+`<span class="alt-wx-label">${wxLabel(vDayCode)}</span>`;
     $("altVillageDet").textContent = `Min ${Math.round(vMin)}° · Max ${Math.round(vMax)}° · ${Math.round(vDayMm)} mm`;
-    $("altLiftWx").innerHTML = wxIconSVG(lDayCode, wxColor(lDayCode)) + `<span class="alt-wx-label">${wxLabel(lDayCode)}</span>`;
+    $("altLiftWx").innerHTML = wxIconSVG(lDayCode,20)+`<span class="alt-wx-label">${wxLabel(lDayCode)}</span>`;
     $("altLiftDet").textContent = `Min ${Math.round(lMin)}° · Max ${Math.round(lMax)}° · ${Math.round(lDayMm)} mm`;
 
-    // Snow card
-    $("snowTempLift").textContent = `${lNowT.toFixed(1)}°`;
+    // Snow
+    $("snowTemp").textContent   = `${lNowT.toFixed(1)}°`;
     $("snowPrecip").textContent = `${Math.round(lDayMm)} mm`;
-    let snowText = "";
-    if (lNowT < 0 && lDayMm > 0) snowText = `Precipitazioni attese con temp. <strong>${lNowT.toFixed(1)}°</strong> in quota — <strong>neve fresca probabile</strong>`;
-    else if (lNowT < 0 && lDayMm === 0) snowText = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> in quota — neve presente in buone condizioni`;
-    else if (lNowT >= 0 && lNowT < 3) snowText = `Temperatura limite a <strong>${lNowT.toFixed(1)}°</strong> — possibile innevamento artificiale`;
-    else snowText = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> in quota — neve molla possibile nelle ore calde`;
-    $("snowTrendText").innerHTML = snowText;
+    let snowTxt;
+    if (currentSeason === "winter") {
+      if (lNowT < 0 && lDayMm > 0)        snowTxt = `Temp. <strong>${lNowT.toFixed(1)}°</strong> in quota con precipitazioni — <strong>neve fresca probabile</strong> oggi`;
+      else if (lNowT < 0 && lDayMm === 0) snowTxt = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> — neve in buone condizioni, nessuna precipitazione`;
+      else if (lNowT < 3)                 snowTxt = `Temperatura limite a <strong>${lNowT.toFixed(1)}°</strong> — neve più morbida nelle ore centrali`;
+      else                                snowTxt = `Temperatura <strong>${lNowT.toFixed(1)}°</strong> in quota — neve molla nelle ore più calde`;
+    } else {
+      if (lDayMm > 4)                     snowTxt = `Pioggia attesa in quota: <strong>${Math.round(lDayMm)} mm</strong> — meglio percorsi facili o coperti`;
+      else if (lNowW > 40)                snowTxt = `Vento in quota <strong>${Math.round(lNowW)} km/h</strong> — meglio itinerari riparati`;
+      else if (lNowT >= 20)               snowTxt = `Quota a <strong>${lNowT.toFixed(1)}°</strong> — ideale partire al mattino e rientrare presto`;
+      else                                snowTxt = `Condizioni outdoor buone — quota a <strong>${lNowT.toFixed(1)}°</strong>, precipitazioni limitate`;
+    }
+    $("snowInsight").innerHTML = snowTxt;
 
-    // Ski bands
+    // Bands
     $("skiNow").textContent = `${lNowT.toFixed(1)}° · Vento ${Math.round(lNowW)}`;
     const slots = buildSlots(lF.hourly, dayISO);
-    $("bands").innerHTML = slots.map(s => `
+    $("bands").innerHTML = slots.map(s=>`
       <div class="band">
         <div class="band-time">${s.time}</div>
-        <div class="band-wx">${wxIconSVG(s.code, wxColor(s.code))} ${s.label}</div>
+        <div class="band-wx">${wxIconSVG(s.code,14)} ${s.label}</div>
         <div class="band-det">${s.temp.toFixed(1)}° · ${Math.round(s.mm)} mm<br/>Vento ${Math.round(s.wind)}</div>
-        <div class="band-risk ${riskClass(s.mm, s.code)}">Rischio ${riskText(s.mm, s.code)}</div>
-      </div>
-    `).join("");
+        <div class="band-risk ${riskClass(s.mm,s.code)}">${currentSeason === "winter" ? riskText(s.mm,s.code) : ((s.mm > 5 || [95,96,99].includes(s.code)) ? "Instabile" : (s.mm > 1 ? "Variabile" : "Buona"))}</div>
+      </div>`).join("");
 
-    // 7-day forecast
-    const allTemps = vF.daily.temperature_2m_min.concat(vF.daily.temperature_2m_max);
-    const tMin = Math.min(...allTemps), tMax = Math.max(...allTemps);
-    const range = tMax - tMin || 1;
-
-    $("daysList").innerHTML = vF.daily.time.slice(0, 7).map((iso, i) => {
-      const d = new Date(iso + "T12:00:00");
-      const dow = i === 0 ? "oggi" : i === 1 ? "domani" : DOW[d.getDay()];
-      const code = vF.daily.weather_code[i];
-      const mn = vF.daily.temperature_2m_min[i];
-      const mx = vF.daily.temperature_2m_max[i];
-      const mm = vF.daily.precipitation_sum[i] ?? 0;
-      const left = ((mn - tMin) / range * 100).toFixed(1);
-      const width = ((mx - mn) / range * 100).toFixed(1);
-      return `
-        <div class="day-row">
-          <div class="day-name ${i===0?'today':''}">${dow}</div>
-          <div class="day-ico">${wxIconSVG(code, wxColor(code))}</div>
-          <div class="day-bar-wrap">
-            <div class="day-bar-track">
-              <div class="day-bar-fill" style="left:${left}%;width:${width}%"></div>
-            </div>
-            ${mm > 0 ? `<div class="day-mm">${Math.round(mm)} mm</div>` : '<div class="day-mm" style="opacity:0">0</div>'}
-          </div>
-          <div class="day-temps"><span class="tmin">${Math.round(mn)}°</span> <span class="tmax">${Math.round(mx)}°</span></div>
+    // 7 days
+    const allT = [...vF.daily.temperature_2m_min, ...vF.daily.temperature_2m_max];
+    const tMin = Math.min(...allT), tRange = Math.max(...allT) - tMin || 1;
+    $("daysList").innerHTML = vF.daily.time.slice(0,7).map((iso,i)=>{
+      const d   = new Date(iso+"T12:00:00");
+      const dow = i===0 ? "oggi" : i===1 ? "domani" : DOW_IT[d.getDay()];
+      const code= vF.daily.weather_code[i];
+      const mn  = vF.daily.temperature_2m_min[i];
+      const mx  = vF.daily.temperature_2m_max[i];
+      const mm  = vF.daily.precipitation_sum[i]??0;
+      const left  = ((mn-tMin)/tRange*100).toFixed(1);
+      const width = ((mx-mn)/tRange*100).toFixed(1);
+      return `<div class="day-row">
+        <div class="day-name ${i===0?'today':''}">${dow}</div>
+        <div class="day-ico">${wxIconSVG(code,26)}</div>
+        <div class="day-bar-wrap">
+          <div class="day-bar-track"><div class="day-bar-fill" style="left:${left}%;width:${width}%"></div></div>
+          <div class="day-mm">${mm>0?Math.round(mm)+' mm':''}</div>
         </div>
-      `;
+        <div class="day-temps"><span class="tmin">${Math.round(mn)}°</span> <span class="tmax">${Math.round(mx)}°</span></div>
+      </div>`;
     }).join("");
 
-    // Updated
     const now = new Date();
     $("updated").textContent = `Aggiornato: ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
 
@@ -1121,32 +1305,45 @@ async function refresh() {
   }
 }
 
-/* ── INIT ── */
 (function init() {
   const params = new URLSearchParams(location.search);
-  const placeKey = (params.get("place") || "sauze").toLowerCase();
-  const mode = (params.get("mode") || "oggi").toLowerCase();
+  const placeKey = (params.get("place")||"sauze").toLowerCase();
+  const mode = (params.get("mode")||"oggi").toLowerCase();
 
-  // Populate select
   const ps = $("placeSelect");
   PLACES.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.key;
-    opt.textContent = p.name;
-    ps.appendChild(opt);
+    const o = document.createElement("option");
+    o.value = p.key; o.textContent = p.name;
+    ps.appendChild(o);
   });
   ps.value = placeKey;
-  ps.addEventListener("change", refresh);
+  ps.addEventListener("change", () => {
+    const url = new URL(location.href);
+    url.searchParams.set("place", $("placeSelect").value);
+    url.searchParams.set("mode", currentMode);
+    url.searchParams.set("season", currentSeason || autoSeasonByDate());
+    history.replaceState({}, "", url);
+    refresh();
+  });
 
   currentMode = ["oggi","domani"].includes(mode) ? mode : "oggi";
-  $("pillOggi").classList.toggle("active", currentMode === "oggi");
-  $("pillDomani").classList.toggle("active", currentMode === "domani");
+  currentSeason = (params.get("season") || autoSeasonByDate()).toLowerCase();
+  $("pillOggi").classList.toggle("active", currentMode==="oggi");
+  $("pillDomani").classList.toggle("active", currentMode==="domani");
+  $("pillWinter").classList.toggle("active", currentSeason==="winter");
+  $("pillSummer").classList.toggle("active", currentSeason==="summer");
 
-  // Load Chart.js then refresh
-  const script = document.createElement("script");
-  script.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
-  script.onload = refresh;
-  document.head.appendChild(script);
+  if (!params.get("season")) {
+    const url = new URL(location.href);
+    url.searchParams.set("season", currentSeason);
+    url.searchParams.set("mode", currentMode);
+    history.replaceState({}, "", url);
+  }
+
+  const s = document.createElement("script");
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
+  s.onload = refresh;
+  document.head.appendChild(s);
 })();
 </script>
 </body>
