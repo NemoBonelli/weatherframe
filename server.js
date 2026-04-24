@@ -405,10 +405,8 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
   }
 
   // Stagione: per display fisici sempre winter (auto da mese), solo preview browser può cambiare
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-  const season = ((month === 12) || (month >= 1 && month <= 3) || (month === 4 && day < 10)) ? "winter" : "summer";
+  const month = new Date().getMonth() + 1;
+  const season = (month >= 6 && month <= 9) ? "summer" : "winter";
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
@@ -493,46 +491,18 @@ function pngToRaw1Bit(pngBuffer, profile) {
   return raw;
 }
 
-function hasFile(file) {
-  try { return fs.existsSync(file) && fs.statSync(file).size > 0; }
-  catch { return false; }
-}
-
 async function ensureRendered(place, lang, mode, profile) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
   const pJpg = jpgPath(place, lang, mode, profile);
-
-  const freshPng = isFresh(pPng);
-  const freshRaw = isFresh(pRaw);
-  const freshJpg = isFresh(pJpg);
-
-  if (freshPng && freshRaw && freshJpg) {
-    return { png: pPng, raw: pRaw, jpg: pJpg, stale: false };
-  }
-
-  try {
-    const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
-    fs.writeFileSync(pPng, pngBuffer);
-    fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
-
-    // Genera anche JPEG per Inkplate (supporta JPEG da URL, non PNG)
-    const jpgBuffer = await renderJpgBuffer(place, lang, mode, profile);
-    fs.writeFileSync(pJpg, jpgBuffer);
-
-    return { png: pPng, raw: pRaw, jpg: pJpg, stale: false };
-  } catch (err) {
-    const hasPng = hasFile(pPng);
-    const hasRaw = hasFile(pRaw);
-    const hasJpg = hasFile(pJpg);
-
-    if (hasPng && hasRaw) {
-      console.warn(`[RENDER] Using stale cached render for ${place}/${lang}/${mode}/${profile}: ${err.message}`);
-      return { png: pPng, raw: pRaw, jpg: hasJpg ? pJpg : null, stale: true };
-    }
-
-    throw err;
-  }
+  if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw, jpg: pJpg };
+  const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
+  fs.writeFileSync(pPng, pngBuffer);
+  fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
+  // Genera anche JPEG per Inkplate (supporta JPEG da URL, non PNG)
+  const jpgBuffer = await renderJpgBuffer(place, lang, mode, profile);
+  fs.writeFileSync(pJpg, jpgBuffer);
+  return { png: pPng, raw: pRaw, jpg: pJpg };
 }
 
 async function renderJpgBuffer(place, lang, mode, profile) {
@@ -660,7 +630,6 @@ app.get("/raw", async (req, res) => {
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", RAW_SIZE);
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
     fs.createReadStream(files.raw).pipe(res);
   } catch (e) {
     console.error(e);
@@ -679,7 +648,6 @@ app.get("/img", async (req, res) => {
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Content-Length", stat.size);
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
     fs.createReadStream(files.png).pipe(res);
   } catch (e) {
     console.error(e);
@@ -695,13 +663,11 @@ app.get("/jpg", async (req, res) => {
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
   try {
     const files = await ensureRendered(place, lang, mode, profile);
-    const jpgFile = files.jpg || jpgPath(place, lang, mode, profile);
-    const stat = fs.statSync(jpgFile);
+    const stat = fs.statSync(files.jpg);
     res.setHeader("Content-Type", "image/jpeg");
     res.setHeader("Content-Length", stat.size);
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("X-WeatherFrame-Stale", files.stale ? "1" : "0");
-    fs.createReadStream(jpgFile).pipe(res);
+    fs.createReadStream(files.jpg).pipe(res);
   } catch (e) {
     console.error(e);
     res.status(500).send("JPEG render error");
