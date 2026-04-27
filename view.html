@@ -107,9 +107,9 @@
     .profile-waveshare75 .paese           { padding: 16px 12px 20px 0; }
     .profile-waveshare75 .consigli        { padding: 16px 0 20px 12px; display: flex; flex-direction: column; justify-content: center; }
     .profile-waveshare75 .icoBox          { display: none; }
-    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; justify-content: flex-start; gap: 0; margin-top: 10px; min-height: 46px; }
+    .profile-waveshare75 .mainWx          { font-size: 20px; font-weight: 900; line-height: 1.2; display: flex; align-items: center; justify-content: flex-start; gap: 0; margin-top: 0; min-height: 38px; }
     .profile-waveshare75 .mainWx svg      { display: block; }
-    .profile-waveshare75 .mainTemp        { font-size: 46px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 8px; }
+    .profile-waveshare75 .mainTemp        { font-size: 34px; font-weight: 950; line-height: 1; letter-spacing: -1px; margin-top: 0; }
     .profile-waveshare75 .sub             { font-size: 12px; font-weight: 800; margin-top: 10px; line-height: 1.35; }
     .profile-waveshare75 .adviceTitle     { display: none; }
     .profile-waveshare75 .adviceLines     { font-size: 19px; font-weight: 400; line-height: 1.4; color: #000; white-space: pre-line; }
@@ -314,9 +314,15 @@
       justify-content:center;
       background:#fff;
     }
-    .mainRow{ display:flex; align-items:baseline; gap:8px; }
+    .mainRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:8px;
+      min-height:42px;
+    }
     .mainWx{
-      font-size:28px;
+      font-size:24px;
       font-weight:950;
       line-height:1.05;
       letter-spacing:-0.2px;
@@ -325,9 +331,10 @@
       align-items:center;
       justify-content:flex-start;
       min-height:40px;
+      flex-shrink:0;
     }
     .mainTemp{
-      font-size:52px;
+      font-size:38px;
       font-weight:950;
       line-height:1;
       letter-spacing:-1px;
@@ -626,8 +633,10 @@
     <div class="grid2">
       <div class="panel paese">
         <div class="kicker" id="kPaese">PAESE</div>
-        <div class="mainWx" id="mainWx"></div>
-        <div class="mainTemp" id="mainTemp">4°C</div>
+        <div class="mainRow">
+          <div class="mainWx" id="mainWx"></div>
+          <div class="mainTemp" id="mainTemp">4°C</div>
+        </div>
         <div class="sub" id="mainSub">Min −1° · Max 6° · 0 mm · perc. 2°</div>
       </div>
       <div class="panel consigli">
