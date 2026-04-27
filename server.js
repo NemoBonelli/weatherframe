@@ -404,9 +404,18 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     }
   }
 
-  // Stagione: per display fisici sempre winter (auto da mese), solo preview browser può cambiare
-  const month = new Date().getMonth() + 1;
-  const season = (month >= 6 && month <= 9) ? "summer" : "winter";
+  // Stagione automatica Via Lattea:
+  // Estate: 15 aprile → 30 novembre
+  // Inverno: 1 dicembre → 14 aprile
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+
+  const isSummer =
+    (month > 4 && month < 12) ||      // maggio → novembre
+    (month === 4 && day >= 15);       // dal 15 aprile
+
+  const season = isSummer ? "summer" : "winter";
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
