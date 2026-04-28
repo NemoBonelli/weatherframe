@@ -33,7 +33,7 @@ function downsample2x(pngBuffer, targetW, targetH) {
 
 // ── Open-Meteo fetch (server-side, with cache) ───────────────
 const WEATHER_CACHE = {};
-const WEATHER_TTL   = 55 * 60 * 1000; // 55 min
+const WEATHER_TTL   = 15 * 60 * 1000; // 15 min — dati meteo più freschi
 const WEATHERAPI_KEY = "5b14deeb26e5493f9ee211416262003";
 
 const PLACES = {
@@ -361,8 +361,8 @@ function saveWelcome(d) {
 }
 
 // ── Cache helpers ─────────────────────────────────────────────
-// Smart cache: TTL 60 min, but can be invalidated per device
-const TTL = 60 * 60 * 1000; // 60 min
+// Smart cache render: TTL 15 min, ma forzabile con ?force=1
+const TTL = 15 * 60 * 1000; // 15 min
 
 function pngPath(place, lang, mode, profile) {
   return path.join(OUT_DIR, `${place}_${lang}_${mode}_${profile}.png`);
@@ -381,10 +381,18 @@ function isFresh(file, ttl = TTL) {
 function invalidateCache(place, lang, profile) {
   // Touch file mtime to epoch to force re-render
   ["oggi","domani","auto"].forEach(mode => {
-    [pngPath(place,lang,mode,profile), rawPath(place,lang,mode,profile)].forEach(f => {
+    [
+      pngPath(place, lang, mode, profile),
+      rawPath(place, lang, mode, profile),
+      jpgPath(place, lang, mode, profile)
+    ].forEach(f => {
       try { fs.utimesSync(f, new Date(0), new Date(0)); } catch {}
     });
   });
+}
+
+function invalidateAllLanguages(place, profile) {
+  ["it", "en", "fr"].forEach(lang => invalidateCache(place, lang, profile));
 }
 
 // ── Puppeteer render ─────────────────────────────────────────
@@ -404,18 +412,11 @@ async function renderPNGBuffer(place, lang, mode, profile, welcomeData = null, f
     }
   }
 
-  // Stagione automatica Via Lattea:
-  // Estate: 15 aprile → 30 novembre
-  // Inverno: 1 dicembre → 14 aprile
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-
-  const isSummer =
-    (month > 4 && month < 12) ||      // maggio → novembre
-    (month === 4 && day >= 15);       // dal 15 aprile
-
-  const season = isSummer ? "summer" : "winter";
+  // Stagione automatica Via Lattea: estate 15 Apr → 30 Nov, inverno 1 Dic → 14 Apr
+  const nowSeason = new Date();
+  const month = nowSeason.getMonth() + 1;
+  const day = nowSeason.getDate();
+  const season = ((month > 4 && month < 12) || (month === 4 && day >= 15)) ? "summer" : "winter";
   let url = `http://127.0.0.1:${PORT}/view?place=${place}&lang=${lang}&mode=${mode}&profile=${profile}&season=${season}&render=1&t=${Date.now()}`;
   if (welcomeData) {
     url += `&welcome=1&guestName=${encodeURIComponent(welcomeData.guestName || "")}&wifiSsid=${encodeURIComponent(welcomeData.wifiSsid || "")}&wifiPass=${encodeURIComponent(welcomeData.wifiPass || "")}`;
@@ -500,11 +501,11 @@ function pngToRaw1Bit(pngBuffer, profile) {
   return raw;
 }
 
-async function ensureRendered(place, lang, mode, profile) {
+async function ensureRendered(place, lang, mode, profile, force = false) {
   const pPng = pngPath(place, lang, mode, profile);
   const pRaw = rawPath(place, lang, mode, profile);
   const pJpg = jpgPath(place, lang, mode, profile);
-  if (isFresh(pPng) && isFresh(pRaw)) return { png: pPng, raw: pRaw, jpg: pJpg };
+  if (!force && isFresh(pPng) && isFresh(pRaw) && isFresh(pJpg)) return { png: pPng, raw: pRaw, jpg: pJpg };
   const pngBuffer = await renderPNGBuffer(place, lang, mode, profile);
   fs.writeFileSync(pPng, pngBuffer);
   fs.writeFileSync(pRaw, pngToRaw1Bit(pngBuffer, profile));
@@ -632,10 +633,12 @@ app.get("/raw", async (req, res) => {
   const lang    = safe(req.query.lang    || "it");
   const mode    = safe(req.query.mode    || "auto");
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
+  const force   = req.query.force === "1" || req.query.refresh === "1";
   const { w, h } = getProfile(profile);
   const RAW_SIZE = (w * h) / 8;
   try {
-    const files = await ensureRendered(place, lang, mode, profile);
+    if (force) invalidateAllLanguages(place, profile);
+    const files = await ensureRendered(place, lang, mode, profile, force);
     res.setHeader("Content-Type", "application/octet-stream");
     res.setHeader("Content-Length", RAW_SIZE);
     res.setHeader("Cache-Control", "no-store");
@@ -651,8 +654,10 @@ app.get("/img", async (req, res) => {
   const lang    = safe(req.query.lang    || "it");
   const mode    = safe(req.query.mode    || "auto");
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
+  const force   = req.query.force === "1" || req.query.refresh === "1";
   try {
-    const files = await ensureRendered(place, lang, mode, profile);
+    if (force) invalidateAllLanguages(place, profile);
+    const files = await ensureRendered(place, lang, mode, profile, force);
     const stat = fs.statSync(files.png);
     res.setHeader("Content-Type", "image/png");
     res.setHeader("Content-Length", stat.size);
@@ -670,8 +675,10 @@ app.get("/jpg", async (req, res) => {
   const lang    = safe(req.query.lang    || "it");
   const mode    = safe(req.query.mode    || "auto");
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
+  const force   = req.query.force === "1" || req.query.refresh === "1";
   try {
-    const files = await ensureRendered(place, lang, mode, profile);
+    if (force) invalidateAllLanguages(place, profile);
+    const files = await ensureRendered(place, lang, mode, profile, force);
     const stat = fs.statSync(files.jpg);
     res.setHeader("Content-Type", "image/jpeg");
     res.setHeader("Content-Length", stat.size);
@@ -688,8 +695,10 @@ app.get("/render", async (req, res) => {
   const lang    = safe(req.query.lang    || "it");
   const mode    = safe(req.query.mode    || "auto");
   const profile = safe(req.query.profile || DEFAULT_PROFILE);
+  const force   = req.query.force === "1" || req.query.refresh === "1";
   try {
-    const files = await ensureRendered(place, lang, mode, profile);
+    if (force) invalidateAllLanguages(place, profile);
+    const files = await ensureRendered(place, lang, mode, profile, force);
     const { w, h } = getProfile(profile);
     res.json({ ok:true, profile, width:w, height:h,
       png: `/public/renders/${path.basename(files.png)}`,
@@ -854,7 +863,7 @@ app.post("/admin/devices/:id", requireAuth, (req, res) => {
   if (place) devices[id].place = safe(place);
   if (lang)  devices[id].lang  = safe(lang);
   if (label) devices[id].label = label.slice(0, 40);
-  invalidateCache(devices[id].place, devices[id].lang, devices[id].profile);
+  invalidateAllLanguages(devices[id].place, devices[id].profile);
   saveDevices(devices);
   res.json({ ok: true, device: devices[id] });
 });
