@@ -539,6 +539,9 @@ app.get("/", (req, res) => res.redirect("/view"));
 
 app.get("/view", (req, res) => res.sendFile(path.join(__dirname, "view.html")));
 app.get("/mobile", (req, res) => res.sendFile(path.join(__dirname, "mobile-light.html")));
+app.get("/meteo", (req, res) =>
+  res.sendFile(path.join(__dirname, "soft-wow-cabin-meteo-web.html"))
+);
 
 // ── Device registration ───────────────────────────────────────
 // Called by ESP32 at boot: GET /register?id=AA:BB:CC:DD:EE:FF&profile=waveshare75
