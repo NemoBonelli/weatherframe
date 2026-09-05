@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /softwowcabin/guest.html
+
+Sitemap: https://nemobonelli.github.io/softwowcabin/sitemap.xml
